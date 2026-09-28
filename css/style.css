@@ -1,0 +1,107 @@
+:root {
+  --bg: #0d0b1e;
+  --bg2: #1a1440;
+  --card: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #ece9ff;
+  --muted: #a9a3d0;
+  --accent: #f5c56b;
+  --accent2: #8f7cff;
+  --good: #6fdca0;
+  --bad: #ff8a8a;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  color: var(--text);
+  background: radial-gradient(1200px 700px at 80% -10%, var(--bg2), transparent), var(--bg);
+  background-attachment: fixed;
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+.hero { text-align: center; margin: 12px 0 24px; }
+.hero h1 { margin: 0 0 6px; font-size: clamp(1.8rem, 6vw, 2.5rem); letter-spacing: .01em; color: var(--accent); }
+.hero p { margin: 0; color: var(--muted); }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(6px);
+}
+.card h3 { margin: 0 0 10px; font-size: 1.05rem; color: var(--accent); }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; margin-bottom: 12px; }
+.grid .wide { grid-column: 1 / -1; }
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+label { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; color: var(--muted); }
+label.check { flex-direction: row; align-items: center; gap: 8px; align-self: end; padding-bottom: 10px; }
+.opt { opacity: .7; }
+input[type=text], input[type=date], input[type=time], input[type=number] {
+  width: 100%;
+  font: inherit; color: var(--text);
+  background: rgba(0, 0, 0, .28);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color-scheme: dark;
+}
+input:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.place { position: relative; }
+.suggestions {
+  position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 4px);
+  margin: 0; padding: 4px; list-style: none;
+  background: #1b1640; border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+}
+.suggestions li { padding: 8px 10px; border-radius: 8px; cursor: pointer; color: var(--text); }
+.suggestions li:hover, .suggestions li[aria-selected=true] { background: rgba(143, 124, 255, .3); }
+.suggestions small { color: var(--muted); }
+.hint { font-size: .8rem; color: var(--muted); min-height: 1.2em; }
+.advanced { margin: 0 0 12px; color: var(--muted); font-size: .9rem; }
+.advanced summary { cursor: pointer; margin-bottom: 10px; }
+button.primary {
+  align-self: end;
+  font: inherit; font-weight: 600; cursor: pointer;
+  color: #1a1230; background: linear-gradient(135deg, var(--accent), #ffdca0);
+  border: 0; border-radius: 12px; padding: 11px 16px;
+}
+button.primary:disabled { opacity: .6; cursor: wait; }
+.error { color: var(--bad); margin: 6px 0 0; }
+
+.eyebrow { margin: 0; text-transform: uppercase; letter-spacing: .12em; font-size: .75rem; color: var(--muted); }
+.day h2 { margin: 4px 0 8px; font-size: 1.4rem; line-height: 1.25; }
+.moon { margin: 0 0 8px; color: var(--accent2); font-size: .95rem; }
+.notes { color: var(--accent); font-size: .92rem; }
+.advice { border-left: 3px solid var(--accent); padding-left: 12px; margin-bottom: 0; }
+
+.areas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 640px) { .areas { grid-template-columns: 1fr; } }
+.areas .card { margin: 0; }
+.areas h3 { display: flex; justify-content: space-between; gap: 8px; }
+.stars { letter-spacing: 2px; color: var(--accent); white-space: nowrap; }
+.stars .off { color: rgba(255, 255, 255, .2); }
+.areas p { margin: 8px 0 0; font-size: .93rem; }
+.areas .driver { color: var(--muted); font-size: .78rem; }
+
+.aspects, .profile { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.aspects li { padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.aspects li:last-child { border: 0; padding-bottom: 0; }
+.aspects .t { font-weight: 600; }
+.aspects .meta { color: var(--muted); font-size: .8rem; margin-left: 6px; }
+.tag { display: inline-block; font-size: .7rem; padding: 1px 8px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; }
+.tag.F { background: rgba(111, 220, 160, .18); color: var(--good); }
+.tag.H { background: rgba(255, 138, 138, .18); color: var(--bad); }
+.tag.V { background: rgba(143, 124, 255, .25); color: #c9c0ff; }
+.aspects p { margin: 4px 0 0; font-size: .93rem; }
+
+.wheel svg { width: 100%; height: auto; max-width: 460px; display: block; margin: 0 auto; }
+.profile li b { color: var(--accent); }
+.planets { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: .9rem; }
+.planets td, .planets th { text-align: left; padding: 5px 4px; border-top: 1px solid var(--border); }
+.planets th { color: var(--muted); font-weight: 500; border-top: 0; }
+footer { color: var(--muted); font-size: .78rem; text-align: center; margin-top: 24px; }
+footer a { color: var(--accent2); }

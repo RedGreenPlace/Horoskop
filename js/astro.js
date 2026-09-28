@@ -1,0 +1,257 @@
+/*
+ * Astronomie-Engine: Planetenpositionen (tropisch, geozentrisch), Aszendent, MC,
+ * Häuser (Whole Sign) und Aspekte. Basiert auf den Bahnelementen von Paul Schlyter
+ * ("How to compute planetary positions"). Genauigkeit: ca. 1-2 Bogenminuten für die
+ * inneren Planeten, Mond ~0,3°, ausreichend für ein Tageshoroskop.
+ */
+(function (root) {
+  'use strict';
+
+  const RAD = Math.PI / 180;
+  const norm = (x) => ((x % 360) + 360) % 360;
+  const sind = (x) => Math.sin(x * RAD);
+  const cosd = (x) => Math.cos(x * RAD);
+  const atan2d = (y, x) => Math.atan2(y, x) / RAD;
+  const diff180 = (a, b) => ((a - b + 540) % 360) - 180;
+
+  const SIGNS = ['Widder', 'Stier', 'Zwillinge', 'Krebs', 'Löwe', 'Jungfrau', 'Waage', 'Skorpion', 'Schütze', 'Steinbock', 'Wassermann', 'Fische'];
+  const SIGN_GLYPHS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+  const PLANETS = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  const PLANET_NAMES = {
+    sun: 'Sonne', moon: 'Mond', mercury: 'Merkur', venus: 'Venus', mars: 'Mars',
+    jupiter: 'Jupiter', saturn: 'Saturn', uranus: 'Uranus', neptune: 'Neptun', pluto: 'Pluto',
+    asc: 'Aszendent', mc: 'Medium Coeli',
+  };
+  const PLANET_GLYPHS = {
+    sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂', jupiter: '♃', saturn: '♄',
+    uranus: '♅', neptune: '♆', pluto: '♇', asc: 'AC', mc: 'MC',
+  };
+
+  function julianDay(date) {
+    return date.getTime() / 86400000 + 2440587.5;
+  }
+
+  function solveKepler(M, e) {
+    let E = M + (e / RAD) * sind(M) * (1 + e * cosd(M));
+    for (let i = 0; i < 12; i++) {
+      const dE = (E - (e / RAD) * sind(E) - M) / (1 - e * cosd(E));
+      E -= dE;
+      if (Math.abs(dE) < 1e-7) break;
+    }
+    return E;
+  }
+
+  // d = Tage seit 2000 Jan 0.0 TT (JD 2451543.5)
+  function elements(name, d) {
+    switch (name) {
+      case 'sun': return { N: 0, i: 0, w: 282.9404 + 4.70935e-5 * d, a: 1, e: 0.016709 - 1.151e-9 * d, M: 356.047 + 0.9856002585 * d };
+      case 'moon': return { N: 125.1228 - 0.0529538083 * d, i: 5.1454, w: 318.0634 + 0.1643573223 * d, a: 60.2666, e: 0.0549, M: 115.3654 + 13.0649929509 * d };
+      case 'mercury': return { N: 48.3313 + 3.24587e-5 * d, i: 7.0047 + 5e-8 * d, w: 29.1241 + 1.01444e-5 * d, a: 0.387098, e: 0.205635 + 5.59e-10 * d, M: 168.6562 + 4.0923344368 * d };
+      case 'venus': return { N: 76.6799 + 2.4659e-5 * d, i: 3.3946 + 2.75e-8 * d, w: 54.891 + 1.38374e-5 * d, a: 0.72333, e: 0.006773 - 1.302e-9 * d, M: 48.0052 + 1.6021302244 * d };
+      case 'mars': return { N: 49.5574 + 2.11081e-5 * d, i: 1.8497 - 1.78e-8 * d, w: 286.5016 + 2.92961e-5 * d, a: 1.523688, e: 0.093405 + 2.516e-9 * d, M: 18.6021 + 0.5240207766 * d };
+      case 'jupiter': return { N: 100.4542 + 2.76854e-5 * d, i: 1.303 - 1.557e-7 * d, w: 273.8777 + 1.64505e-5 * d, a: 5.20256, e: 0.048498 + 4.469e-9 * d, M: 19.895 + 0.0830853001 * d };
+      case 'saturn': return { N: 113.6634 + 2.3898e-5 * d, i: 2.4886 - 1.081e-7 * d, w: 339.3939 + 2.97661e-5 * d, a: 9.55475, e: 0.055546 - 9.499e-9 * d, M: 316.967 + 0.0334442282 * d };
+      case 'uranus': return { N: 74.0005 + 1.3978e-5 * d, i: 0.7733 + 1.9e-8 * d, w: 96.6612 + 3.0565e-5 * d, a: 19.18171 - 1.55e-8 * d, e: 0.047318 + 7.45e-9 * d, M: 142.5905 + 0.011725806 * d };
+      case 'neptune': return { N: 131.7806 + 3.0173e-5 * d, i: 1.77 - 2.55e-7 * d, w: 272.8461 - 6.027e-6 * d, a: 30.05826 + 3.313e-8 * d, e: 0.008606 + 2.15e-9 * d, M: 260.2471 + 0.005995147 * d };
+      default: throw new Error('Unbekannter Körper: ' + name);
+    }
+  }
+
+  // Position im Bahnsystem -> ekliptikale Länge, Breite, Distanz
+  function orbit(el) {
+    const E = solveKepler(el.M, el.e);
+    const xv = el.a * (cosd(E) - el.e);
+    const yv = el.a * Math.sqrt(1 - el.e * el.e) * sind(E);
+    const v = atan2d(yv, xv);
+    const r = Math.sqrt(xv * xv + yv * yv);
+    const vw = v + el.w;
+    const x = r * (cosd(el.N) * cosd(vw) - sind(el.N) * sind(vw) * cosd(el.i));
+    const y = r * (sind(el.N) * cosd(vw) + cosd(el.N) * sind(vw) * cosd(el.i));
+    const z = r * sind(vw) * sind(el.i);
+    return { x, y, z, r, lon: norm(atan2d(y, x)), lat: atan2d(z, Math.sqrt(x * x + y * y)), v, E };
+  }
+
+  function plutoLon(d) {
+    const S = 50.03 + 0.033459652 * d;
+    const P = 238.95 + 0.003968789 * d;
+    return norm(
+      238.9508 + 0.00400703 * d
+      - 19.799 * sind(P) + 19.848 * cosd(P)
+      + 0.897 * sind(2 * P) - 4.956 * cosd(2 * P)
+      + 0.61 * sind(3 * P) + 1.211 * cosd(3 * P)
+      - 0.341 * sind(4 * P) - 0.19 * cosd(4 * P)
+      + 0.128 * sind(5 * P) - 0.034 * cosd(5 * P)
+      - 0.038 * sind(6 * P) + 0.031 * cosd(6 * P)
+      + 0.02 * sind(S - P) - 0.01 * cosd(S - P)
+    );
+  }
+
+  function longitudes(d) {
+    const out = {};
+
+    // Sonne
+    const selS = elements('sun', d);
+    const sun = orbit(selS);
+    const sunLon = norm(sun.lon);
+    out.sun = sunLon;
+    const xs = sun.r * cosd(sunLon);
+    const ys = sun.r * sind(sunLon);
+    const Ms = selS.M;
+    const Ls = selS.M + selS.w;
+
+    // Mond
+    const elM = elements('moon', d);
+    const mo = orbit(elM);
+    const Mm = elM.M;
+    const Lm = elM.M + elM.w + elM.N;
+    const D = Lm - Ls;
+    const F = Lm - elM.N;
+    out.moon = norm(
+      mo.lon
+      - 1.274 * sind(Mm - 2 * D) + 0.658 * sind(2 * D) - 0.186 * sind(Ms)
+      - 0.059 * sind(2 * Mm - 2 * D) - 0.057 * sind(Mm - 2 * D + Ms) + 0.053 * sind(Mm + 2 * D)
+      + 0.046 * sind(2 * D - Ms) + 0.041 * sind(Mm - Ms) - 0.035 * sind(D) - 0.031 * sind(Mm + Ms)
+      - 0.015 * sind(2 * F - 2 * D) + 0.011 * sind(Mm - 4 * D)
+    );
+
+    // Planeten
+    const Mj = elements('jupiter', d).M;
+    const Msat = elements('saturn', d).M;
+    const Mu = elements('uranus', d).M;
+    ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].forEach((name) => {
+      const p = orbit(elements(name, d));
+      let lon = p.lon;
+      let lat = p.lat;
+      if (name === 'jupiter') {
+        lon += -0.332 * sind(2 * Mj - 5 * Msat - 67.6) - 0.056 * sind(2 * Mj - 2 * Msat + 21)
+          + 0.042 * sind(3 * Mj - 5 * Msat + 21) - 0.036 * sind(Mj - 2 * Msat)
+          + 0.022 * cosd(Mj - Msat) + 0.023 * sind(2 * Mj - 3 * Msat + 52) - 0.016 * sind(Mj - 5 * Msat - 69);
+      } else if (name === 'saturn') {
+        lon += 0.812 * sind(2 * Mj - 5 * Msat - 67.6) - 0.229 * cosd(2 * Mj - 4 * Msat - 2)
+          + 0.119 * sind(Mj - 2 * Msat - 3) + 0.046 * sind(2 * Mj - 6 * Msat - 69) + 0.014 * sind(Mj - 3 * Msat + 32);
+        lat += -0.02 * cosd(2 * Mj - 4 * Msat - 2) + 0.018 * sind(2 * Mj - 6 * Msat - 49);
+      } else if (name === 'uranus') {
+        lon += 0.04 * sind(Msat - 2 * Mu + 6) + 0.035 * sind(Msat - 3 * Mu + 33) - 0.015 * sind(Mj - Mu + 20);
+      }
+      const xh = p.r * cosd(lon) * cosd(lat);
+      const yh = p.r * sind(lon) * cosd(lat);
+      out[name] = norm(atan2d(yh + ys, xh + xs));
+    });
+
+    out.pluto = plutoLon(d);
+    return out;
+  }
+
+  function daysSince2000(date) {
+    return julianDay(date) - 2451543.5;
+  }
+
+  function planetPositions(date) {
+    const d = daysSince2000(date);
+    const now = longitudes(d);
+    const before = longitudes(d - 0.05);
+    const after = longitudes(d + 0.05);
+    const res = {};
+    PLANETS.forEach((p) => {
+      const speed = diff180(after[p], before[p]) / 0.1; // Grad / Tag
+      res[p] = { lon: now[p], speed, retro: speed < 0 };
+    });
+    return res;
+  }
+
+  function obliquity(date) {
+    return 23.4393 - 3.563e-7 * daysSince2000(date);
+  }
+
+  function siderealTime(date, lonEast) {
+    const jd = julianDay(date);
+    return norm(280.46061837 + 360.98564736629 * (jd - 2451545) + lonEast);
+  }
+
+  function angles(date, lat, lonEast) {
+    const ramc = siderealTime(date, lonEast);
+    const eps = obliquity(date);
+    const asc = norm(atan2d(cosd(ramc), -(sind(ramc) * cosd(eps) + Math.tan(lat * RAD) * sind(eps))));
+    const mc = norm(atan2d(sind(ramc), cosd(ramc) * cosd(eps)));
+    return { asc, mc, ramc };
+  }
+
+  function signIndex(lon) {
+    return Math.floor(norm(lon) / 30);
+  }
+
+  function formatLon(lon) {
+    const s = signIndex(lon);
+    const within = norm(lon) - s * 30;
+    const deg = Math.floor(within);
+    const min = Math.floor((within - deg) * 60);
+    return deg + '°' + String(min).padStart(2, '0') + '′ ' + SIGNS[s];
+  }
+
+  // Whole-Sign-Haus (1-12) eines Punktes bezogen auf den Aszendenten
+  function wholeSignHouse(lon, asc) {
+    return ((signIndex(lon) - signIndex(asc) + 12) % 12) + 1;
+  }
+
+  /**
+   * Geburtshoroskop. `date` ist ein UTC-Date, `lat`/`lon` in Grad (Ost positiv).
+   * Ohne bekannte Geburtszeit (timeKnown=false) werden Aszendent, MC und Häuser weggelassen.
+   */
+  function natalChart(date, lat, lon, timeKnown) {
+    const planets = planetPositions(date);
+    const chart = { planets, timeKnown: !!timeKnown, asc: null, mc: null };
+    if (timeKnown) {
+      const a = angles(date, lat, lon);
+      chart.asc = a.asc;
+      chart.mc = a.mc;
+      PLANETS.forEach((p) => { planets[p].house = wholeSignHouse(planets[p].lon, a.asc); });
+    }
+    PLANETS.forEach((p) => { planets[p].sign = signIndex(planets[p].lon); });
+    return chart;
+  }
+
+  const ASPECTS = [
+    { key: 'conjunction', name: 'Konjunktion', symbol: '☌', angle: 0, orbFactor: 1 },
+    { key: 'sextile', name: 'Sextil', symbol: '⚹', angle: 60, orbFactor: 0.7 },
+    { key: 'square', name: 'Quadrat', symbol: '□', angle: 90, orbFactor: 0.9 },
+    { key: 'trine', name: 'Trigon', symbol: '△', angle: 120, orbFactor: 0.9 },
+    { key: 'opposition', name: 'Opposition', symbol: '☍', angle: 180, orbFactor: 1 },
+  ];
+
+  const TRANSIT_ORB = { moon: 3, sun: 3, mercury: 3, venus: 3, mars: 3, jupiter: 2.5, saturn: 2.5, uranus: 2.5, neptune: 2.5, pluto: 2.5 };
+
+  /**
+   * Aspekte zwischen den laufenden Planeten (Transit) und den Geburtspunkten.
+   * `transit` = planetPositions(...), `natal` = natalChart(...).
+   */
+  function transitAspects(transit, natal) {
+    const targets = PLANETS.map((p) => ({ key: p, lon: natal.planets[p].lon }));
+    if (natal.timeKnown) {
+      targets.push({ key: 'asc', lon: natal.asc }, { key: 'mc', lon: natal.mc });
+    }
+    const out = [];
+    PLANETS.forEach((tp) => {
+      targets.forEach((tg) => {
+        const sep = Math.abs(diff180(transit[tp].lon, tg.lon));
+        ASPECTS.forEach((asp) => {
+          const maxOrb = TRANSIT_ORB[tp] * asp.orbFactor;
+          const orb = Math.abs(sep - asp.angle);
+          if (orb <= maxOrb) {
+            // Wird der Abstand kleiner? (Transit-Geschwindigkeit, Geburtspunkt fest)
+            const future = Math.abs(Math.abs(diff180(transit[tp].lon + transit[tp].speed * 0.25, tg.lon)) - asp.angle);
+            out.push({ transit: tp, natal: tg.key, aspect: asp, orb, maxOrb, applying: future < orb });
+          }
+        });
+      });
+    });
+    return out;
+  }
+
+  const api = {
+    SIGNS, SIGN_GLYPHS, PLANETS, PLANET_NAMES, PLANET_GLYPHS, ASPECTS,
+    julianDay, planetPositions, natalChart, transitAspects, angles, signIndex, formatLon,
+    wholeSignHouse, norm, diff180,
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.Astro = api;
+})(typeof window !== 'undefined' ? window : globalThis);

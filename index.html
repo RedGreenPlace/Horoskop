@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Mein Tageshoroskop</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <h1>Mein Tageshoroskop</h1>
+      <p>Persönlich berechnet aus Geburtsdatum, Uhrzeit und Ort – mit den echten Planetenständen des Tages.</p>
+    </header>
+
+    <form id="form" class="card" autocomplete="off">
+      <div class="grid">
+        <label>Name <span class="opt">(optional)</span>
+          <input id="name" type="text" placeholder="Dein Vorname">
+        </label>
+        <label>Geburtsdatum
+          <input id="date" type="date" required min="1900-01-01">
+        </label>
+        <label>Geburtszeit
+          <input id="time" type="time" value="12:00">
+        </label>
+        <label class="check"><input id="unknownTime" type="checkbox"> Uhrzeit unbekannt</label>
+        <label class="wide">Geburtsort
+          <div class="place">
+            <input id="place" type="text" placeholder="z. B. Hamburg" required>
+            <ul id="suggestions" class="suggestions" hidden></ul>
+          </div>
+          <span id="placeInfo" class="hint"></span>
+        </label>
+      </div>
+
+      <details class="advanced">
+        <summary>Koordinaten &amp; Zeitzone manuell eingeben</summary>
+        <div class="grid">
+          <label>Breitengrad (N+)<input id="lat" type="number" step="any" min="-90" max="90"></label>
+          <label>Längengrad (O+)<input id="lon" type="number" step="any" min="-180" max="180"></label>
+          <label class="wide">Zeitzone (IANA)<input id="tz" type="text" placeholder="Europe/Berlin"></label>
+        </div>
+      </details>
+
+      <div class="grid">
+        <label>Horoskop für den Tag
+          <input id="forDate" type="date">
+        </label>
+        <button type="submit" class="primary">Horoskop erstellen</button>
+      </div>
+      <p id="error" class="error" role="alert" hidden></p>
+    </form>
+
+    <section id="result" hidden>
+      <article class="card day">
+        <p class="eyebrow" id="dayLabel"></p>
+        <h2 id="headline"></h2>
+        <p id="moonLine" class="moon"></p>
+        <p id="intro"></p>
+        <p id="notes" class="notes"></p>
+        <p class="advice"><strong>Rat des Tages:</strong> <span id="advice"></span></p>
+      </article>
+
+      <div id="areas" class="areas"></div>
+
+      <article class="card">
+        <h3>Die wichtigsten Konstellationen für dich</h3>
+        <ul id="aspects" class="aspects"></ul>
+      </article>
+
+      <article class="card">
+        <h3>Dein Himmel heute</h3>
+        <div id="wheel" class="wheel"></div>
+        <p class="hint">Innen: Geburtshoroskop · Außen (farbig): Planeten heute.</p>
+      </article>
+
+      <article class="card">
+        <h3>Dein Geburtshoroskop</h3>
+        <ul id="profile" class="profile"></ul>
+        <table id="planetTable" class="planets"></table>
+      </article>
+    </section>
+
+    <footer>
+      <p>Unterhaltung, keine Beratung. Berechnung: tropischer Tierkreis, Whole-Sign-Häuser, geozentrische Planetenpositionen (Genauigkeit für Tageshoroskope ausreichend).
+        Ortssuche über <a href="https://open-meteo.com/en/docs/geocoding-api" target="_blank" rel="noopener">Open-Meteo</a>; deine Daten bleiben im Browser.</p>
+    </footer>
+  </main>
+
+  <script src="js/astro.js"></script>
+  <script src="js/interpret.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
