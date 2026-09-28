@@ -138,6 +138,31 @@
   const PLANET_VALENCE = { sun: 0.5, moon: 0.2, mercury: 0.2, venus: 0.8, mars: -0.2, jupiter: 0.9, saturn: -0.6, uranus: -0.1, neptune: -0.2, pluto: -0.3 };
   const PERSONAL_FOCUS = { mercury: 'Du denkst und sprichst', venus: 'In Liebe, Freundschaft und Genuss bist du', mars: 'Du gehst Dinge an und setzt dich durch:' };
 
+  const NAT_TONE = {
+    F: 'Das ist eine eingespielte Stärke – der heutige Transit kann sie nutzen.',
+    H: 'Diese Grundspannung kennst du gut – der heutige Transit rührt daran.',
+    V: 'Beide Anteile wirken bei dir als Einheit – der Transit trifft sie gemeinsam.',
+  };
+  const KEYWORD = { sun: 'Identität', moon: 'Gefühle', mercury: 'Denken', venus: 'Liebe und Werte', mars: 'Antrieb', jupiter: 'Wachstum', saturn: 'Struktur', uranus: 'Freiheitsdrang', neptune: 'Intuition', pluto: 'Tiefe', asc: 'Auftreten', mc: 'Berufung' };
+  const DEIN = { asc: 'deinem Aszendenten', mc: 'deinem Medium Coeli' };
+  const ELEMENT_DOM = [
+    'Feuer dominiert: Du brauchst Begeisterung, Bewegung und Taten.',
+    'Erde dominiert: Du brauchst Greifbares, Verlässlichkeit und Ergebnisse.',
+    'Luft dominiert: Du brauchst Austausch, Ideen und geistige Freiheit.',
+    'Wasser dominiert: Du brauchst emotionale Tiefe, Intuition und Nähe.',
+  ];
+  const ELEMENT_MISSING = [
+    'Feuer fehlt: Antrieb entsteht bei dir selten spontan – Motivation kommt über Struktur oder andere Menschen.',
+    'Erde fehlt: Praktisches und Körperliches vergisst du leicht – feste Routinen helfen.',
+    'Luft fehlt: Abstand und Sachlichkeit fallen dir schwer – Gedanken aufzuschreiben hilft.',
+    'Wasser fehlt: Gefühle laufen bei dir eher nebenher – nimm dir bewusst Zeit dafür.',
+  ];
+  const QUALITY_DOM = [
+    'Du setzt Impulse und beginnst gern Neues (viel kardinale Energie).',
+    'Du bleibst dran und lässt dich schwer umstimmen (viel fixe Energie).',
+    'Du passt dich an und wechselst gern die Perspektive (viel veränderliche Energie).',
+  ];
+
   const SUN_SIGN = ['Tatkraft, Mut und Pioniergeist', 'Beständigkeit, Genuss- und Sicherheitsstreben', 'Neugier, Wandelbarkeit und Kommunikationslust', 'Gefühlstiefe, Fürsorge und Schutzbedürfnis', 'Selbstausdruck, Herzenswärme und Stolz', 'Genauigkeit, Dienstbereitschaft und Analyse', 'Harmoniebedürfnis, Ästhetik und Fairness', 'Intensität, Leidenschaft und Tiefgang', 'Freiheitsdrang, Optimismus und Sinnsuche', 'Ehrgeiz, Verlässlichkeit und Ausdauer', 'Eigenständigkeit, Ideenreichtum und Gemeinschaftssinn', 'Empathie, Fantasie und Hingabe'];
   const MOON_NATAL = ['schnelle, direkte Gefühlsreaktionen und den Wunsch nach Aktion', 'Ruhe, Körperlichkeit und verlässliche Rituale', 'Abwechslung, Gespräche und geistige Anregung', 'Geborgenheit, Nähe und emotionale Sicherheit', 'Wärme, Anerkennung und Großzügigkeit', 'Ordnung, Nützlichsein und klare Abläufe', 'Harmonie, Zweisamkeit und Ausgeglichenheit', 'tiefe Bindungen, Vertrauen und emotionale Intensität', 'Weite, Freiheit und Zuversicht', 'Struktur, Selbstkontrolle und Zurückhaltung', 'Unabhängigkeit, Raum und Freundschaft', 'Mitgefühl, Rückzug und Träumerei'];
   const ASC_SIGN = ['direkt, energisch, initiativ', 'ruhig, sinnlich, verlässlich', 'aufgeweckt, wendig, kommunikativ', 'sensibel, fürsorglich, zurückhaltend', 'strahlend, warmherzig, präsent', 'bescheiden, aufmerksam, sachlich', 'charmant, diplomatisch, gewinnend', 'magnetisch, intensiv, geheimnisvoll', 'offen, unternehmungslustig, herzlich', 'seriös, kontrolliert, zielstrebig', 'originell, distanziert, freundlich', 'sanft, einfühlsam, verträumt'];
@@ -178,7 +203,7 @@
   }
 
   // Zusatzsätze aus den konkreten Werten: Zeichen, Häuser, Rückläufigkeit, Genauigkeit
-  function details(a, natal, transit) {
+  function details(a, natal, transit, ruler, nAsp) {
     const t = transit[a.transit];
     const name = A.PLANET_NAMES[a.transit];
     const tSign = A.signIndex(t.lon);
@@ -200,6 +225,15 @@
       const s = A.signIndex(lon);
       out.push(`Dein ${nName} liegt ${A.SIGNS_IN[s]}: ${SIGN_STYLE[s]}.`);
     }
+    if (ruler && a.natal === ruler.planet) {
+      out.push(`Dein ${nName} ist zugleich dein Aszendentherrscher – ein Schlüsselplanet deines Horoskops, Transite darauf wiegen schwerer.`);
+    }
+    const na = nAsp.find((e) => e.a === a.natal || e.b === a.natal);
+    if (na) {
+      const other = na.a === a.natal ? na.b : na.a;
+      const target = DEIN[other] || `deinem ${A.PLANET_NAMES[other]}`;
+      out.push(`Dein ${nName} steht im Geburtshoroskop ${na.aspect.phrase} ${target}. ${NAT_TONE[TONE_OF[na.aspect.key]]}`);
+    }
     out.push(exactness(a.orb, a.applying));
     return out;
   }
@@ -215,15 +249,17 @@
    * @param {string} seed   beliebiger String für stabile Textvarianten (z. B. Geburtsdaten + Datum)
    */
   function dailyHoroscope(natal, transit, seed) {
+    const ruler = A.chartRuler(natal);
+    const nAsp = A.natalAspects(natal);
     const aspects = A.transitAspects(transit, natal).map((a) => ({
-      ...a, tone: TONE_OF[a.aspect.key], strength: strength(a), value: aspectValue(a),
+      ...a, tone: TONE_OF[a.aspect.key], strength: strength(a) * (ruler && a.natal === ruler.planet ? 1.3 : 1), value: aspectValue(a),
     }));
     aspects.sort((x, y) => y.strength - x.strength);
     const top = aspects.slice(0, 6).map((a) => ({
       ...a,
       title: `${A.PLANET_NAMES[a.transit]} ${a.aspect.symbol} ${A.PLANET_NAMES[a.natal]}`,
       text: `${TRANSIT[a.transit][a.tone]} ${NATAL[a.natal][a.tone]}`,
-      details: details(a, natal, transit),
+      details: details(a, natal, transit, ruler, nAsp),
     }));
 
     // Bereiche mit Sternen
@@ -302,10 +338,40 @@
       const retro = pl.retro ? ' Rückläufig geboren: Du verarbeitest dieses Thema nach innen und brauchst dafür Zeit.' : '';
       lines.push({ label: A.PLANET_NAMES[p], sign: pl.sign, text: `${PERSONAL_FOCUS[p]} ${SIGN_STYLE[pl.sign]}.${house}${retro}` });
     });
+    const ruler = A.chartRuler(natal);
+    if (ruler) {
+      const r = natal.planets[ruler.planet];
+      lines.push({
+        heading: `Aszendentherrscher: ${A.PLANET_NAMES[ruler.planet]} ${A.SIGNS_IN[ruler.sign]}`,
+        text: `Der Schlüsselplanet deines Horoskops. Sein Thema zieht sich durch dein Leben: ${KEYWORD[ruler.planet]}, ${SIGN_STYLE[ruler.sign]} gelebt.${r.house ? ` Schwerpunkt: ${HOUSE_TOPIC[r.house - 1]} (${r.house}. Haus).` : ''}`,
+      });
+    }
+    const d = A.distribution(natal);
+    const top = d.elements.indexOf(Math.max(...d.elements));
+    const elText = [];
+    if (d.elements[top] / d.total >= 0.4) elText.push(ELEMENT_DOM[top]);
+    d.elements.forEach((v, i) => { if (v === 0) elText.push(ELEMENT_MISSING[i]); });
+    const qTop = d.qualities.indexOf(Math.max(...d.qualities));
+    if (d.qualities[qTop] / d.total >= 0.45) elText.push(QUALITY_DOM[qTop]);
+    if (elText.length) lines.push({ heading: 'Elemente & Qualitäten: ', text: elText.join(' ') });
     return lines;
   }
 
-  const api = { dailyHoroscope, natalProfile, hash };
+  // Die engsten Aspekte im Geburtshoroskop als Grundspannungen
+  function natalAspectLines(natal, limit) {
+    return A.natalAspects(natal).slice(0, limit || 5).map((e) => {
+      const tone = TONE_OF[e.aspect.key];
+      const k = (x) => KEYWORD[x];
+      const text = {
+        F: `${k(e.a)} und ${k(e.b)} unterstützen sich bei dir – hier liegt eine natürliche Begabung.`,
+        H: `${k(e.a)} und ${k(e.b)} ziehen bei dir in verschiedene Richtungen – daraus entsteht Reibung, aber auch Entwicklung.`,
+        V: `${k(e.a)} und ${k(e.b)} wirken bei dir als Einheit – intensiv und schwer zu trennen.`,
+      }[tone];
+      return { title: `${A.PLANET_NAMES[e.a]} ${e.aspect.symbol} ${A.PLANET_NAMES[e.b]}`, name: e.aspect.name, orb: e.orb, tone, text };
+    });
+  }
+
+  const api = { dailyHoroscope, natalProfile, natalAspectLines, hash };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Interpret = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -29,4 +29,22 @@ assert(A.planetPositions(new Date(Date.UTC(2024, 5, 1))).mercury.retro === false
 const a = A.angles(new Date(Date.UTC(2000, 0, 1, 12, 0)), 51.5, 0);
 near('ASC London J2000', a.asc, 24.5, 1);
 near('MC London J2000', a.mc, 279.7, 1);
+// Exakter Zeitpunkt: Frühlings-Tagundnachtgleiche 2024-03-20 ~03:06 UT (Sonne auf 0° Widder)
+const eq = A.exactTime('sun', 0, 0, new Date(Date.UTC(2024, 2, 20, 12, 0)));
+assert(eq && Math.abs(eq.getTime() - Date.UTC(2024, 2, 20, 3, 6)) < 30 * 60000, 'Äquinoktium: ' + eq);
+console.log('OK   Äquinoktium exakt:', eq.toISOString());
+// Kein Durchgang im Fenster -> null
+assert(A.exactTime('saturn', 10, 0, new Date(Date.UTC(2024, 2, 20, 12, 0))) === null);
+// Aszendentherrscher und Verteilung
+const ch = A.natalChart(new Date(Date.UTC(1990, 5, 15, 10, 30)), 53.55, 10, true);
+const ru = A.chartRuler(ch);
+assert(ru && A.RULERS[A.signIndex(ch.asc)] === ru.planet && ru.house >= 1 && ru.house <= 12);
+assert(A.chartRuler(A.natalChart(new Date(Date.UTC(1990, 5, 15, 12, 0)), 53.55, 10, false)) === null);
+const dist = A.distribution(ch);
+assert.strictEqual(dist.elements.reduce((x, y) => x + y, 0), dist.total);
+assert.strictEqual(dist.qualities.reduce((x, y) => x + y, 0), dist.total);
+// Geburtsaspekte: Orbs innerhalb der Grenzen, sortiert nach Enge, keine Uranus/Neptun/Pluto-Paare
+const na = A.natalAspects(ch);
+assert(na.length > 0 && na.every((e) => e.orb <= e.maxOrb));
+assert(na.every((e) => !(['uranus', 'neptune', 'pluto'].includes(e.a) && ['uranus', 'neptune', 'pluto'].includes(e.b))));
 console.log('Alle Tests bestanden');

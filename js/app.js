@@ -206,6 +206,16 @@
     $('wheel').replaceChildren(root);
   }
 
+  // Uhrzeit, zu der der Aspekt exakt wird (nur wenn im Umfeld von ±3 Tagen)
+  function exactNote(a, noon) {
+    const t = A.exactTime(a.transit, a.natalLon, a.aspect.angle, noon);
+    if (!t) return '';
+    const sameDay = t.toDateString() === noon.toDateString();
+    const hm = t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const when = sameDay ? `heute um ${hm} Uhr` : `am ${t.toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric' })} um ${hm} Uhr`;
+    return ` Exakt wird er ${when}.`;
+  }
+
   // ---------- Ausgabe ----------
   function render(ctx) {
     const { natal, transit, forDate, name } = ctx;
@@ -237,10 +247,15 @@
       el('span', { class: 'tag ' + a.tone }, a.aspect.name),
       el('span', { class: 'meta' }, `${a.orb.toFixed(1)}° · ${a.applying ? 'baut sich auf' : 'lässt nach'}`),
       el('p', {}, a.text),
-      el('p', { class: 'detail' }, a.details.join(' ')))) : [el('li', {}, 'Heute gibt es keine engen Aspekte zu deinem Geburtshoroskop – ein ruhiger Tag.')]));
+      el('p', { class: 'detail' }, a.details.join(' ') + exactNote(a, ctx.noon)))) : [el('li', {}, 'Heute gibt es keine engen Aspekte zu deinem Geburtshoroskop – ein ruhiger Tag.')]));
 
     $('profile').replaceChildren(...I.natalProfile(natal).map((l) => el('li', {},
-      el('b', {}, `${l.label} ${A.SIGNS_IN[l.sign]}: `), l.text)));
+      el('b', {}, l.heading || `${l.label} ${A.SIGNS_IN[l.sign]}: `), l.heading && !l.heading.endsWith(' ') ? ': ' : '', l.text)));
+    $('natalAspects').replaceChildren(...I.natalAspectLines(natal).map((l) => el('li', {},
+      el('span', { class: 't' }, l.title),
+      el('span', { class: 'tag ' + l.tone }, l.name),
+      el('span', { class: 'meta' }, `${l.orb.toFixed(1)}°`),
+      el('p', {}, l.text))));
     if (!natal.timeKnown) $('profile').append(el('li', { class: 'hint' }, 'Ohne Geburtszeit sind Aszendent, Häuser und Medium Coeli nicht berechenbar – die Deutung nutzt nur die Planeten.'));
 
     const rows = [el('tr', {}, el('th', {}, 'Planet'), el('th', {}, 'Position'), el('th', {}, natal.timeKnown ? 'Haus' : ''))];
@@ -294,7 +309,7 @@
       const natal = A.natalChart(birthUtc, lat, lon, timeKnown);
       const transit = A.planetPositions(noon);
       saveProfile();
-      render({ natal, transit, forDate, name: $('name').value.trim(), birthKey: `${dateVal}${timeKnown ? $('time').value : ''}${lat.toFixed(2)}${lon.toFixed(2)}` });
+      render({ natal, transit, forDate, noon, name: $('name').value.trim(), birthKey: `${dateVal}${timeKnown ? $('time').value : ''}${lat.toFixed(2)}${lon.toFixed(2)}` });
       $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
       showError(err.message || String(err));

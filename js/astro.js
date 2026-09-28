@@ -214,11 +214,11 @@
   }
 
   const ASPECTS = [
-    { key: 'conjunction', name: 'Konjunktion', symbol: '☌', angle: 0, orbFactor: 1 },
-    { key: 'sextile', name: 'Sextil', symbol: '⚹', angle: 60, orbFactor: 0.7 },
-    { key: 'square', name: 'Quadrat', symbol: '□', angle: 90, orbFactor: 0.9 },
-    { key: 'trine', name: 'Trigon', symbol: '△', angle: 120, orbFactor: 0.9 },
-    { key: 'opposition', name: 'Opposition', symbol: '☍', angle: 180, orbFactor: 1 },
+    { key: 'conjunction', phrase: 'in Konjunktion mit', name: 'Konjunktion', symbol: '☌', angle: 0, orbFactor: 1 },
+    { key: 'sextile', phrase: 'im Sextil zu', name: 'Sextil', symbol: '⚹', angle: 60, orbFactor: 0.7 },
+    { key: 'square', phrase: 'im Quadrat zu', name: 'Quadrat', symbol: '□', angle: 90, orbFactor: 0.9 },
+    { key: 'trine', phrase: 'im Trigon zu', name: 'Trigon', symbol: '△', angle: 120, orbFactor: 0.9 },
+    { key: 'opposition', phrase: 'in Opposition zu', name: 'Opposition', symbol: '☍', angle: 180, orbFactor: 1 },
   ];
 
   const TRANSIT_ORB = { moon: 3, sun: 3, mercury: 3, venus: 3, mars: 3, jupiter: 2.5, saturn: 2.5, uranus: 2.5, neptune: 2.5, pluto: 2.5 };
@@ -242,7 +242,7 @@
           if (orb <= maxOrb) {
             // Wird der Abstand kleiner? (Transit-Geschwindigkeit, Geburtspunkt fest)
             const future = Math.abs(Math.abs(diff180(transit[tp].lon + transit[tp].speed * 0.25, tg.lon)) - asp.angle);
-            out.push({ transit: tp, natal: tg.key, aspect: asp, orb, maxOrb, applying: future < orb });
+            out.push({ transit: tp, natal: tg.key, natalLon: tg.lon, aspect: asp, orb, maxOrb, applying: future < orb });
           }
         });
       });
@@ -250,9 +250,102 @@
     return out;
   }
 
+  // ---------- Geburtshoroskop-Struktur ----------
+  const RULERS = ['mars', 'venus', 'mercury', 'moon', 'sun', 'mercury', 'venus', 'pluto', 'jupiter', 'saturn', 'uranus', 'neptune'];
+  const ELEMENTS = ['Feuer', 'Erde', 'Luft', 'Wasser'];
+  const QUALITIES = ['kardinal', 'fix', 'veränderlich'];
+
+  // Aszendentherrscher (moderne Herrschaft), null ohne Geburtszeit
+  function chartRuler(natal) {
+    if (!natal.timeKnown) return null;
+    const planet = RULERS[signIndex(natal.asc)];
+    return { planet, sign: natal.planets[planet].sign, house: natal.planets[planet].house };
+  }
+
+  // Verteilung auf Elemente und Qualitäten (Sonne, Mond, Aszendent doppelt; Merkur bis Saturn einfach)
+  function distribution(natal) {
+    const weights = { sun: 2, moon: 2, mercury: 1, venus: 1, mars: 1, jupiter: 1, saturn: 1 };
+    const el = [0, 0, 0, 0];
+    const q = [0, 0, 0];
+    const add = (sign, w) => { el[sign % 4] += w; q[sign % 3] += w; };
+    Object.keys(weights).forEach((p) => add(natal.planets[p].sign, weights[p]));
+    if (natal.timeKnown) add(signIndex(natal.asc), 2);
+    const total = el.reduce((a, b) => a + b, 0);
+    return { elements: el, qualities: q, total };
+  }
+
+  // Aspekte innerhalb des Geburtshoroskops (ohne rein generationsbedingte Uranus/Neptun/Pluto-Paare)
+  function natalAspects(natal) {
+    const pts = PLANETS.map((p) => ({ key: p, lon: natal.planets[p].lon }));
+    if (natal.timeKnown) pts.push({ key: 'asc', lon: natal.asc }, { key: 'mc', lon: natal.mc });
+    const outer = ['uranus', 'neptune', 'pluto'];
+    const orbOf = (k) => (k === 'sun' || k === 'moon' ? 7 : k === 'asc' || k === 'mc' ? 5 : 5);
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const a = pts[i];
+        const b = pts[j];
+        if (outer.includes(a.key) && outer.includes(b.key)) continue;
+        if (['asc', 'mc'].includes(a.key) && ['asc', 'mc'].includes(b.key)) continue;
+        const sep = Math.abs(diff180(a.lon, b.lon));
+        ASPECTS.forEach((asp) => {
+          const maxOrb = Math.max(orbOf(a.key), orbOf(b.key)) * asp.orbFactor;
+          const orb = Math.abs(sep - asp.angle);
+          if (orb <= maxOrb) out.push({ a: a.key, b: b.key, aspect: asp, orb, maxOrb });
+        });
+      }
+    }
+    return out.sort((x, y) => x.orb / x.maxOrb - y.orb / y.maxOrb);
+  }
+
+  // Ekliptikale Länge eines Körpers zu einem Zeitpunkt
+  function longitudeAt(planet, date) {
+    return longitudes(daysSince2000(date))[planet];
+  }
+
+  /**
+   * Zeitpunkt, an dem `planet` den Winkel `angle` zu `targetLon` exakt erreicht,
+   * gesucht im Fenster ±spanHours um `around`. Bei mehreren Treffern (Rückläufigkeit)
+   * gewinnt der nächste. Gibt null zurück, wenn im Fenster kein exakter Durchgang liegt.
+   */
+  function exactTime(planet, targetLon, angle, around, spanHours, stepHours) {
+    spanHours = spanHours || 72;
+    stepHours = stepHours || 2;
+    const cands = angle === 0 || angle === 180 ? [norm(targetLon + angle)] : [norm(targetLon + angle), norm(targetLon - angle)];
+    const H = 3600000;
+    const t0 = around.getTime() - spanHours * H;
+    const n = Math.round((2 * spanHours) / stepHours);
+    const lonAt = (ms) => longitudeAt(planet, new Date(ms));
+    let best = null;
+    cands.forEach((c) => {
+      let prevT = t0;
+      let prevG = diff180(lonAt(t0), c);
+      for (let i = 1; i <= n; i++) {
+        const t = t0 + i * stepHours * H;
+        const g = diff180(lonAt(t), c);
+        if (Math.abs(prevG) < 30 && Math.abs(g) < 30 && prevG * g <= 0) {
+          let lo = prevT;
+          let hi = t;
+          let glo = prevG;
+          for (let k = 0; k < 30; k++) {
+            const mid = (lo + hi) / 2;
+            const gm = diff180(lonAt(mid), c);
+            if (glo * gm <= 0) hi = mid; else { lo = mid; glo = gm; }
+          }
+          const tm = (lo + hi) / 2;
+          if (best === null || Math.abs(tm - around.getTime()) < Math.abs(best - around.getTime())) best = tm;
+        }
+        prevT = t;
+        prevG = g;
+      }
+    });
+    return best === null ? null : new Date(best);
+  }
+
   const api = {
     SIGNS, SIGNS_IN, SIGNS_INTO, SIGN_GLYPHS, PLANETS, PLANET_NAMES, PLANET_GLYPHS, ASPECTS,
-    julianDay, planetPositions, natalChart, transitAspects, angles, signIndex, formatLon,
+    julianDay, planetPositions, natalChart, transitAspects, natalAspects, chartRuler, distribution, exactTime, longitudeAt,
+    RULERS, ELEMENTS, QUALITIES, angles, signIndex, formatLon,
     wholeSignHouse, norm, diff180,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

@@ -30,5 +30,13 @@ assert(n.intro.length > 0);
 // Anderer Tag -> andere Konstellationen
 const tomorrow = A.planetPositions(new Date(Date.UTC(2026, 9, 5, 10, 0)));
 assert.notStrictEqual(flat(h), flat(I.dailyHoroscope(hamburg, tomorrow, 'a')), 'Datum ohne Wirkung');
+// Aszendentherrscher-, Geburtsaspekt- und Profilzeilen
+const prof = I.natalProfile(hamburg);
+assert(prof.some((l) => /Aszendentherrscher/.test(l.heading || '')), 'Herrscher fehlt im Profil');
+assert(!I.natalProfile(noTime).some((l) => /Aszendentherrscher/.test(l.heading || '')));
+const nal = I.natalAspectLines(hamburg);
+assert(nal.length > 0 && nal.every((l) => l.text && l.title));
+assert(h.aspects.some((a) => a.details.some((d) => /im Geburtshoroskop/.test(d))), 'Geburtsaspekt-Bezug fehlt');
+assert(h.aspects.every((a) => typeof a.natalLon === 'number'));
 console.log('Interpretationstests bestanden');
 console.log(h.aspects[0].title, '\n ', h.aspects[0].text, '\n ', h.aspects[0].details.join('\n  '));

@@ -106,3 +106,5 @@ button.primary:disabled { opacity: .6; cursor: wait; }
 .planets th { color: var(--muted); font-weight: 500; border-top: 0; }
 footer { color: var(--muted); font-size: .78rem; text-align: center; margin-top: 24px; }
 footer a { color: var(--accent2); }
+
+.card h4 { margin: 16px 0 8px; font-size: .95rem; color: var(--muted); }
