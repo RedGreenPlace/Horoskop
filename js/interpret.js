@@ -40,7 +40,7 @@
       mc: 'Deine Gefühlslage färbt heute deine Haltung zu Beruf und Zielen.',
     },
     sun: {
-      sun: 'Die Sonne trifft ihren Ausgangspunkt in deinem Horoskop – ein Tag, der dich an deine eigenen Ziele erinnert.',
+      sun: 'Ein persönlicher Jahreszyklus beginnt neu – ein Tag, der dich an deine eigenen Ziele erinnert.',
       moon: 'Bewusstsein und Gefühl begegnen sich – ein guter Moment, um herauszufinden, was du wirklich brauchst.',
       mercury: 'Dein Denken wird klar: Du kannst heute gut ordnen, was dich beschäftigt.',
       venus: 'Deine Ausstrahlung und dein Sinn für das, was dir wichtig ist, werden beleuchtet.',
@@ -101,7 +101,7 @@
       mercury: 'Der Blick weitet sich; Lernen, Planen und Veröffentlichen gelingen.',
       venus: 'Liebe, Freundschaft und Genuss werden reicher – Einladungen und Geschenke sind möglich.',
       mars: 'Tatkraft mit Rückenwind; große Vorhaben wollen gestartet werden.',
-      jupiter: 'Ein Jupiter-Zyklus schließt sich – Zeit, Bilanz zu ziehen und neu zu wachsen.',
+      jupiter: 'Ein Wachstumszyklus schließt sich – Zeit, Bilanz zu ziehen und neu zu wachsen.',
       saturn: 'Wachstum und Vorsicht müssen sich verständigen: solide Erweiterung statt Risiko.',
       uranus: 'Überraschende Chancen; plötzlich öffnen sich Türen.',
       neptune: 'Ideale und Vertrauen sind stark – Glaube ohne Prüfung kann täuschen.',
@@ -116,7 +116,7 @@
       venus: 'Liebe und Geld werden nüchtern auf Verbindlichkeit geprüft.',
       mars: 'Gas und Bremse zugleich: Ausdauer wird verlangt, Frust ist möglich.',
       jupiter: 'Erwartungen und Realität werden abgeglichen; Wachstum gibt es nur mit Substanz.',
-      saturn: 'Ein Saturn-Zyklus erreicht einen Meilenstein – Lebensbilanz und neue Verantwortung.',
+      saturn: 'Ein Lebenszyklus erreicht einen Meilenstein – Zeit für Bilanz und neue Verantwortung.',
       uranus: 'Struktur und Freiheit ringen miteinander: Altes bricht, Neues muss tragfähig werden.',
       neptune: 'Träume werden auf Machbarkeit geprüft; Ideale brauchen Form.',
       pluto: 'Tiefer Druck und harte Realität, aber auch enorme Standfestigkeit.',
@@ -416,10 +416,9 @@
   // Verflochtene Tagesdeutung: Dauerthema (langsamer Planet) + Auslöser (schneller Planet) + Begleiter
   const SLOW = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
   const FAST = ['sun', 'moon', 'mercury', 'venus', 'mars'];
-  function story(natal, all, opts) {
+  function pickStory(all) {
     const top = all.slice(0, 8);
     if (!top.length) return null;
-    const name = (k) => A.PLANET_NAMES[k];
     // Roter Faden: der Geburtspunkt mit den meisten (und stärksten) Aspekten
     const agg = {};
     top.forEach((a) => {
@@ -439,6 +438,14 @@
       if (rest.length < 2 && !rest.some((r) => r.natal === a.natal && r.transit === a.transit)) rest.push(a);
     });
 
+    return { top, agg, focus, bg, trig, rest };
+  }
+
+  function story(natal, all, opts) {
+    const sel = pickStory(all);
+    if (!sel) return null;
+    const { top, agg, focus, bg, trig, rest } = sel;
+    const name = (k) => A.PLANET_NAMES[k];
     const parts = [];
     const n = agg[focus].n;
     parts.push(n >= 2
@@ -580,6 +587,7 @@
     const advice = pick(ADVICE[adviceKey], seed, 'advice');
 
     const st = story(natal, aspects, opts);
+    const pl = plainStory(natal, aspects, opts);
     const headline = lead
       ? `${lead.title}: ${{ F: 'Rückenwind', H: 'Herausforderung mit Entwicklungspotenzial', V: 'Verdichtete Energie' }[lead.tone]}`
       : 'Ein ruhiger Tag';
@@ -590,7 +598,9 @@
       moon: { sign: moonSign, house: moonHouse, phase },
       overview: overview(aspects, natal),
       story: st ? st.text : null,
-      areas, aspects: top, advice: st && st.advice ? st.advice : advice, notes,
+      plain: pl,
+      moonPlain: moonPlain(transit, natal),
+      areas, aspects: top, advice: pl && pl.advice ? pl.advice : st && st.advice ? st.advice : advice, notes,
     };
   }
 
@@ -637,6 +647,242 @@
   // Wechselt der Mond im Lauf des Tages das Zeichen, ändert sich die Tagesstimmung
   function rhythm(from, to, hm) {
     return `Bis ${hm} Uhr wirkt der Mond ${A.SIGNS_IN[from]} – ${SIGN_STYLE[from]}. Danach steht er ${A.SIGNS_IN[to]} – ${SIGN_STYLE[to]}: Die Tagesstimmung wechselt.`;
+  }
+
+  // ---------- Klartext: durchgehender Text ohne Fachbegriffe ----------
+  const PLAIN_FOCUS = {
+    sun: 'deinen Selbstwert und deine Ausstrahlung', moon: 'deine Gefühle und Bedürfnisse', mercury: 'dein Denken und Sprechen',
+    venus: 'Nähe und das, was dir wichtig ist', mars: 'deinen Antrieb und deine Durchsetzung', jupiter: 'deine Zuversicht und deine Ziele',
+    saturn: 'Verantwortung und Verlässlichkeit', uranus: 'deinen Freiheitsdrang', neptune: 'deine Träume und deine Intuition',
+    pluto: 'Kontrolle und Wandel', asc: 'dein Auftreten', mc: 'deine berufliche Richtung',
+  };
+  // Was hochwill (Bedürfnis hinter dem betroffenen Punkt)
+  const NEED = {
+    sun: 'der Wunsch, dich so zu zeigen, wie du wirklich bist',
+    moon: 'das Bedürfnis nach Wärme, Anerkennung und Geborgenheit',
+    mercury: 'etwas, das du sagen oder klären willst',
+    venus: 'der Wunsch nach Nähe und danach, dass dich jemand wirklich wertschätzt',
+    mars: 'aufgestaute Tatkraft und Ärger, der raus will',
+    jupiter: 'die Hoffnung auf mehr und der Wunsch, etwas Großes zu wagen',
+    saturn: 'das Gefühl, zu viel Verantwortung zu tragen',
+    uranus: 'der Drang nach Freiheit und Veränderung',
+    neptune: 'eine Sehnsucht, die du nicht recht benennen kannst',
+    pluto: 'ein tiefes Thema, das du lange festhältst',
+    asc: 'der Wunsch, anders aufzutreten, als du es gewohnt bist',
+    mc: 'der Wunsch, beruflich mehr zu bewirken und anerkannt zu werden',
+  };
+  // Was es zurückhält (Art des Drucks)
+  const HOLD = {
+    saturn: 'Vorsicht, Pflichtgefühl und dem Zweifel, ob du es dir erlauben darfst',
+    jupiter: 'zu großen Erwartungen, die dich zögern lassen',
+    uranus: 'Unruhe und dem Widerstand gegen jede Einengung',
+    neptune: 'Unsicherheit und dem Gefühl, dass alles verschwimmt',
+    pluto: 'der Angst, die Kontrolle zu verlieren oder dich auszuliefern',
+    mars: 'Ungeduld und Reizbarkeit',
+    venus: 'der Sorge, Nähe oder Harmonie zu gefährden',
+    mercury: 'Grübeln und der Angst, das Falsche zu sagen',
+    sun: 'der Frage, wie du dabei wirkst',
+    moon: 'schwankender Stimmung',
+  };
+  // Was es trägt (bei leichtem Aspekt)
+  const SUPPORT = {
+    saturn: 'Ausdauer und Verlässlichkeit', jupiter: 'Zuversicht und Großzügigkeit', uranus: 'frischen Ideen und Mut zum Ungewohnten',
+    neptune: 'Intuition und Einfühlung', pluto: 'innerer Stärke und Entschlossenheit', mars: 'Tatkraft und Mut',
+    venus: 'Wärme und Charme', mercury: 'klaren Worten', sun: 'Selbstvertrauen', moon: 'einer guten Grundstimmung',
+  };
+  const REL_HEAD = {
+    soften: 'Spannung, die sich löst', sharpen: 'Spannung, die sich zuspitzt', disturb: 'Störfeuer in einem guten Lauf',
+    boost: 'Rückenwind', fuse: 'ein Thema, das nicht loslässt',
+  };
+  // Auslöser im Klartext; davor steht die Uhrzeit („Um 21:22 Uhr …“)
+  const PLAIN_TRIG = {
+    sun: {
+      soften: 'wird es leichter: Was du jetzt aussprichst oder zeigst, kommt an, statt Druck zu erzeugen.',
+      sharpen: 'wirst du vor die Wahl gestellt: Position beziehen oder ausweichen.',
+      disturb: 'kommt Unruhe in etwas, das eigentlich gut läuft.',
+      boost: 'kommt zusätzlicher Rückenwind dazu.',
+      fuse: 'rückt das Thema ins Licht – es lässt sich nicht mehr übergehen.',
+    },
+    moon: {
+      soften: 'wird die Stimmung weicher, und das Thema fühlt sich erträglicher an.',
+      sharpen: 'liegen die Gefühle dünnhäutig an der Oberfläche, und das Thema tut mehr weh als sonst.',
+      disturb: 'stören Stimmungsschwankungen einen sonst guten Lauf.',
+      boost: 'trägt dich deine Stimmung zusätzlich.',
+      fuse: 'verdichten sich die Gefühle.',
+    },
+    mercury: {
+      soften: 'helfen klare Worte und ein ruhiges Gespräch, die Spannung zu lösen.',
+      sharpen: 'fallen Worte schärfer aus und lösen Streit oder Grübeln aus.',
+      disturb: 'sorgen Missverständnisse für Störungen in einem sonst guten Fluss.',
+      boost: 'geben Ideen und Gespräche zusätzlichen Schwung.',
+      fuse: 'kreist das Thema im Kopf.',
+    },
+    venus: {
+      soften: 'machen Zuwendung und ein freundliches Wort alles milder.',
+      sharpen: 'reiben sich Ansprüche an Nähe und Anerkennung am Thema.',
+      disturb: 'bremst Bequemlichkeit oder der Wunsch nach Harmonie einen sonst guten Lauf.',
+      boost: 'verstärken Freundlichkeit und Genuss das Gute.',
+      fuse: 'geht es um Nähe und darum, was dir wichtig ist.',
+    },
+    mars: {
+      soften: 'hilft Tatkraft, es anzupacken, statt zu grübeln.',
+      sharpen: 'heizt Ungeduld es an – Reizbarkeit und Konflikte werden wahrscheinlicher.',
+      disturb: 'stört Ungeduld einen sonst guten Lauf.',
+      boost: 'gibt Antrieb zusätzlichen Schub.',
+      fuse: 'wird es konkret und drängt zum Handeln.',
+    },
+  };
+  const PLAIN_TONE = { F: 'Das geht leicht von der Hand.', H: 'Das kostet Kraft.', V: 'Das lässt sich nicht übergehen.' };
+  const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+
+  // Beginn und Ende des lokalen Tages von `when`
+  function dayBounds(when, opts) {
+    if (!opts.timeZone) {
+      const a = new Date(when.getFullYear(), when.getMonth(), when.getDate());
+      return [a, new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1)];
+    }
+    const offset = (ms) => {
+      const p = {};
+      new Intl.DateTimeFormat('en-US', { timeZone: opts.timeZone, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })
+        .formatToParts(new Date(ms)).forEach((x) => { p[x.type] = +x.value; });
+      return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - Math.floor(ms / 1000) * 1000;
+    };
+    const [y, m, d] = new Intl.DateTimeFormat('en-CA', { timeZone: opts.timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(when).split('-').map(Number);
+    const mid = (dd) => { const g = Date.UTC(y, m - 1, dd, 0, 0); let u = g - offset(g); u = g - offset(u); return new Date(u); };
+    return [mid(d), mid(d + 1)];
+  }
+
+  // Alle exakten Aspekte (laufender Planet -> Geburtspunkt) im Zeitfenster [from, to]
+  function eventsBetween(natal, planets, from, to, minWeight) {
+    const H = 3600000;
+    const around = new Date((from.getTime() + to.getTime()) / 2);
+    const span = (to.getTime() - from.getTime()) / 2 / H;
+    const pos = A.planetPositions(around);
+    const targets = A.PLANETS.map((k) => [k, natal.planets[k].lon]);
+    if (natal.timeKnown) targets.push(['asc', natal.asc], ['mc', natal.mc]);
+    const out = [];
+    planets.forEach((tp) => {
+      const reach = Math.abs(pos[tp].speed) * (span / 12) + 0.5; // Grad, die der Planet im Fenster zurücklegen kann
+      targets.forEach(([k, lon]) => A.ASPECTS.forEach((asp) => {
+        const cands = asp.angle === 0 || asp.angle === 180 ? [A.norm(lon + asp.angle)] : [A.norm(lon + asp.angle), A.norm(lon - asp.angle)];
+        if (!cands.some((c) => Math.abs(A.diff180(pos[tp].lon, c)) <= reach)) return;
+        const t = A.exactTime(tp, lon, asp.angle, around, span, tp === 'moon' ? 0.5 : 2);
+        if (t && t >= from && t <= to) {
+          const w = T_WEIGHT[tp] * N_WEIGHT[k];
+          if (!minWeight || w >= minWeight) out.push({ t, transit: tp, natal: k, aspect: asp, tone: TONE_OF[asp.key], weight: w });
+        }
+      }));
+    });
+    return out.sort((a, b) => a.t - b.t);
+  }
+
+  function whenPhrase(t, opts) {
+    const hm = fmtTime(t, opts);
+    if (sameDay(t, opts.when, opts)) return `um ${hm} Uhr`;
+    const next = sameDay(t, new Date(opts.when.getTime() + 24 * 3600000), opts);
+    if (next && +hm.slice(0, 2) < 5) return `in der Nacht um ${hm} Uhr`;
+    return `am ${t.toLocaleDateString('de-DE', { weekday: 'long', ...tzOpt(opts) })} um ${hm} Uhr`;
+  }
+
+  // Zeitpunkt, an dem der Mond im Zeitfenster das Zeichen wechselt (sonst null)
+  function moonIngress(from, to) {
+    const sign = (ms) => A.signIndex(A.planetPositions(new Date(ms)).moon.lon);
+    const s0 = sign(from.getTime());
+    const s1 = sign(to.getTime());
+    if (s0 === s1) return null;
+    let lo = from.getTime();
+    let hi = to.getTime();
+    for (let i = 0; i < 22; i++) {
+      const mid = (lo + hi) / 2;
+      if (sign(mid) === s0) lo = mid; else hi = mid;
+    }
+    return { time: new Date(hi), sign: s1 };
+  }
+
+  // Durchgehender Text: Worum es geht, was hochwill, was es hält, wann es sich löst, Tagesverlauf, Ausblick
+  function plainStory(natal, all, opts) {
+    const sel = pickStory(all);
+    if (!sel) return null;
+    const { focus, agg, bg, trig } = sel;
+    const paras = [];
+    let rel = null;
+
+    // Absatz 1: Worum es geht, was hochwill und was es zurückhält
+    const n = agg[focus].n;
+    const p1 = [n >= 2 ? `Der Tag dreht sich um ${PLAIN_FOCUS[focus]} – mehrere Einflüsse treffen genau hier zusammen.` : `Im Mittelpunkt stehen ${PLAIN_FOCUS[focus]}.`];
+    if (bg) {
+      const bgTone = bg.tone === 'V' ? (bg.value < 0 ? 'H' : 'F') : bg.tone;
+      if (bgTone === 'H') p1.push(`Was raus will, ist ${NEED[bg.natal]}. Zurückgehalten wird es von ${HOLD[bg.transit]}.`);
+      else p1.push(`${cap(NEED[bg.natal])} findet heute Unterstützung, getragen von ${SUPPORT[bg.transit]}.`);
+      p1.push(THEME[bg.transit][bg.natal]);
+      if (trig) rel = trig.tone === 'V' ? 'fuse' : trig.tone === 'F' ? (bgTone === 'H' ? 'soften' : 'boost') : (bgTone === 'H' ? 'sharpen' : 'disturb');
+    } else {
+      const lead = sel.top[0];
+      p1.push(THEME[lead.transit][lead.natal]);
+    }
+    paras.push(p1.join(' '));
+
+    // Absatz 2: Auslöser und übrige Ereignisse des Tages in zeitlicher Reihenfolge
+    const canTime = opts && opts.when;
+    const bounds = canTime ? dayBounds(opts.when, opts) : null;
+    const inDay = (t) => t && t >= bounds[0] && t <= bounds[1];
+    const items = [];
+    const isSame = (e, a) => a && e.transit === a.transit && e.natal === a.natal && e.aspect.angle === a.aspect.angle;
+    // Tonabhängiger Satz zu einem Ereignis: Bedürfnis + Hemmnis bzw. Halt
+    const eventLine = (e) => {
+      if (e.transit === 'moon') return THEME.moon[e.natal]; // Mondkontakte färben die Stimmung
+      if (e.tone === 'H') return `${cap(NEED[e.natal])} – zurückgehalten von ${HOLD[e.transit]}.`;
+      if (e.tone === 'F') return `${cap(NEED[e.natal])} – getragen von ${SUPPORT[e.transit]}.`;
+      return `${cap(NEED[e.natal])} steht im Mittelpunkt.`;
+    };
+    if (bg && trig) {
+      const t = canTime ? A.exactTime(trig.transit, trig.natalLon, trig.aspect.angle, opts.when) : null;
+      const when = inDay(t) ? whenPhrase(t, opts) : 'im Lauf des Tages';
+      items.push({ t: inDay(t) ? t : new Date(0), text: `${cap(when)} ${PLAIN_TRIG[trig.transit][rel]}` });
+    }
+    let outlook = null;
+    if (canTime) {
+      const [ds, de] = bounds;
+      const upcoming = (e) => (e.t >= new Date(opts.when.getTime() - 3600000) ? 1.5 : 1);
+      eventsBetween(natal, A.PLANETS, ds, de, 2.2)
+        .filter((e) => !isSame(e, trig) && !isSame(e, bg))
+        .sort((a, b) => b.weight * upcoming(b) - a.weight * upcoming(a)).slice(0, 6)
+        .forEach((e) => items.push({ t: e.t, text: `${cap(whenPhrase(e.t, opts))}: ${eventLine(e)}` }));
+      const ing = moonIngress(ds, de);
+      if (ing) items.push({ t: ing.time, text: `${cap(whenPhrase(ing.time, opts))} wechselt die Grundstimmung: ${SIGN_STYLE[ing.sign]}.` });
+      const next = eventsBetween(natal, ['sun', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'], de, new Date(de.getTime() + 72 * 3600000), 4);
+      const o = next.sort((a, b) => b.weight - a.weight)[0];
+      if (o) {
+        const head = { F: 'kommt Rückenwind', H: 'wird es zäh', V: 'rückt ein Thema in den Mittelpunkt' }[o.tone];
+        outlook = `Ausblick: ${cap(whenPhrase(o.t, { ...opts, when: de }))} ${head}. ${eventLine(o)}`;
+      }
+    }
+    items.sort((a, b) => a.t - b.t);
+    if (items.length) paras.push(items.map((x) => x.text).join(' '));
+    if (outlook) paras.push(outlook);
+
+    const focusHead = cap(`es geht um ${PLAIN_FOCUS[focus]}`);
+    return {
+      headline: `${focusHead}: ${rel ? REL_HEAD[rel] : 'ein Thema, das dich begleitet'}`,
+      text: paras.join('\n\n'),
+      advice: rel ? REL_ADVICE[rel] : null,
+    };
+  }
+
+  function moonPlain(transit, natal) {
+    const phase = moonPhase(transit);
+    const sign = A.signIndex(transit.moon.lon);
+    const house = natal.timeKnown ? ` ${MOON_HOUSE[A.wholeSignHouse(transit.moon.lon, natal.asc) - 1]}` : '';
+    const d = phase.elong; // 0 = Neumond, 180 = Vollmond
+    const near = (target, label) => (Math.abs(d - target) > 4 && phase.name === label ? (d > target ? `Kurz nach ${label}` : `Kurz vor ${label}`) : phase.name);
+    const name = near(180, 'Vollmond') !== phase.name ? near(180, 'Vollmond') : near(d > 180 ? 360 : 0, 'Neumond');
+    const NEAR = {
+      'Kurz nach Vollmond': 'Der Höhepunkt liegt gerade hinter dir; Gefühle und Ergebnisse klingen nach.',
+      'Kurz vor Vollmond': 'Der Höhepunkt steht kurz bevor; Gefühle verdichten sich.',
+      'Kurz nach Neumond': 'Ein Neuanfang hat gerade begonnen; erste Ideen zeigen sich.',
+      'Kurz vor Neumond': 'Ein Zyklus schließt sich; Ruhe und Loslassen tun gut.',
+    };
+    return `${phase.icon} ${name}: ${NEAR[name] || phase.text} Der Grundton des Tages ist ${SIGN_STYLE[sign]}.${house}`;
   }
 
   function natalProfile(natal) {

@@ -109,3 +109,8 @@ footer a { color: var(--accent2); }
 
 .card h4 { margin: 16px 0 8px; font-size: .95rem; color: var(--muted); }
 .overview { font-weight: 500; }
+
+.story p { margin: 0 0 12px; }
+.story p:first-child { font-size: 1.02rem; }
+details.expert summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+details.expert[open] summary { margin-bottom: 12px; }

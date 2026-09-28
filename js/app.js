@@ -216,14 +216,14 @@
     const dayStart = new Date(y, m - 1, d, 0, 0);
     const dayEnd = new Date(y, m - 1, d + 1, 0, 0);
     $('dayLabel').textContent = (name ? name + ' · ' : '') + dayStart.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    $('headline').textContent = h.headline;
+    $('headline').textContent = h.plain ? h.plain.headline : h.headline;
+    $('story').replaceChildren(...(h.plain ? h.plain.text.split('\n\n') : [h.overview]).map((t) => el('p', {}, t)));
     $('overview').textContent = h.story || h.overview;
 
-    let moonLine = `${h.moon.phase.icon} ${h.moon.phase.name} ${A.SIGNS_IN[h.moon.sign]} – ${h.moon.phase.text}`;
-    const ing = moonIngress(dayStart, dayEnd);
-    if (ing) moonLine += ' ' + I.rhythm((ing.sign + 11) % 12, ing.sign, ing.time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }));
+    const moonLine = h.moonPlain;
     $('moonLine').textContent = moonLine;
-    $('intro').textContent = h.intro;
+    const ing = moonIngress(dayStart, new Date(y, m - 1, d + 1, 0, 0));
+    $('intro').textContent = h.intro + (ing ? ' ' + I.rhythm((ing.sign + 11) % 12, ing.sign, ing.time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })) : '');
     $('notes').textContent = h.notes.join(' ');
     $('notes').hidden = !h.notes.length;
     $('advice').textContent = h.advice;
@@ -231,7 +231,7 @@
     $('areas').replaceChildren(...h.areas.map((a) => el('div', { class: 'card' },
       el('h3', {}, el('span', {}, `${glyph(a.icon)} ${a.title}`), stars(a.stars)),
       el('p', {}, a.text),
-      a.driver ? el('p', { class: 'driver' }, 'Auslöser: ' + a.driver) : '')));
+      '')));
 
     $('aspects').replaceChildren(...(h.aspects.length ? h.aspects.map((a) => el('li', {},
       el('span', { class: 't' }, a.title),

@@ -59,5 +59,22 @@ const sj = hs.aspects.find((a) => a.title.startsWith('Saturn') && a.natal === 'j
 assert(sj && sj.details.some((d) => /war am 26\.9\. um 05:27 Uhr exakt und klingt ab/.test(d)), JSON.stringify(sj && sj.details));
 // Ohne opts weiterhin lauffähig
 assert(typeof run(hamburg, 'a').story === 'string');
+// Klartext-Modus: durchgehender Text ohne Fachbegriffe, mit Ursache, Auslöser und Uhrzeiten
+const JARGON = /(Pluto|Saturn|Uranus|Neptun|Merkur|Jupiter|Sextil|Trigon|Quadrat|Opposition|Konjunktion|Aszendent|Medium Coeli|\d\. Haus|Transit)/;
+A.PLANETS.forEach((t) => [...A.PLANETS, 'asc', 'mc'].forEach((nk) => assert(!JARGON.test(I.THEME[t][nk]), `Fachbegriff in THEME ${t}>${nk}: ${I.THEME[t][nk]}`)));
+assert(hs.plain && hs.plain.text.includes('\n\n'));
+assert(!JARGON.test(hs.plain.headline + hs.plain.text + hs.moonPlain + hs.advice), 'Fachbegriff im Klartext');
+assert(hs.plain.text.includes('Was raus will, ist das Bedürfnis nach Wärme, Anerkennung und Geborgenheit.'));
+assert(hs.plain.text.includes('Zurückgehalten wird es von der Angst, die Kontrolle zu verlieren oder dich auszuliefern.'));
+assert(hs.plain.text.includes('Um 21:22 Uhr wird es leichter'), hs.plain.text);
+assert(/Um 06:55 Uhr: Der Wunsch nach Nähe/.test(hs.plain.text), hs.plain.text);
+assert(/Ausblick: Am Mittwoch um 04:39 Uhr/.test(hs.plain.text), hs.plain.text);
+assert(/Kurz nach Vollmond/.test(hs.moonPlain), hs.moonPlain);
+// Am Folgetag liegt der Auslöser schon hinter dir und wird nicht als Zukunft dargestellt
+const w2 = new Date(Date.UTC(2026, 8, 28, 10, 0));
+const h2 = I.dailyHoroscope(herne, A.planetPositions(w2), 'x', { when: w2, timeZone: 'Europe/Berlin' });
+assert(/Im Lauf des Tages wird es leichter/.test(h2.plain.text) && !/Am Sonntag/.test(h2.plain.text), h2.plain.text);
+assert(/Um 21:28 Uhr/.test(h2.plain.text) && /Um 16:42 Uhr wechselt die Grundstimmung/.test(h2.plain.text), h2.plain.text);
+assert(!/undefined|NaN/.test(h2.plain.text));
 console.log('Interpretationstests bestanden');
 console.log(h.aspects[0].title, '\n ', h.aspects[0].text, '\n ', h.aspects[0].details.join('\n  '));
