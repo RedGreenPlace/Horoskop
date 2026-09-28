@@ -287,7 +287,65 @@
     V: 'Beide Anteile wirken bei dir als Einheit – der Transit trifft sie gemeinsam.',
   };
   const KEYWORD = { sun: 'Identität', moon: 'Gefühle', mercury: 'Denken', venus: 'Liebe und Werte', mars: 'Antrieb', jupiter: 'Wachstum', saturn: 'Struktur', uranus: 'Freiheitsdrang', neptune: 'Intuition', pluto: 'Tiefe', asc: 'Auftreten', mc: 'Berufung' };
-  const DEIN = { sun: 'deiner Sonne', venus: 'deiner Venus', asc: 'deinem Aszendenten', mc: 'deinem Medium Coeli' };
+  const DEIN = {
+    sun: 'deiner Sonne', moon: 'deinem Mond', mercury: 'deinem Merkur', venus: 'deiner Venus', mars: 'deinem Mars',
+    jupiter: 'deinem Jupiter', saturn: 'deinem Saturn', uranus: 'deinem Uranus', neptune: 'deinem Neptun', pluto: 'deinem Pluto',
+    asc: 'deinem Aszendenten', mc: 'deinem Medium Coeli',
+  };
+  const ACC = {
+    sun: 'deine Sonne', moon: 'deinen Mond', mercury: 'deinen Merkur', venus: 'deine Venus', mars: 'deinen Mars',
+    jupiter: 'deinen Jupiter', saturn: 'deinen Saturn', uranus: 'deinen Uranus', neptune: 'deinen Neptun', pluto: 'deinen Pluto',
+    asc: 'deinen Aszendenten', mc: 'dein Medium Coeli',
+  };
+  const PRONOUN = { sun: 'sie', venus: 'sie', mc: 'es' };
+
+  // Wie ein schneller Planet ein Dauerthema auslöst, je nach Verhältnis zum Hintergrund
+  // soften = harmonischer Auslöser auf Spannung, sharpen = Spannung auf Spannung,
+  // disturb = Spannung auf Rückenwind, boost = Rückenwind auf Rückenwind, fuse = Konjunktion
+  const TRIGGER = {
+    sun: {
+      soften: 'Sie federt die Spannung ab und macht es leichter, darüber zu sprechen, statt es wegzudrücken.',
+      sharpen: 'Sie stellt dich vor die Wahl: Position beziehen oder ausweichen.',
+      disturb: 'Sie bringt Unruhe in etwas, das eigentlich gut läuft.',
+      boost: 'Sie gibt zusätzlich Rückenwind.',
+      fuse: 'Sie rückt das Thema ins Licht.',
+    },
+    moon: {
+      soften: 'Deine Stimmung macht es weicher und erträglicher.',
+      sharpen: 'Deine Stimmung verstärkt es – Gefühle liegen dünnhäutig nah an der Oberfläche.',
+      disturb: 'Stimmungsschwankungen stören einen sonst guten Lauf.',
+      boost: 'Deine Stimmung trägt dich zusätzlich.',
+      fuse: 'Die Gefühle verdichten sich.',
+    },
+    mercury: {
+      soften: 'Gespräche und klare Worte entschärfen es.',
+      sharpen: 'Worte fallen schärfer aus und lösen Streit oder Grübelei aus.',
+      disturb: 'Missverständnisse stören einen sonst guten Fluss.',
+      boost: 'Ideen und Gespräche geben zusätzlichen Schwung.',
+      fuse: 'Das Thema kreist im Kopf.',
+    },
+    venus: {
+      soften: 'Zuwendung, Charme und ein freundliches Wort machen es milder.',
+      sharpen: 'Ansprüche an Nähe oder Anerkennung reiben sich am Thema.',
+      disturb: 'Bequemlichkeit oder Harmoniebedürfnis bremsen einen sonst guten Lauf.',
+      boost: 'Freundlichkeit und Genuss verstärken das Gute.',
+      fuse: 'Es geht heute um Nähe und um das, was dir wichtig ist.',
+    },
+    mars: {
+      soften: 'Tatkraft hilft, es anzupacken, statt zu grübeln.',
+      sharpen: 'Ungeduld heizt es an – Reizbarkeit und Konflikte sind wahrscheinlicher.',
+      disturb: 'Ungeduld stört einen sonst guten Lauf.',
+      boost: 'Antrieb und Mut geben zusätzlichen Schub.',
+      fuse: 'Es wird konkret und drängt zum Handeln.',
+    },
+  };
+  const REL_ADVICE = {
+    soften: 'Nutze die Entlastung und sprich Schwieriges heute an – aber nicht überstürzt.',
+    sharpen: 'Nimm Tempo raus und entscheide nichts im Affekt.',
+    disturb: 'Halte am Bewährten fest und lass dich nicht aus dem Konzept bringen.',
+    boost: 'Nutze den Rückenwind für etwas, das dir wirklich wichtig ist.',
+    fuse: 'Konzentriere dich heute auf dieses eine Thema.',
+  };
   const ELEMENT_DOM = [
     'Feuer dominiert: Du brauchst Begeisterung, Bewegung und Taten.',
     'Erde dominiert: Du brauchst Greifbares, Verlässlichkeit und Ergebnisse.',
@@ -338,6 +396,75 @@
     return T_WEIGHT[a.transit] * N_WEIGHT[a.natal] * (1 - (a.orb / a.maxOrb) * 0.6);
   }
 
+  const tzOpt = (opts) => (opts && opts.timeZone ? { timeZone: opts.timeZone } : {});
+  const fmtTime = (d, opts) => d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', ...tzOpt(opts) });
+  const fmtDate = (d, opts) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric', ...tzOpt(opts) });
+  const sameDay = (a, b, opts) => a.toLocaleDateString('de-DE', tzOpt(opts)) === b.toLocaleDateString('de-DE', tzOpt(opts));
+  const exactAt = (a, opts) => (opts && opts.when ? A.exactTime(a.transit, a.natalLon, a.aspect.angle, opts.when) : null);
+
+  // Satz zur Exaktheit: mit echtem Zeitpunkt, sonst nur nach Abstand
+  function exactSentence(a, opts) {
+    const t = exactAt(a, opts);
+    if (!t) return exactness(a.orb, a.applying);
+    const dh = (t - opts.when) / 3.6e6;
+    const day = sameDay(t, opts.when, opts) ? 'heute' : `am ${fmtDate(t, opts)}`;
+    if (Math.abs(dh) < 3) return `Der Aspekt ist jetzt auf den Punkt genau (exakt um ${fmtTime(t, opts)} Uhr).`;
+    if (dh > 0) return `Der Aspekt wird ${day} um ${fmtTime(t, opts)} Uhr exakt.`;
+    return `Der Aspekt war ${day} um ${fmtTime(t, opts)} Uhr exakt und klingt ab.`;
+  }
+
+  // Verflochtene Tagesdeutung: Dauerthema (langsamer Planet) + Auslöser (schneller Planet) + Begleiter
+  const SLOW = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  const FAST = ['sun', 'moon', 'mercury', 'venus', 'mars'];
+  function story(natal, all, opts) {
+    const top = all.slice(0, 8);
+    if (!top.length) return null;
+    const name = (k) => A.PLANET_NAMES[k];
+    // Roter Faden: der Geburtspunkt mit den meisten (und stärksten) Aspekten
+    const agg = {};
+    top.forEach((a) => {
+      agg[a.natal] = agg[a.natal] || { n: 0, sum: 0 };
+      agg[a.natal].n += 1;
+      agg[a.natal].sum += a.strength;
+    });
+    const focus = Object.keys(agg).sort((x, y) => agg[y].n - agg[x].n || agg[y].sum - agg[x].sum)[0];
+    const best = (list) => list.slice().sort((x, y) => y.strength - x.strength)[0] || null;
+    const slow = top.filter((a) => SLOW.includes(a.transit));
+    const fast = top.filter((a) => FAST.includes(a.transit));
+    const bg = best(slow.filter((a) => a.natal === focus)) || best(slow);
+    const trig = bg ? best(fast.filter((a) => a.natal === focus)) || best(fast) : null;
+    const used = new Set([bg, trig].filter(Boolean));
+    const rest = [];
+    top.filter((a) => !used.has(a)).forEach((a) => {
+      if (rest.length < 2 && !rest.some((r) => r.natal === a.natal && r.transit === a.transit)) rest.push(a);
+    });
+
+    const parts = [];
+    const n = agg[focus].n;
+    parts.push(n >= 2
+      ? `Der Tag dreht sich um ${ACC[focus]}: ${n} Planeten sprechen ${PRONOUN[focus] || 'ihn'} an.`
+      : `Im Mittelpunkt steht ${ACC[focus]}.`);
+    let rel = null;
+    if (bg) {
+      parts.push(`Im Hintergrund läuft ${name(bg.transit)} ${bg.aspect.phrase} ${DEIN[bg.natal]}: ${THEME[bg.transit][bg.natal]}`);
+      if (trig) {
+        const bgTone = bg.tone === 'V' ? (bg.value < 0 ? 'H' : 'F') : bg.tone;
+        rel = trig.tone === 'V' ? 'fuse' : trig.tone === 'F' ? (bgTone === 'H' ? 'soften' : 'boost') : (bgTone === 'H' ? 'sharpen' : 'disturb');
+        const t = exactAt(trig, opts);
+        const when = t && sameDay(t, opts.when, opts) ? ` (exakt um ${fmtTime(t, opts)} Uhr)` : '';
+        const lead = trig.natal === bg.natal ? 'Ausgelöst wird das durch' : 'Dazu kommt heute';
+        parts.push(`${lead} ${name(trig.transit)} ${trig.aspect.phrase} ${DEIN[trig.natal]}${when}: ${TRIGGER[trig.transit][rel]}`);
+      }
+    } else {
+      const lead = top[0];
+      parts.push(`${THEME[lead.transit][lead.natal]} ${TRANSIT[lead.transit][lead.tone]}`);
+      rest.splice(0, 1);
+    }
+    const conns = ['Zugleich wirkt', 'Dazu kommt'];
+    rest.forEach((a, i) => parts.push(`${conns[i]} ${name(a.transit)} ${a.aspect.phrase} ${DEIN[a.natal]}: ${THEME[a.transit][a.natal]}`));
+    return { text: parts.join(' '), advice: rel ? REL_ADVICE[rel] : null, relation: rel };
+  }
+
   function exactness(orb, applying) {
     const phase = applying ? 'noch im Aufbau' : 'schon im Abklingen';
     if (orb < 0.3) return 'Der Aspekt ist heute auf den Punkt genau – sein Höhepunkt liegt jetzt.';
@@ -346,7 +473,7 @@
   }
 
   // Zusatzsätze aus den konkreten Werten: Zeichen, Häuser, Rückläufigkeit, Genauigkeit
-  function details(a, natal, transit, ruler, nAsp) {
+  function details(a, natal, transit, ruler, nAsp, opts) {
     const t = transit[a.transit];
     const name = A.PLANET_NAMES[a.transit];
     const tSign = A.signIndex(t.lon);
@@ -377,7 +504,7 @@
       const target = DEIN[other] || `deinem ${A.PLANET_NAMES[other]}`;
       out.push(`Dein ${nName} steht im Geburtshoroskop ${na.aspect.phrase} ${target}. ${NAT_TONE[TONE_OF[na.aspect.key]]}`);
     }
-    out.push(exactness(a.orb, a.applying));
+    out.push(exactSentence(a, opts));
     return out;
   }
 
@@ -391,7 +518,7 @@
    * @param {object} transit Ergebnis von Astro.planetPositions (für den Tag)
    * @param {string} seed   beliebiger String für stabile Textvarianten (z. B. Geburtsdaten + Datum)
    */
-  function dailyHoroscope(natal, transit, seed) {
+  function dailyHoroscope(natal, transit, seed, opts) {
     const ruler = A.chartRuler(natal);
     const nAsp = A.natalAspects(natal);
     const aspects = A.transitAspects(transit, natal).map((a) => ({
@@ -402,7 +529,7 @@
       ...a,
       title: `${A.PLANET_NAMES[a.transit]} ${a.aspect.symbol} ${A.PLANET_NAMES[a.natal]}`,
       text: `${THEME[a.transit][a.natal]} ${TRANSIT[a.transit][a.tone]}`,
-      details: details(a, natal, transit, ruler, nAsp),
+      details: details(a, natal, transit, ruler, nAsp, opts),
     }));
 
     // Bereiche mit Sternen
@@ -452,6 +579,7 @@
     const adviceKey = lead ? lead.tone : 'N';
     const advice = pick(ADVICE[adviceKey], seed, 'advice');
 
+    const st = story(natal, aspects, opts);
     const headline = lead
       ? `${lead.title}: ${{ F: 'Rückenwind', H: 'Herausforderung mit Entwicklungspotenzial', V: 'Verdichtete Energie' }[lead.tone]}`
       : 'Ein ruhiger Tag';
@@ -461,7 +589,8 @@
       intro: `${MOON_SIGN[moonSign]}${moonHouse ? ' ' + MOON_HOUSE[moonHouse - 1] : ''}`,
       moon: { sign: moonSign, house: moonHouse, phase },
       overview: overview(aspects, natal),
-      areas, aspects: top, advice, notes,
+      story: st ? st.text : null,
+      areas, aspects: top, advice: st && st.advice ? st.advice : advice, notes,
     };
   }
 

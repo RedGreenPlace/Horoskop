@@ -206,28 +206,18 @@
     $('wheel').replaceChildren(root);
   }
 
-  // Uhrzeit, zu der der Aspekt exakt wird (nur wenn im Umfeld von ±3 Tagen)
-  function exactNote(a, noon) {
-    const t = A.exactTime(a.transit, a.natalLon, a.aspect.angle, noon);
-    if (!t) return '';
-    const sameDay = t.toDateString() === noon.toDateString();
-    const hm = t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-    const when = sameDay ? `heute um ${hm} Uhr` : `am ${t.toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric' })} um ${hm} Uhr`;
-    return ` Exakt wird er ${when}.`;
-  }
-
   // ---------- Ausgabe ----------
   function render(ctx) {
     const { natal, transit, forDate, name } = ctx;
     const seed = `${ctx.birthKey}|${forDate}`;
-    const h = I.dailyHoroscope(natal, transit, seed);
+    const h = I.dailyHoroscope(natal, transit, seed, { when: ctx.noon });
 
     const [y, m, d] = forDate.split('-').map(Number);
     const dayStart = new Date(y, m - 1, d, 0, 0);
     const dayEnd = new Date(y, m - 1, d + 1, 0, 0);
     $('dayLabel').textContent = (name ? name + ' · ' : '') + dayStart.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     $('headline').textContent = h.headline;
-    $('overview').textContent = h.overview;
+    $('overview').textContent = h.story || h.overview;
 
     let moonLine = `${h.moon.phase.icon} ${h.moon.phase.name} ${A.SIGNS_IN[h.moon.sign]} – ${h.moon.phase.text}`;
     const ing = moonIngress(dayStart, dayEnd);
@@ -248,7 +238,7 @@
       el('span', { class: 'tag ' + a.tone }, a.aspect.name),
       el('span', { class: 'meta' }, `${a.orb.toFixed(1)}° · ${a.applying ? 'baut sich auf' : 'lässt nach'}`),
       el('p', {}, a.text),
-      el('p', { class: 'detail' }, a.details.join(' ') + exactNote(a, ctx.noon)))) : [el('li', {}, 'Heute gibt es keine engen Aspekte zu deinem Geburtshoroskop – ein ruhiger Tag.')]));
+      el('p', { class: 'detail' }, a.details.join(' ')))) : [el('li', {}, 'Heute gibt es keine engen Aspekte zu deinem Geburtshoroskop – ein ruhiger Tag.')]));
 
     $('profile').replaceChildren(...I.natalProfile(natal).map((l) => el('li', {},
       el('b', {}, l.heading || `${l.label} ${A.SIGNS_IN[l.sign]}: `), l.heading && !l.heading.endsWith(' ') ? ': ' : '', l.text)));
@@ -305,7 +295,8 @@
 
       const forDate = $('forDate').value || todayStr();
       const [fy, fm, fd] = forDate.split('-').map(Number);
-      const noon = new Date(fy, fm - 1, fd, 12, 0);
+      const [th, tmin] = ($('forTime').value || '12:00').split(':').map(Number);
+      const noon = new Date(fy, fm - 1, fd, th, tmin);
 
       const natal = A.natalChart(birthUtc, lat, lon, timeKnown);
       const transit = A.planetPositions(noon);

@@ -44,5 +44,20 @@ A.PLANETS.forEach((t) => [...A.PLANETS, 'asc', 'mc'].forEach((nk) => assert(I.TH
 assert(h.overview.length > 30);
 assert.notStrictEqual(h.overview, I.dailyHoroscope(hamburg, tomorrow, 'a').overview, 'Synthese nicht tagesabhängig');
 assert(/Uhr/.test(I.rhythm(0, 1, '14:20')));
+// Verflochtene Tagesdeutung: Beispiel Herne, 27.09.2026 19:00 Berlin
+const herne = A.natalChart(new Date(Date.UTC(1996, 2, 2, 2, 15)), 51.5364, 7.2228, true);
+const when = new Date(Date.UTC(2026, 8, 27, 17, 0));
+const hs = I.dailyHoroscope(herne, A.planetPositions(when), 'x', { when, timeZone: 'Europe/Berlin' });
+assert(hs.story, 'Story fehlt');
+assert(/Der Tag dreht sich um deinen Mond/.test(hs.story), hs.story);
+assert(/Pluto in Opposition zu deinem Mond/.test(hs.story), hs.story);
+assert(/Ausgelöst wird das durch Sonne im Sextil zu deinem Mond \(exakt um 21:22 Uhr\)/.test(hs.story), hs.story);
+assert(!/undefined|NaN/.test(hs.story + hs.advice));
+assert(hs.advice && hs.advice !== h.advice);
+// Exaktheit nutzt den echten Zeitpunkt: Saturn □ Jupiter war schon am 26.9. exakt
+const sj = hs.aspects.find((a) => a.title.startsWith('Saturn') && a.natal === 'jupiter');
+assert(sj && sj.details.some((d) => /war am 26\.9\. um 05:27 Uhr exakt und klingt ab/.test(d)), JSON.stringify(sj && sj.details));
+// Ohne opts weiterhin lauffähig
+assert(typeof run(hamburg, 'a').story === 'string');
 console.log('Interpretationstests bestanden');
 console.log(h.aspects[0].title, '\n ', h.aspects[0].text, '\n ', h.aspects[0].details.join('\n  '));
