@@ -38,5 +38,11 @@ const nal = I.natalAspectLines(hamburg);
 assert(nal.length > 0 && nal.every((l) => l.text && l.title));
 assert(h.aspects.some((a) => a.details.some((d) => /im Geburtshoroskop/.test(d))), 'Geburtsaspekt-Bezug fehlt');
 assert(h.aspects.every((a) => typeof a.natalLon === 'number'));
+// Jede Kombination hat einen eigenen Text
+A.PLANETS.forEach((t) => [...A.PLANETS, 'asc', 'mc'].forEach((nk) => assert(I.THEME[t][nk] && I.THEME[t][nk].length > 20, `THEME ${t}>${nk}`)));
+// Tagessynthese vorhanden und tagesabhängig
+assert(h.overview.length > 30);
+assert.notStrictEqual(h.overview, I.dailyHoroscope(hamburg, tomorrow, 'a').overview, 'Synthese nicht tagesabhängig');
+assert(/Uhr/.test(I.rhythm(0, 1, '14:20')));
 console.log('Interpretationstests bestanden');
 console.log(h.aspects[0].title, '\n ', h.aspects[0].text, '\n ', h.aspects[0].details.join('\n  '));

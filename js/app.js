@@ -227,10 +227,11 @@
     const dayEnd = new Date(y, m - 1, d + 1, 0, 0);
     $('dayLabel').textContent = (name ? name + ' · ' : '') + dayStart.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     $('headline').textContent = h.headline;
+    $('overview').textContent = h.overview;
 
     let moonLine = `${h.moon.phase.icon} ${h.moon.phase.name} ${A.SIGNS_IN[h.moon.sign]} – ${h.moon.phase.text}`;
     const ing = moonIngress(dayStart, dayEnd);
-    if (ing) moonLine += ` Um ${ing.time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr wechselt der Mond ${A.SIGNS_INTO[ing.sign]}.`;
+    if (ing) moonLine += ' ' + I.rhythm((ing.sign + 11) % 12, ing.sign, ing.time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }));
     $('moonLine').textContent = moonLine;
     $('intro').textContent = h.intro;
     $('notes').textContent = h.notes.join(' ');
