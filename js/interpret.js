@@ -287,7 +287,7 @@
     V: 'Beide Anteile wirken bei dir als Einheit – der Transit trifft sie gemeinsam.',
   };
   const KEYWORD = { sun: 'Identität', moon: 'Gefühle', mercury: 'Denken', venus: 'Liebe und Werte', mars: 'Antrieb', jupiter: 'Wachstum', saturn: 'Struktur', uranus: 'Freiheitsdrang', neptune: 'Intuition', pluto: 'Tiefe', asc: 'Auftreten', mc: 'Berufung' };
-  const DEIN = { asc: 'deinem Aszendenten', mc: 'deinem Medium Coeli' };
+  const DEIN = { sun: 'deiner Sonne', venus: 'deiner Venus', asc: 'deinem Aszendenten', mc: 'deinem Medium Coeli' };
   const ELEMENT_DOM = [
     'Feuer dominiert: Du brauchst Begeisterung, Bewegung und Taten.',
     'Erde dominiert: Du brauchst Greifbares, Verlässlichkeit und Ergebnisse.',
@@ -356,7 +356,7 @@
     }
     if (natal.timeKnown) {
       const h = A.wholeSignHouse(t.lon, natal.asc);
-      out.push(`Sie landet in deinem ${h}. Haus (${HOUSE_TOPIC[h - 1]}): ${INTO[a.transit]}.`);
+      out.push(`Der Transit landet in deinem ${h}. Haus (${HOUSE_TOPIC[h - 1]}): ${INTO[a.transit]}.`);
     }
     const nName = A.PLANET_NAMES[a.natal];
     if (natal.planets[a.natal]) {
