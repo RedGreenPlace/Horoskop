@@ -218,9 +218,9 @@
     $('dayLabel').textContent = (name ? name + ' · ' : '') + dayStart.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     $('headline').textContent = h.headline;
 
-    let moonLine = `${h.moon.phase.icon} ${h.moon.phase.name} im ${A.SIGNS[h.moon.sign]} – ${h.moon.phase.text}`;
+    let moonLine = `${h.moon.phase.icon} ${h.moon.phase.name} ${A.SIGNS_IN[h.moon.sign]} – ${h.moon.phase.text}`;
     const ing = moonIngress(dayStart, dayEnd);
-    if (ing) moonLine += ` Um ${ing.time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr wechselt der Mond in ${A.SIGNS[ing.sign]}.`;
+    if (ing) moonLine += ` Um ${ing.time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr wechselt der Mond ${A.SIGNS_INTO[ing.sign]}.`;
     $('moonLine').textContent = moonLine;
     $('intro').textContent = h.intro;
     $('notes').textContent = h.notes.join(' ');
@@ -236,10 +236,11 @@
       el('span', { class: 't' }, a.title),
       el('span', { class: 'tag ' + a.tone }, a.aspect.name),
       el('span', { class: 'meta' }, `${a.orb.toFixed(1)}° · ${a.applying ? 'baut sich auf' : 'lässt nach'}`),
-      el('p', {}, a.text))) : [el('li', {}, 'Heute gibt es keine engen Aspekte zu deinem Geburtshoroskop – ein ruhiger Tag.')]));
+      el('p', {}, a.text),
+      el('p', { class: 'detail' }, a.details.join(' ')))) : [el('li', {}, 'Heute gibt es keine engen Aspekte zu deinem Geburtshoroskop – ein ruhiger Tag.')]));
 
     $('profile').replaceChildren(...I.natalProfile(natal).map((l) => el('li', {},
-      el('b', {}, `${l.label} im ${A.SIGNS[l.sign]}: `), l.text)));
+      el('b', {}, `${l.label} ${A.SIGNS_IN[l.sign]}: `), l.text)));
     if (!natal.timeKnown) $('profile').append(el('li', { class: 'hint' }, 'Ohne Geburtszeit sind Aszendent, Häuser und Medium Coeli nicht berechenbar – die Deutung nutzt nur die Planeten.'));
 
     const rows = [el('tr', {}, el('th', {}, 'Planet'), el('th', {}, 'Position'), el('th', {}, natal.timeKnown ? 'Haus' : ''))];

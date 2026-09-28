@@ -85,6 +85,7 @@
     love: {
       title: 'Liebe & Beziehungen', icon: '♥',
       targets: { venus: 1, moon: 0.8, mars: 0.5, sun: 0.4, asc: 0.4 },
+      houses: { 5: 1, 7: 1, 8: 0.5 },
       text: {
         low: ['Beziehungen brauchen heute Geduld. Sprich Bedürfnisse ruhig aus, statt sie zu erwarten.', 'Zwischenmenschlich kann es haken – nimm Kritik nicht persönlich und verschiebe Grundsatzdiskussionen.'],
         mid: ['Ein ausgeglichener Beziehungstag ohne große Wellen – Raum für kleine Gesten.', 'Nähe entsteht heute im Alltäglichen: zuhören, da sein, gemeinsam etwas essen.'],
@@ -94,6 +95,7 @@
     career: {
       title: 'Beruf & Finanzen', icon: '◆',
       targets: { mc: 1, saturn: 0.8, sun: 0.7, jupiter: 0.7, mercury: 0.6, venus: 0.4 },
+      houses: { 10: 1, 6: 0.6, 2: 0.6 },
       text: {
         low: ['Im Job ist Durchhaltevermögen gefragt. Wichtige Entscheidungen lieber vertagen und Details prüfen.', 'Widerstände oder Verzögerungen sind möglich – setze Prioritäten, statt alles auf einmal zu wollen.'],
         mid: ['Solider Arbeitstag: Routineaufgaben laufen, für Großes braucht es einen zweiten Anlauf.', 'Weder Rückenwind noch Gegenwind – nutze die Ruhe für Planung und Ordnung.'],
@@ -103,6 +105,7 @@
     energy: {
       title: 'Energie & Wohlbefinden', icon: '✦',
       targets: { sun: 1, mars: 0.9, moon: 0.7, asc: 0.7, saturn: 0.4 },
+      houses: { 1: 1, 6: 0.6 },
       text: {
         low: ['Deine Energie ist eher niedrig oder unruhig. Pausen, Wasser, frische Luft und früh ins Bett.', 'Du bist schneller erschöpft oder gereizt – schone deine Kräfte und vermeide Überforderung.'],
         mid: ['Stabile Energie mit kleinen Schwankungen; Bewegung an der frischen Luft gleicht sie aus.', 'Du kommst gut durch den Tag, wenn du dir Zeit für Mahlzeiten und Pausen nimmst.'],
@@ -117,6 +120,23 @@
     V: ['Konzentriere dich auf ein Thema; Intensität wirkt, wenn sie gebündelt wird.', 'Was heute auftaucht, will beachtet werden. Nimm dir Zeit für die Frage dahinter.', 'Ein bewusster Moment der Stille am Abend hilft, den Tag zu verdauen.'],
     N: ['Ein ruhiger Tag ohne große Sterne-Ereignisse: Nutze ihn für Dinge, die du selbst bestimmst.', 'Wenn die Himmelsbühne leise ist, zählt deine eigene Entscheidung besonders.'],
   };
+
+  // Wie sich Energie im jeweiligen Zeichen ausdrückt
+  const SIGN_STYLE = [
+    'impulsiv, direkt und ungeduldig', 'beharrlich, sinnlich und bodenständig', 'beweglich, neugierig und sprunghaft',
+    'gefühlvoll, schützend und wechselhaft', 'stolz, großzügig und dramatisch', 'sorgfältig, kritisch und praktisch',
+    'ausgleichend, höflich und unentschlossen', 'intensiv, kontrolliert und leidenschaftlich', 'optimistisch, offen und unbekümmert',
+    'diszipliniert, ehrgeizig und nüchtern', 'eigenwillig, distanziert und erfinderisch', 'einfühlsam, verträumt und grenzenlos',
+  ];
+  const HOUSE_TOPIC = [
+    'Selbstbild, Körper und Neuanfänge', 'Geld, Besitz und Selbstwert', 'Kommunikation, Umfeld und Lernen',
+    'Zuhause, Familie und Wurzeln', 'Kreativität, Romantik und Vergnügen', 'Alltag, Arbeit und Gesundheit',
+    'Partnerschaft und Verträge', 'Intimität, geteilte Ressourcen und Wandlung', 'Reisen, Weltbild und Weiterbildung',
+    'Beruf, Ruf und Lebensziel', 'Freundschaften, Netzwerke und Zukunftspläne', 'Rückzug, Unterbewusstes und Erholung',
+  ];
+  // Wie günstig ein laufender Planet ist, wenn er durch ein Bereichshaus zieht
+  const PLANET_VALENCE = { sun: 0.5, moon: 0.2, mercury: 0.2, venus: 0.8, mars: -0.2, jupiter: 0.9, saturn: -0.6, uranus: -0.1, neptune: -0.2, pluto: -0.3 };
+  const PERSONAL_FOCUS = { mercury: 'Du denkst und sprichst', venus: 'In Liebe, Freundschaft und Genuss bist du', mars: 'Du gehst Dinge an und setzt dich durch:' };
 
   const SUN_SIGN = ['Tatkraft, Mut und Pioniergeist', 'Beständigkeit, Genuss- und Sicherheitsstreben', 'Neugier, Wandelbarkeit und Kommunikationslust', 'Gefühlstiefe, Fürsorge und Schutzbedürfnis', 'Selbstausdruck, Herzenswärme und Stolz', 'Genauigkeit, Dienstbereitschaft und Analyse', 'Harmoniebedürfnis, Ästhetik und Fairness', 'Intensität, Leidenschaft und Tiefgang', 'Freiheitsdrang, Optimismus und Sinnsuche', 'Ehrgeiz, Verlässlichkeit und Ausdauer', 'Eigenständigkeit, Ideenreichtum und Gemeinschaftssinn', 'Empathie, Fantasie und Hingabe'];
   const MOON_NATAL = ['schnelle, direkte Gefühlsreaktionen und den Wunsch nach Aktion', 'Ruhe, Körperlichkeit und verlässliche Rituale', 'Abwechslung, Gespräche und geistige Anregung', 'Geborgenheit, Nähe und emotionale Sicherheit', 'Wärme, Anerkennung und Großzügigkeit', 'Ordnung, Nützlichsein und klare Abläufe', 'Harmonie, Zweisamkeit und Ausgeglichenheit', 'tiefe Bindungen, Vertrauen und emotionale Intensität', 'Weite, Freiheit und Zuversicht', 'Struktur, Selbstkontrolle und Zurückhaltung', 'Unabhängigkeit, Raum und Freundschaft', 'Mitgefühl, Rückzug und Träumerei'];
@@ -150,6 +170,40 @@
     return T_WEIGHT[a.transit] * N_WEIGHT[a.natal] * (1 - (a.orb / a.maxOrb) * 0.6);
   }
 
+  function exactness(orb, applying) {
+    const phase = applying ? 'noch im Aufbau' : 'schon im Abklingen';
+    if (orb < 0.3) return 'Der Aspekt ist heute auf den Punkt genau – sein Höhepunkt liegt jetzt.';
+    if (orb < 1) return `Der Aspekt ist sehr eng (${orb.toFixed(1)}°) und ${phase}.`;
+    return `Der Aspekt ist noch ${orb.toFixed(1)}° vom exakten Punkt entfernt und ${phase} – spürbar, aber nicht dominant.`;
+  }
+
+  // Zusatzsätze aus den konkreten Werten: Zeichen, Häuser, Rückläufigkeit, Genauigkeit
+  function details(a, natal, transit) {
+    const t = transit[a.transit];
+    const name = A.PLANET_NAMES[a.transit];
+    const tSign = A.signIndex(t.lon);
+    const out = [`${name} steht ${A.SIGNS_IN[tSign]} und wirkt dort ${SIGN_STYLE[tSign]}.`];
+    if (t.retro && a.transit !== 'sun' && a.transit !== 'moon') {
+      out.push(`${name} ist rückläufig: Das Thema kehrt zurück – prüfe und überarbeite, statt Neues zu erzwingen.`);
+    }
+    if (natal.timeKnown) {
+      const h = A.wholeSignHouse(t.lon, natal.asc);
+      out.push(`Die Energie landet in deinem ${h}. Haus: ${HOUSE_TOPIC[h - 1]}.`);
+    }
+    const nName = A.PLANET_NAMES[a.natal];
+    if (natal.planets[a.natal]) {
+      const n = natal.planets[a.natal];
+      const house = n.house ? ` im ${n.house}. Haus (${HOUSE_TOPIC[n.house - 1]})` : '';
+      out.push(`Dein ${nName} steht ${A.SIGNS_IN[n.sign]}${house} – du erlebst dieses Thema ${SIGN_STYLE[n.sign]}.`);
+    } else {
+      const lon = a.natal === 'asc' ? natal.asc : natal.mc;
+      const s = A.signIndex(lon);
+      out.push(`Dein ${nName} liegt ${A.SIGNS_IN[s]}: ${SIGN_STYLE[s]}.`);
+    }
+    out.push(exactness(a.orb, a.applying));
+    return out;
+  }
+
   function moonPhase(transit) {
     const elong = A.norm(transit.moon.lon - transit.sun.lon);
     return { elong, ...PHASES[Math.floor(A.norm(elong + 22.5) / 45) % 8] };
@@ -169,6 +223,7 @@
       ...a,
       title: `${A.PLANET_NAMES[a.transit]} ${a.aspect.symbol} ${A.PLANET_NAMES[a.natal]}`,
       text: `${TRANSIT[a.transit][a.tone]} ${NATAL[a.natal][a.tone]}`,
+      details: details(a, natal, transit),
     }));
 
     // Bereiche mit Sternen
@@ -176,19 +231,31 @@
       const cfg = AREAS[key];
       let sum = 0;
       let driver = null;
+      const consider = (label, c) => { if (!driver || Math.abs(c) > Math.abs(driver.c)) driver = { label, c }; };
       aspects.forEach((a) => {
         const w = cfg.targets[a.natal];
         if (!w) return;
         const contribution = (a.value * a.strength * w) / 8;
         sum += contribution;
-        if (!driver || Math.abs(contribution) > Math.abs(driver.c)) driver = { a, c: contribution };
+        consider(`${A.PLANET_NAMES[a.transit]} ${a.aspect.symbol} ${A.PLANET_NAMES[a.natal]}`, contribution);
       });
+      // Laufende Planeten in den Häusern, die zu diesem Bereich gehören
+      if (natal.timeKnown) {
+        A.PLANETS.forEach((p) => {
+          const h = A.wholeSignHouse(transit[p].lon, natal.asc);
+          const hw = cfg.houses[h];
+          if (!hw) return;
+          const c = (PLANET_VALENCE[p] * T_WEIGHT[p] * hw) / 10;
+          sum += c;
+          consider(`${A.PLANET_NAMES[p]} im ${h}. Haus`, c);
+        });
+      }
       const stars = clamp(Math.round(3 + sum), 1, 5);
       const level = stars <= 2 ? 'low' : stars === 3 ? 'mid' : 'high';
       return {
         key, title: cfg.title, icon: cfg.icon, stars,
         text: pick(cfg.text[level], seed, key),
-        driver: driver ? `${A.PLANET_NAMES[driver.a.transit]} ${driver.a.aspect.symbol} ${A.PLANET_NAMES[driver.a.natal]}` : null,
+        driver: driver ? driver.label : null,
       };
     });
 
@@ -229,6 +296,12 @@
       const asc = A.signIndex(natal.asc);
       lines.push({ label: 'Aszendent', sign: asc, text: `Andere erleben dich als ${ASC_SIGN[asc]}.` });
     }
+    ['mercury', 'venus', 'mars'].forEach((p) => {
+      const pl = natal.planets[p];
+      const house = pl.house ? ` Schwerpunkt: ${HOUSE_TOPIC[pl.house - 1]} (${pl.house}. Haus).` : '';
+      const retro = pl.retro ? ' Rückläufig geboren: Du verarbeitest dieses Thema nach innen und brauchst dafür Zeit.' : '';
+      lines.push({ label: A.PLANET_NAMES[p], sign: pl.sign, text: `${PERSONAL_FOCUS[p]} ${SIGN_STYLE[pl.sign]}.${house}${retro}` });
+    });
     return lines;
   }
 

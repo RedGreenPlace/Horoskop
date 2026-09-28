@@ -97,6 +97,7 @@ button.primary:disabled { opacity: .6; cursor: wait; }
 .tag.H { background: rgba(255, 138, 138, .18); color: var(--bad); }
 .tag.V { background: rgba(143, 124, 255, .25); color: #c9c0ff; }
 .aspects p { margin: 4px 0 0; font-size: .93rem; }
+.aspects p.detail { color: var(--muted); font-size: .85rem; }
 
 .wheel svg { width: 100%; height: auto; max-width: 460px; display: block; margin: 0 auto; }
 .profile li b { color: var(--accent); }

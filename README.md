@@ -17,6 +17,6 @@ Ohne Geburtszeit werden Aszendent, Häuser und MC weggelassen.
 
 ## Tests
 
-`node test/astro.test.js` prüft die Planetenberechnung gegen bekannte Referenzwerte.
+`node test/astro.test.js` prüft die Planetenberechnung gegen bekannte Referenzwerte, `node test/interpret.test.js`, dass sich die Deutung mit Geburtsdaten, Ort und Tag ändert.
 
 Nur zur Unterhaltung, keine Beratung.

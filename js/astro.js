@@ -15,7 +15,10 @@
   const diff180 = (a, b) => ((a - b + 540) % 360) - 180;
 
   const SIGNS = ['Widder', 'Stier', 'Zwillinge', 'Krebs', 'Löwe', 'Jungfrau', 'Waage', 'Skorpion', 'Schütze', 'Steinbock', 'Wassermann', 'Fische'];
-  const SIGN_GLYPHS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+  // Grammatisch korrekte Formen: „steht im Widder“ / „wechselt in den Widder“
+  const SIGNS_IN = ['im Widder', 'im Stier', 'in den Zwillingen', 'im Krebs', 'im Löwen', 'in der Jungfrau', 'in der Waage', 'im Skorpion', 'im Schützen', 'im Steinbock', 'im Wassermann', 'in den Fischen'];
+  const SIGNS_INTO = ['in den Widder', 'in den Stier', 'in die Zwillinge', 'in den Krebs', 'in den Löwen', 'in die Jungfrau', 'in die Waage', 'in den Skorpion', 'in den Schützen', 'in den Steinbock', 'in den Wassermann', 'in die Fische'];
+  const SIGN_GLYPHS =['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
   const PLANETS = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
   const PLANET_NAMES = {
     sun: 'Sonne', moon: 'Mond', mercury: 'Merkur', venus: 'Venus', mars: 'Mars',
@@ -248,7 +251,7 @@
   }
 
   const api = {
-    SIGNS, SIGN_GLYPHS, PLANETS, PLANET_NAMES, PLANET_GLYPHS, ASPECTS,
+    SIGNS, SIGNS_IN, SIGNS_INTO, SIGN_GLYPHS, PLANETS, PLANET_NAMES, PLANET_GLYPHS, ASPECTS,
     julianDay, planetPositions, natalChart, transitAspects, angles, signIndex, formatLon,
     wholeSignHouse, norm, diff180,
   };
