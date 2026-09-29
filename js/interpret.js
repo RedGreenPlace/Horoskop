@@ -717,6 +717,21 @@
     return (perHour * 0.25 / speed) * 1440 <= 30;
   }
 
+  // Achsen: Eine Opposition zum MC trifft zugleich den IC (Zuhause), eine Opposition zum Aszendenten den
+  // Deszendenten (Gegenüber). Bei einer Konjunktion steht die Gegenseite im Hintergrund.
+  const AXIS = {
+    mc: {
+      opposition: 'Dabei geht es zugleich um dein Zuhause: Familie, Wurzeln und den Ort, an dem du zur Ruhe kommst.',
+      conjunction: 'Zuhause und Familie treten dabei in den Hintergrund – die Balance zwischen Beruf und Zuhause wird spürbar.',
+    },
+    asc: {
+      opposition: 'Dabei geht es zugleich um andere Menschen: deine Partnerschaft und dein Gegenüber.',
+      conjunction: 'Partnerschaft und das Gegenüber treten dabei in den Hintergrund – die Balance zwischen dir und anderen wird spürbar.',
+    },
+  };
+  const axisNote = (a) => (AXIS[a.natal] && AXIS[a.natal][a.aspect.key]) || '';
+  const themeAxis = (a) => `${themeFor(a.transit, a.natal, a.tone)}${axisNote(a) ? ` ${axisNote(a)}` : ''}`;
+
   // Stufe des Hintergrundeinflusses: Höhepunkt / nah / weit, je anlaufend oder abklingend.
   // Der Abstand zum Höhepunkt wird aus Orbis und tatsächlicher Tagesgeschwindigkeit geschätzt.
   function stageSentence(a, speed) {
@@ -752,7 +767,7 @@
       const bgTone = bg.tone === 'V' ? (bg.value < 0 ? 'H' : 'F') : bg.tone;
       if (bgTone === 'H') p1.push(`Was raus will, ist ${NEED[bg.natal]}. Zurückgehalten wird es von ${HOLD[bg.transit]}.`);
       else p1.push(`${cap(NEED[bg.natal])}${['moon', 'uranus'].includes(bg.natal) ? '' : ','} findet heute Unterstützung, getragen von ${SUPPORT[bg.transit]}.`);
-      p1.push(themeFor(bg.transit, bg.natal, bg.tone));
+      p1.push(themeAxis(bg));
       const nuance = Fein.aspectNuance(bg.transit, bg.natal, bg.aspect.key);
       if (nuance) p1.push(nuance);
       p1.push(stageSentence(bg, transit[bg.transit].speed));
@@ -760,7 +775,7 @@
       if (trig) rel = trig.tone === 'V' ? 'fuse' : trig.tone === 'F' ? (bgTone === 'H' ? 'soften' : 'boost') : (bgTone === 'H' ? 'sharpen' : 'disturb');
     } else {
       const lead = sel.top[0];
-      p1.push(themeFor(lead.transit, lead.natal, lead.tone));
+      p1.push(themeAxis(lead));
     }
     paras.push(p1.join(' '));
 
@@ -773,13 +788,13 @@
     let chain = [];
     const isSame = (e, a) => a && e.transit === a.transit && e.natal === a.natal && e.aspect.angle === a.aspect.angle;
     // Paarspezifischer, tonabhängiger Satz zu einem Ereignis
-    const eventLine = (e) => themeFor(e.transit, e.natal, e.tone);
+    const eventLine = (e) => themeAxis(e);
     if (bg && trig) {
       const t = canTime ? A.exactTime(trig.transit, trig.natalLon, trig.aspect.angle, opts.when) : null;
       const when = inDay(t) ? (exactTimeReliable(trig, natal, transit) ? `um ${fmtTime(t, opts)} Uhr` : whenPhrase(t, opts)) : 'im Lauf des Tages';
       const combo = [tn(bg), tn(trig)].sort().join('');
       const pairLine = Verf.pair(bg.transit, trig.transit, combo === 'HF' ? 'FH' : combo, hash(`${seed}|pair`));
-      items.push({ t: inDay(t) ? t : new Date(0), when, text: `${cap(when)} ${PLAIN_TRIG[trig.transit][rel]}${pairLine ? ` ${pairLine}` : ''}` });
+      items.push({ t: inDay(t) ? t : new Date(0), when, text: `${cap(when)} ${PLAIN_TRIG[trig.transit][rel]}${axisNote(trig) ? ` ${axisNote(trig)}` : ''}${pairLine ? ` ${pairLine}` : ''}` });
       // Weitere Konstellationen verflechten: am selben Punkt per Brücke, an anderen per Auflösung
       let prev = trig;
       const woven = [];
@@ -791,7 +806,7 @@
         if (p1.some((x) => x.includes(raw)) || chain.some((x) => x.includes(raw))) return;
         woven.push(e);
         const r = e.tone === 'V' ? 'fuse' : tn(e) === 'F' ? (tn(prev) === 'H' ? 'soften' : 'boost') : (tn(prev) === 'H' ? 'sharpen' : 'disturb');
-        let line = themeFor(e.transit, e.natal, e.tone);
+        let line = themeAxis(e);
         if (e.natal === prev.natal && r !== 'fuse') line = `${Verf.bridge(r, e.natal, hash(`${seed}|b${woven.length}`))} ${line}`;
         else {
           let auf = [tn(e), tn(prev)].includes('H') ? Verf.aufloesung(e.natal, prev.natal) : null;

@@ -13,6 +13,8 @@ Persönliches Tageshoroskop aus Geburtsdatum, -zeit und -ort. Reine Browser-App 
 3. **Geburtshoroskop:** Planetenpositionen (Bahnelemente nach P. Schlyter), Aszendent, MC, Whole-Sign-Häuser (`js/astro.js`).
 4. **Tageshoroskop:** Planetenstände des gewählten Tages werden mit dem Geburtshoroskop verglichen (Aspekte: Konjunktion, Sextil, Quadrat, Trigon, Opposition). Für jede der 120 Kombinationen aus laufendem Planet und Geburtspunkt gibt es drei eigene Texte (leicht, angespannt, verschmelzend; `js/themes.js`, 360 Texte), dazu kommen Zeichen, Haus, Rückläufigkeit, Genauigkeit und eine regelbasierte Tagessynthese (`js/interpret.js`).
 
+Bei Aspekten zu MC und Aszendent nennt der Text auch die Gegenseite der Achse (Zuhause bzw. Partnerschaft).
+
 Die Deutung nutzt außerdem Aspekte innerhalb des Geburtshoroskops, den Aszendentherrscher (Transite darauf zählen stärker), die Element- und Qualitätenverteilung sowie die exakte Uhrzeit jedes Aspekts.
 
 Ohne Geburtszeit werden Aszendent, Häuser und MC weggelassen.

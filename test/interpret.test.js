@@ -99,3 +99,12 @@ console.log('Tageszeit-Test bestanden');
   assert(exact > 0 && exact < 40, `exakte Auslöserzeiten: ${exact}`);
 }
 console.log('Test der Auslöser-Uhrzeit bestanden');
+
+// Achsen: Opposition zum MC nennt auch das Zuhause (Mond gegenüber MC am 29.07.2024)
+{
+  const chart = A.natalChart(new Date(Date.UTC(1996, 2, 2, 4, 14)), 51.5364, 7.2228, true);
+  const w = new Date(Date.UTC(2024, 6, 29, 10, 0));
+  const t = I.dailyHoroscope(chart, A.planetPositions(w), 'x', { when: w, timeZone: 'Europe/Berlin' }).plain.text;
+  assert(/Beruf und Gefühl reiben sich[^.]*\. Dabei geht es zugleich um dein Zuhause/.test(t), t);
+}
+console.log('Achsen-Test bestanden');
