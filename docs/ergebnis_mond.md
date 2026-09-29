@@ -10,8 +10,10 @@ Prüfplan: `docs/pruefplan_mond.md` (vor der Auswertung festgelegt und gepusht).
 
 Gepaarte Differenz (mit Mond – ohne Mond): +0,003 (z = 1,24).
 
-**Ergebnis: kein Zusammenhang nachweisbar, und der Mond ändert daran nichts.** Der Rang liegt mit Mond bei 0,486, also nicht über 0,5. Die Verbesserung gegenüber dem Grundwert (+0,003) ist praktisch null. Die Nullkalibrierung liegt bei 0,478 und damit im erwarteten Bereich, die Auswertung ist verwertbar.
+**Ergebnis: kein Zusammenhang nachweisbar. Der Test ist aber schwach, weil die Wikidata-Personen keine Geburtszeit haben (siehe Einschränkung).** Der Rang liegt mit Mond bei 0,486, also nicht über 0,5. Die Verbesserung gegenüber dem Grundwert (+0,003) ist praktisch null. Die Nullkalibrierung liegt bei 0,478 und damit im erwarteten Bereich, die Auswertung ist verwertbar.
 
-Der Mond wird deshalb nicht in den Rückblick übernommen. Der Einzelfall (Mond auf dem IC am Geburtstag eines Kindes) bleibt eine Beobachtung ohne Nachweis.
+Der Mond wird auf dieser Grundlage nicht in den Rückblick übernommen; das ist keine Widerlegung. Der Einzelfall (Mond auf dem IC am Geburtstag eines Kindes) bleibt eine Beobachtung ohne Nachweis.
 
 Einschränkung: getestet wurde nur Heirat ohne Geburtszeit, mit einem einzigen Gewicht (0,2). Andere Gewichte oder Themen wurden nicht ausprobiert.
+
+Wichtig: Ohne Geburtszeit fehlen genau die Punkte, die für Partnerschaft und für den Mond zentral sind (Geburtsmond, Deszendent, Häuser). Der Test prüft daher nur einen Teil der Methode und kann sie mit Geburtszeit weder bestätigen noch widerlegen. Um das zu klären, bräuchte man Personen mit belegter Geburtszeit und Geburtsort (zum Beispiel Wikidata-Einträge mit minutengenauer Geburt oder eine geprüfte Sammlung wie die Astro-Databank).
