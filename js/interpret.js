@@ -9,6 +9,7 @@
   const Themes = root.Themes || (typeof require !== 'undefined' ? require('./themes.js') : null);
   // Kombinationstext je laufendem Planet, Geburtspunkt und Tonart (F leicht, H angespannt, V verschmelzend)
   const themeFor = (t, n, tone) => Themes.themeFor(t, n, tone);
+  const Fein = root.Feinheit || (typeof require !== 'undefined' ? require('./feinheit.js') : null);
 
   const TONE_OF = { conjunction: 'V', sextile: 'F', trine: 'F', square: 'H', opposition: 'H' };
 
@@ -445,7 +446,7 @@
     const advice = pick(ADVICE[adviceKey], seed, 'advice');
 
     const st = story(natal, aspects, opts);
-    const pl = plainStory(natal, aspects, opts);
+    const pl = plainStory(natal, aspects, opts, seed, transit);
     const headline = lead
       ? `${lead.title}: ${{ F: 'Rückenwind', H: 'Herausforderung mit Entwicklungspotenzial', V: 'Verdichtete Energie' }[lead.tone]}`
       : 'Ein ruhiger Tag';
@@ -672,8 +673,25 @@
     return { time: new Date(hi), sign: s1 };
   }
 
+  // Zwei Zusatzsätze zum Dauerthema aus vier möglichen (Haus/Zeichen des Planeten, Haus/Zeichen deines Geburtspunkts);
+  // welche erscheinen, dreht sich mit dem Datum weiter.
+  function modifiers(bg, natal, transit, seed) {
+    const v = hash(`${seed}|v`) % 2;
+    const t = transit[bg.transit];
+    const np = natal.planets[bg.natal];
+    const cands = [];
+    if (natal.timeKnown) cands.push(Fein.transitHouse(bg.transit, A.wholeSignHouse(t.lon, natal.asc), v));
+    if (np && np.house) cands.push(Fein.natalHouse(bg.natal, np.house, v));
+    cands.push(Fein.transitSign(bg.transit, A.signIndex(t.lon), v));
+    if (np) cands.push(Fein.natalSign(bg.natal, np.sign, v));
+    const list = cands.filter(Boolean);
+    if (!list.length) return [];
+    const start = hash(`${seed}|m`) % list.length;
+    return list.length > 1 ? [list[start], list[(start + 1) % list.length]] : [list[0]];
+  }
+
   // Durchgehender Text: Worum es geht, was hochwill, was es hält, wann es sich löst, Tagesverlauf, Ausblick
-  function plainStory(natal, all, opts) {
+  function plainStory(natal, all, opts, seed, transit) {
     const sel = pickStory(all);
     if (!sel) return null;
     const { focus, agg, bg, trig } = sel;
@@ -688,6 +706,9 @@
       if (bgTone === 'H') p1.push(`Was raus will, ist ${NEED[bg.natal]}. Zurückgehalten wird es von ${HOLD[bg.transit]}.`);
       else p1.push(`${cap(NEED[bg.natal])} findet heute Unterstützung, getragen von ${SUPPORT[bg.transit]}.`);
       p1.push(themeFor(bg.transit, bg.natal, bg.tone));
+      const nuance = Fein.aspectNuance(bg.transit, bg.natal, bg.aspect.key);
+      if (nuance) p1.push(nuance);
+      modifiers(bg, natal, transit, seed).forEach((m) => p1.push(m));
       if (trig) rel = trig.tone === 'V' ? 'fuse' : trig.tone === 'F' ? (bgTone === 'H' ? 'soften' : 'boost') : (bgTone === 'H' ? 'sharpen' : 'disturb');
     } else {
       const lead = sel.top[0];
