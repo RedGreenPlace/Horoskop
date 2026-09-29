@@ -1,0 +1,28 @@
+Rohdaten: {"personen":300,"mehrereGeburtsdaten":0,"keineGueltigeHeirat":0} | Ereignisse nach Filter: 300
+Stichprobe: 300 Ereignisse gespeichert in data/heirat_stichprobe.tsv (Saatkorn 20260929)
+
+OHNE Mond (Grundwert, wie bisher)
+  n = 300, mittlerer Rang = 0.484 (Erwartung ohne Zusammenhang: 0,500), sd = 0.279
+  95%-Bootstrap-Intervall: 0.451 bis 0.515 | z = -1.02, p (zweiseitig) = 0.307
+  Ereignisse mit Rang >= 0,90: 23 von 300 (7.7 %, erwartet 10 %), p (einseitig) ≈ 0.911
+  Verteilung der Ränge (Fünftel, gleichverteilt wäre 60 je Fünftel): 54 | 70 | 68 | 52 | 56
+
+MIT laufendem Mond (gewichtet mit 0,2)
+  n = 300, mittlerer Rang = 0.486 (Erwartung ohne Zusammenhang: 0,500), sd = 0.277
+  95%-Bootstrap-Intervall: 0.454 bis 0.518 | z = -0.87, p (zweiseitig) = 0.384
+  Ereignisse mit Rang >= 0,90: 26 von 300 (8.7 %, erwartet 10 %), p (einseitig) ≈ 0.779
+  Verteilung der Ränge (Fünftel, gleichverteilt wäre 60 je Fünftel): 55 | 68 | 74 | 46 | 57
+
+Gepaarte Differenz (mit Mond – ohne Mond): Mittel 0.003, sd 0.036, z = 1.24
+
+KONTROLLE mit Mond (zufällige Tage): muss um 0,500 liegen
+  n = 300, mittlerer Rang = 0.478 (Erwartung ohne Zusammenhang: 0,500), sd = 0.285
+  95%-Bootstrap-Intervall: 0.445 bis 0.511 | z = -1.35, p (zweiseitig) = 0.178
+  Ereignisse mit Rang >= 0,90: 30 von 300 (10.0 %, erwartet 10 %), p (einseitig) ≈ 0.500
+  Verteilung der Ränge (Fünftel, gleichverteilt wäre 60 je Fünftel): 62 | 62 | 69 | 51 | 56
+
+Rechenzeit: 10 s
+
+real	0m10.151s
+user	0m10.078s
+sys	0m0.181s
