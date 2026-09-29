@@ -127,6 +127,153 @@
     node: 'deine Lebensrichtung wird berührt – ein Schritt auf deinem Weg wird fällig.',
   };
 
+  // Konkrete Ereignisse je Thema und Signal der Phase. Die Zuordnung ist typisch, aber keine Vorhersage.
+  const SIGNAL_LABEL = { begin: 'Beginn', commit: 'Festigung', end: 'Ende', upheaval: 'Umbruch', sudden: 'Plötzliches', dissolve: 'Auflösung' };
+  const EVENTS = {
+    partnership: {
+      begin: 'Kennenlernen, Verliebtheit oder ein gemeinsamer Neuanfang',
+      commit: 'Zusammenziehen, Verlobung oder Heirat',
+      end: 'Trennung oder das Ende einer Beziehungsphase',
+      upheaval: 'Streit, Krise oder eine Zerreißprobe in der Beziehung',
+      sudden: 'eine überraschende Begegnung oder ein plötzlicher Bruch',
+      dissolve: 'Unklarheit in der Beziehung, Idealisierung oder Sehnsucht nach jemandem',
+    },
+    family: {
+      begin: 'Familienzuwachs – Geburt eines Kindes oder ein neues Familienmitglied',
+      commit: 'ein Familienfest, gemeinsame Verantwortung oder klare Absprachen mit Angehörigen',
+      end: 'Abschied von Angehörigen, Auszug oder das Ende einer Familienrolle',
+      upheaval: 'Streit oder Bruch in der Familie, Krankheit von Angehörigen',
+      sudden: 'plötzliche Nachrichten aus der Familie',
+      dissolve: 'eine unklare Familiensituation, Rückzug oder Überforderung durch andere',
+    },
+    career: {
+      begin: 'neuer Job, Beförderung, Projektstart oder Selbstständigkeit',
+      commit: 'fester Vertrag, mehr Verantwortung oder eine langfristige Position',
+      end: 'Kündigung, Jobverlust oder das Ende eines Arbeitsabschnitts',
+      upheaval: 'Druck, Konflikte im Job oder eine berufliche Krise',
+      sudden: 'ein überraschendes Angebot, Umstrukturierung oder ein plötzlicher Wechsel',
+      dissolve: 'berufliche Orientierungslosigkeit oder Zweifel am eigenen Weg',
+    },
+    education: {
+      begin: 'Studien- oder Ausbildungsbeginn, ein neuer Kurs oder ein neues Wissensgebiet',
+      commit: 'bestandene Prüfung, Abschluss oder ein verbindlicher Ausbildungsplan',
+      end: 'das Ende der Ausbildung oder ein Abbruch',
+      upheaval: 'Prüfungsdruck, Zweifel oder Überforderung',
+      sudden: 'eine plötzliche Chance oder ein Kurswechsel in der Ausbildung',
+      dissolve: 'Unsicherheit, was du lernen oder werden willst',
+    },
+    money: {
+      begin: 'Gehaltssprung, Erbe, neue Einnahmen oder eine größere Anschaffung',
+      commit: 'eine langfristige Bindung wie Kredit oder Kauf, oder solide Rücklagen',
+      end: 'ein Verlust, das Ende einer Einnahmequelle oder das Ablösen von Schulden',
+      upheaval: 'Geldsorgen, Schulden oder ein finanzieller Engpass',
+      sudden: 'eine unerwartete Ausgabe oder unerwartete Einnahme',
+      dissolve: 'Unübersichtlichkeit bei den Finanzen, Täuschung oder Fehlkalkulation',
+    },
+    housing: {
+      begin: 'Umzug, neue Wohnung oder Hauskauf',
+      commit: 'Mietvertrag, Kauf oder langfristiges Einrichten',
+      end: 'Auszug oder das Ende eines Wohnorts',
+      upheaval: 'Streit ums Wohnen, Renovierung oder Wohnungsnot',
+      sudden: 'ein plötzlicher Umzug oder Wohnungswechsel',
+      dissolve: 'Unentschlossenheit, wo du leben willst, oder Heimweh',
+    },
+    health: {
+      begin: 'ein neuer Gesundheitsimpuls: Sport, Ernährung oder Genesung',
+      commit: 'feste Routinen, Vorsorge oder eine gute Behandlung',
+      end: 'das Ende einer Krankheitsphase oder der Abschluss einer Behandlung',
+      upheaval: 'Erschöpfung, Überlastung, Krankheit oder eine OP',
+      sudden: 'akute Beschwerden, ein Unfall oder ein plötzlicher Befund',
+      dissolve: 'diffuse Beschwerden, Müdigkeit oder Empfindlichkeit',
+    },
+    meaning: {
+      begin: 'Neuorientierung, neue Interessen oder ein spiritueller Aufbruch',
+      commit: 'ein klarer Lebensentschluss oder eine feste Praxis',
+      end: 'der Abschied von einem Lebensabschnitt oder von alten Überzeugungen',
+      upheaval: 'eine Sinnkrise oder tiefe innere Erschütterung',
+      sudden: 'eine plötzliche Einsicht oder ein Wendepunkt',
+      dissolve: 'Leere, Suche oder Rückzug',
+    },
+    friends: {
+      begin: 'neue Freundschaften, Gruppen oder Netzwerke',
+      commit: 'eine feste Freundschaft, ein Verein oder gemeinsame Vorhaben',
+      end: 'ein Bruch oder das Ende einer Freundschaft',
+      upheaval: 'Streit im Freundeskreis oder Enttäuschung',
+      sudden: 'eine überraschende Begegnung oder ein Kontaktabbruch',
+      dissolve: 'Distanz oder Zweifel, wer zu dir passt',
+    },
+    identity: {
+      begin: 'ein neuer Look, eine neue Rolle oder ein neuer Selbstausdruck',
+      commit: 'sich zu etwas bekennen, ein Namenswechsel oder eine klare Selbstentscheidung',
+      end: 'das Ende einer alten Rolle oder Lebensphase',
+      upheaval: 'eine Identitätskrise oder starker Druck von außen',
+      sudden: 'ein plötzlicher Wandel im Auftreten',
+      dissolve: 'Orientierungslosigkeit, wer du sein willst',
+    },
+    creative: {
+      begin: 'ein Projektstart, eine Veröffentlichung oder ein neues Hobby',
+      commit: 'der Abschluss eines Werks oder ein verbindliches Engagement',
+      end: 'das Ende eines Projekts oder der Abschied von einem Hobby',
+      upheaval: 'Kritik, Blockade oder Selbstzweifel',
+      sudden: 'plötzliche Inspiration oder eine unerwartete Bühne',
+      dissolve: 'Ideenfluss ohne Richtung',
+    },
+    conflict: {
+      begin: 'ein Vertrag oder eine Vereinbarung, die neu beginnt',
+      commit: 'Einigung, Vertragsabschluss oder klare Regeln',
+      end: 'das Ende eines Streits oder Prozesses',
+      upheaval: 'Streit, Behördenkram oder ein Rechtsstreit',
+      sudden: 'ein plötzlicher Konflikt oder ein unerwartetes Schreiben',
+      dissolve: 'Missverständnisse und Unklarheit in Vereinbarungen',
+    },
+  };
+
+  // Welches Signal (Beginn, Festigung, Ende, Umbruch, Plötzliches, Auflösung) ein einzelner Beitrag trägt
+  function itemSignals(x) {
+    const out = {};
+    const set = (k, w) => { out[k] = (out[k] || 0) + w; };
+    const t = x.tone;
+    if (x.kind === 'eclipse') {
+      if (x.eclipseKind === 'solar') { set('begin', 1); if (t === 'H') set('upheaval', 0.3); } else set('end', 1);
+      return out;
+    }
+    if (x.kind === 'progression') {
+      if (x.transit === 'sun') { if (t === 'H') set('upheaval', 0.4); else set('begin', 0.6); }
+      else if (x.transit === 'moon') { if (t === 'H') set('upheaval', 0.5); else set('begin', 0.3); }
+      else if (x.transit === 'venus') { if (t === 'H') set('upheaval', 0.5); else set('commit', 0.6); }
+      else if (x.transit === 'mars') { if (t === 'H') set('upheaval', 0.6); else set('begin', 0.5); }
+      else set('sudden', 0.3);
+      return out;
+    }
+    switch (x.transit) {
+      case 'jupiter': set('begin', t === 'H' ? 0.4 : 1); if (t === 'H') set('upheaval', 0.3); break;
+      case 'saturn':
+        if (t === 'F') set('commit', 1);
+        else if (t === 'V') { set('commit', 0.6); set('end', 0.4); } else { set('end', 0.6); set('upheaval', 0.6); }
+        break;
+      case 'pluto':
+        if (t === 'F') { set('begin', 0.4); set('end', 0.4); } else { set('end', 0.6); set('upheaval', 0.6); }
+        break;
+      case 'uranus': set('sudden', 1); if (t === 'H') set('upheaval', 0.3); break;
+      case 'neptune': set('dissolve', t === 'F' ? 0.6 : 1); if (t === 'F') set('begin', 0.3); if (t === 'H') set('upheaval', 0.3); break;
+      case 'mars':
+        if (t === 'F') set('begin', 0.5); else if (t === 'V') { set('begin', 0.3); set('upheaval', 0.5); } else set('upheaval', 1);
+        break;
+      default: break;
+    }
+    return out;
+  }
+
+  // Signale einer Phase, nach Gewicht sortiert
+  function signalsOf(items) {
+    const tot = {};
+    items.filter((x) => x.kind !== 'house').forEach((x) => {
+      const sg = itemSignals(x);
+      Object.keys(sg).forEach((k) => { tot[k] = (tot[k] || 0) + sg[k] * x.value; });
+    });
+    return Object.keys(tot).map((k) => ({ signal: k, weight: tot[k] })).sort((a, b) => b.weight - a.weight);
+  }
+
   const DAY = 86400000;
 
   // Ein Geburtspunkt dient mehreren Themen. Sein Einfluss wird auf die Themen verteilt (nach Gewicht),
@@ -304,7 +451,7 @@
       seen.add(key);
       return true;
     }).slice(0, 2).map((x) => ({ kind: x.kind, transit: x.transit, natal: x.natal, aspect: x.aspect.key, tone: x.tone, text: driverText(x) }));
-    return { tone, drivers };
+    return { tone, drivers, signals: signalsOf(c.items) };
   }
 
   /**
@@ -339,11 +486,15 @@
         if (strength < (opts.minStrength === undefined ? 1 : opts.minStrength)) return;
         const d = describePeak(natal, pts, tk, dates[i], ctx);
         const psych = PSYCH[tk][TONE_KEY[d.tone]];
+        const sig = d.signals.filter((x, idx) => idx === 0 || x.weight >= 0.5 * d.signals[0].weight).slice(0, 2);
+        // Bei belastender Phase ist ein Beginn selten unbeschwert
+        const events = sig.map((x) => (d.tone === 'Belastung oder Umbruch' && x.signal === 'begin' ? `ein anstrengender Neubeginn – ${EVENTS[tk][x.signal]}` : EVENTS[tk][x.signal]));
         all.push({
           topic: tk, label: TOPICS[tk].label, peak: dates[i], start: dates[l], end: dates[r], strength,
           began: l === 0, ongoing: r === sm.length - 1, // Phase beginnt vor bzw. endet nach dem betrachteten Zeitraum
           tone: d.tone, drivers: d.drivers, psych,
-          summary: `${TOPICS[tk].label} – ${d.tone}: ${d.drivers.map((x) => x.text).join(' ')} Innere Frage: ${psych}`,
+          signals: sig.map((x) => SIGNAL_LABEL[x.signal]), events,
+          summary: `${TOPICS[tk].label} – ${d.tone}: ${d.drivers.map((x) => x.text).join(' ')} Typisch für so eine Phase (keine Vorhersage): ${events.join(' oder ')}. Innere Frage: ${psych}`,
         });
       });
     });
@@ -359,7 +510,7 @@
     return s.filter((x) => x < v).length / s.length;
   }
 
-  const api = { TOPICS, PSYCH, scan, chapters, rankAt, contributions, natalPoints, makeCtx };
+  const api = { TOPICS, PSYCH, EVENTS, SIGNAL_LABEL, signalsOf, scan, chapters, rankAt, contributions, natalPoints, makeCtx };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.LifeEvents = api;
 })(typeof window !== 'undefined' ? window : globalThis);

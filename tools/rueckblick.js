@@ -36,6 +36,7 @@ ch.forEach((c) => {
   const flag = (c.began ? ' (begann schon vorher)' : '') + (c.ongoing ? ' (läuft weiter)' : '');
   console.log(`${fmt(c.peak)}  ${c.label} – ${c.tone}  (Phase ${fmt(c.start)} bis ${fmt(c.end)}${flag}, Stärke ${c.strength.toFixed(2)})`);
   c.drivers.forEach((x) => console.log(`    · ${x.text}`));
+  console.log(`    → Typisch (${c.signals.join(', ')}, keine Vorhersage): ${c.events.join(' oder ')}`);
   console.log(`    ? Innere Frage: ${c.psych}`);
 });
 checks.forEach((c) => {

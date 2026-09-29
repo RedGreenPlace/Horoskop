@@ -61,6 +61,31 @@ Object.values(L.PSYCH).forEach((t) => assert(t.R && t.B && t.W));
 assert.strictEqual(Object.keys(L.PSYCH).length, 12);
 console.log('OK   Beitragsarten:', [...kinds].join(', '));
 
+// Ereignis-Ebene: vollständige Tabelle, Signale, Kapitel mit konkreten Ereignissen
+const SIGNALS = ['begin', 'commit', 'end', 'upheaval', 'sudden', 'dissolve'];
+Object.keys(L.TOPICS).forEach((tk) => SIGNALS.forEach((sg) => assert(L.EVENTS[tk] && L.EVENTS[tk][sg] && L.EVENTS[tk][sg].length > 10, `Ereignis fehlt: ${tk}/${sg}`)));
+const top1 = (items) => L.signalsOf(items)[0].signal;
+assert.strictEqual(top1([{ kind: 'eclipse', eclipseKind: 'solar', tone: 'V', value: 1 }]), 'begin');
+assert.strictEqual(top1([{ kind: 'eclipse', eclipseKind: 'lunar', tone: 'V', value: 1 }]), 'end');
+assert.strictEqual(top1([{ kind: 'aspect', transit: 'saturn', tone: 'F', value: 1 }]), 'commit');
+assert.strictEqual(top1([{ kind: 'aspect', transit: 'uranus', tone: 'V', value: 1 }]), 'sudden');
+assert.strictEqual(top1([{ kind: 'aspect', transit: 'neptune', tone: 'V', value: 1 }]), 'dissolve');
+assert.strictEqual(top1([{ kind: 'aspect', transit: 'jupiter', tone: 'F', value: 1 }]), 'begin');
+assert.strictEqual(top1([{ kind: 'aspect', transit: 'mars', tone: 'H', value: 1 }]), 'upheaval');
+assert.deepStrictEqual(L.signalsOf([{ kind: 'house', value: 5 }]), [], 'Haus-Beiträge zählen nicht als Signal');
+ch.forEach((c) => {
+  assert(c.events.length >= 1 && c.events.length <= 2 && c.events.every((e) => e.length > 10), 'Ereignisse fehlen');
+  assert(c.signals.length === c.events.length);
+  assert(c.summary.includes('Typisch für so eine Phase (keine Vorhersage):'));
+});
+// Eine Sonnenfinsternis als stärkster Treiber führt zu „Beginn“, eine Mondfinsternis zu „Ende“
+const withEcl = L.chapters(natal, from, to, { limit: 40, perTopic: 3, minStrength: 0.8 });
+withEcl.forEach((c) => {
+  const first = c.drivers[0];
+  if (first && first.kind === 'eclipse') assert(c.signals.includes('Beginn') || c.signals.includes('Ende') || c.signals.includes('Umbruch'), 'Finsternis ohne passendes Signal');
+});
+console.log('OK   Ereignis-Ebene:', ch.slice(0, 3).map((c) => `${c.label}: ${c.signals.join('+')}`).join(' | '));
+
 // Ohne Geburtszeit: läuft ohne Aszendent, MC und Häuser
 const noTime = A.natalChart(new Date(Date.UTC(1996, 2, 2, 11, 0)), 51.5364, 7.2228, false);
 const c2 = L.chapters(noTime, from, to, { limit: 5 });
