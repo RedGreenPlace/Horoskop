@@ -9,6 +9,7 @@
   const Themes = root.Themes || (typeof require !== 'undefined' ? require('./themes.js') : null);
   // Kombinationstext je laufendem Planet, Geburtspunkt und Tonart (F leicht, H angespannt, V verschmelzend)
   const themeFor = (t, n, tone) => Themes.themeFor(t, n, tone);
+  const Verf = root.Verflechtung || (typeof require !== 'undefined' ? require('./verflechtung.js') : null);
   const Fein = root.Feinheit || (typeof require !== 'undefined' ? require('./feinheit.js') : null);
 
   const TONE_OF = { conjunction: 'V', sextile: 'F', trine: 'F', square: 'H', opposition: 'H' };
@@ -700,7 +701,19 @@
 
     // Absatz 1: Worum es geht, was hochwill und was es zurückhält
     const n = agg[focus].n;
-    const p1 = [n >= 2 ? `Der Tag dreht sich um ${PLAIN_FOCUS[focus]} – mehrere Einflüsse treffen genau hier zusammen.` : `Im Mittelpunkt stehen ${PLAIN_FOCUS[focus]}.`];
+    const tn = (a) => (a.tone === 'V' ? (a.value < 0 ? 'H' : 'F') : a.tone);
+    const atFocus = sel.top.filter((a) => a.natal === focus);
+    const nh = atFocus.filter((a) => tn(a) === 'H').length;
+    const nf = atFocus.length - nh;
+    const hAll = sel.top.filter((a) => tn(a) === 'H');
+    const fAll = sel.top.filter((a) => tn(a) === 'F');
+    const pat = !bg || bg.natal === focus ? Verf.patternFor(nh, nf) : null;
+    let opener = n >= 2 ? `Der Tag dreht sich um ${PLAIN_FOCUS[focus]} – mehrere Einflüsse treffen genau hier zusammen.` : `Im Mittelpunkt stehen ${PLAIN_FOCUS[focus]}.`;
+    if (pat) opener = cap(Verf.pattern(pat, focus, hash(`${seed}|pat`)));
+    else if (sel.top.length >= 3 && !hAll.length) opener = `Im Mittelpunkt stehen ${PLAIN_FOCUS[focus]}. ${Verf.pattern('nur_rueckenwind', focus, hash(`${seed}|pat`))}`;
+    else if (sel.top.length >= 3 && !fAll.length) opener = `Im Mittelpunkt stehen ${PLAIN_FOCUS[focus]}. ${Verf.pattern('nur_druck', focus, hash(`${seed}|pat`))}`;
+    else if (new Set(hAll.map((a) => a.natal)).size >= 2 && fAll.length) opener = `Im Mittelpunkt stehen ${PLAIN_FOCUS[focus]}. ${Verf.pattern('gegensatz_bruecke', focus, hash(`${seed}|pat`))}`;
+    const p1 = [opener];
     if (bg) {
       const bgTone = bg.tone === 'V' ? (bg.value < 0 ? 'H' : 'F') : bg.tone;
       if (bgTone === 'H') p1.push(`Was raus will, ist ${NEED[bg.natal]}. Zurückgehalten wird es von ${HOLD[bg.transit]}.`);
@@ -721,21 +734,41 @@
     const bounds = canTime ? dayBounds(opts.when, opts) : null;
     const inDay = (t) => t && t >= bounds[0] && t <= bounds[1];
     const items = [];
+    let wovenSet = [];
     const isSame = (e, a) => a && e.transit === a.transit && e.natal === a.natal && e.aspect.angle === a.aspect.angle;
     // Paarspezifischer, tonabhängiger Satz zu einem Ereignis
     const eventLine = (e) => themeFor(e.transit, e.natal, e.tone);
     if (bg && trig) {
       const t = canTime ? A.exactTime(trig.transit, trig.natalLon, trig.aspect.angle, opts.when) : null;
       const when = inDay(t) ? whenPhrase(t, opts) : 'im Lauf des Tages';
-      items.push({ t: inDay(t) ? t : new Date(0), text: `${cap(when)} ${PLAIN_TRIG[trig.transit][rel]}` });
+      const combo = [tn(bg), tn(trig)].sort().join('');
+      const pairLine = Verf.pair(bg.transit, trig.transit, combo === 'HF' ? 'FH' : combo, hash(`${seed}|pair`));
+      items.push({ t: inDay(t) ? t : new Date(0), text: `${cap(when)} ${PLAIN_TRIG[trig.transit][rel]}${pairLine ? ` ${pairLine}` : ''}` });
+      // Weitere Konstellationen verflechten: am selben Punkt per Brücke, an anderen per Auflösung
+      let prev = trig;
+      const woven = [];
+      (sel.rest || []).forEach((e) => {
+        if (isSame(e, trig) || isSame(e, bg)) return;
+        woven.push(e);
+        const r = e.tone === 'V' ? 'fuse' : tn(e) === 'F' ? (tn(prev) === 'H' ? 'soften' : 'boost') : (tn(prev) === 'H' ? 'sharpen' : 'disturb');
+        let line = themeFor(e.transit, e.natal, e.tone);
+        if (e.natal === prev.natal && r !== 'fuse') line = `${Verf.bridge(r, e.natal, hash(`${seed}|b${woven.length}`))} ${line}`;
+        else {
+          const auf = [tn(e), tn(prev)].includes('H') ? Verf.aufloesung(e.natal, prev.natal) : null;
+          line = `${['Dazu kommt:', 'Außerdem wirkt mit:', 'Nebenbei meldet sich noch etwas:'][hash(`${seed}|l${woven.length}`) % 3]} ${line}${auf ? ` ${auf}` : ''}`;
+        }
+        items[items.length - 1].text += ` ${line}`;
+        prev = e;
+      });
+      wovenSet = woven;
     }
     let outlook = null;
     if (canTime) {
       const [ds, de] = bounds;
       const upcoming = (e) => (e.t >= new Date(opts.when.getTime() - 3600000) ? 1.5 : 1);
       eventsBetween(natal, A.PLANETS, ds, de, 2.2)
-        .filter((e) => !isSame(e, trig) && !isSame(e, bg))
-        .sort((a, b) => b.weight * upcoming(b) - a.weight * upcoming(a)).slice(0, 6)
+        .filter((e) => !isSame(e, trig) && !isSame(e, bg) && !wovenSet.some((w) => isSame(e, w)))
+        .sort((a, b) => b.weight * upcoming(b) - a.weight * upcoming(a)).slice(0, 5)
         .forEach((e) => items.push({ t: e.t, text: `${cap(whenPhrase(e.t, opts))}: ${eventLine(e)}` }));
       const ing = moonIngress(ds, de);
       if (ing) items.push({ t: ing.time, text: `${cap(whenPhrase(ing.time, opts))} wechselt die Grundstimmung: ${SIGN_STYLE[ing.sign]}.` });
