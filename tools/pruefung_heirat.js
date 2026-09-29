@@ -19,6 +19,8 @@ const opt = (name, def) => { const i = args.indexOf(name); return i >= 0 ? +args
 const N = opt('--n', 300);
 const K = opt('--kontrollen', 100);
 const SEED = opt('--saat', 20260929);
+const MOND = args.includes('--mond'); // Zusatzauswertung: laufender Mond mit Gewicht 0,2 (docs/pruefplan_mond.md)
+const FAST = MOND ? { moon: 0.2 } : null;
 if (!file) { console.error('Aufruf: siehe Kopfzeile dieser Datei.'); process.exit(1); }
 
 // ---------- Zufall mit festem Saatkorn ----------
@@ -82,10 +84,10 @@ console.log(`Stichprobe: ${sample.length} Ereignisse gespeichert in data/heirat_
 
 // ---------- Bewertung ----------
 const TOPIC = 'partnership';
-function score(birth, date, ctxBase) {
+function score(birth, date, ctxBase, fast) {
   const natal = A.natalChart(birth, 0, 0, false); // ohne Geburtszeit: keine Häuser und Winkel
   const pts = L.natalPoints(natal).filter((p) => p.key !== 'moon');
-  const c = L.contributions(natal, ctxBase.pos, pts, { eclipses: ctxBase.eclipses, date, skipProgMoon: true });
+  const c = L.contributions(natal, ctxBase.pos, pts, { eclipses: ctxBase.eclipses, date, skipProgMoon: true, fast });
   return c[TOPIC].total;
 }
 function context(date) {
@@ -100,13 +102,17 @@ function rankOf(own, controls) {
 function eventRank(birth, date) {
   const ctx = context(date);
   const own = score(birth, date, ctx);
+  const ownM = FAST ? score(birth, date, ctx, FAST) : null;
   const controls = [];
+  const controlsM = [];
   for (let k = 0; k < K; k++) {
     let shift = 0;
     while (shift === 0) shift = Math.floor(rand() * 731) - 365;
-    controls.push(score(new Date(birth.getTime() + shift * DAY), date, ctx));
+    const b = new Date(birth.getTime() + shift * DAY);
+    controls.push(score(b, date, ctx));
+    if (FAST) controlsM.push(score(b, date, ctx, FAST));
   }
-  return { own, r: rankOf(own, controls) };
+  return { own, r: rankOf(own, controls), rM: FAST ? rankOf(ownM, controlsM) : null };
 }
 
 // ---------- Statistik ----------
@@ -143,6 +149,26 @@ function erf(x) {
 }
 
 const t0 = Date.now();
+if (MOND) {
+  // Zusatzauswertung mit laufendem Mond (vorab festgelegt in docs/pruefplan_mond.md): gleiche Ereignisse, gleiche Kontrollen
+  const both = sample.map((e) => eventRank(e.birth, e.wedding));
+  const base = both.map((x) => x.r);
+  const moon = both.map((x) => x.rM);
+  summarize('OHNE Mond (Grundwert, wie bisher)', base);
+  summarize('MIT laufendem Mond (gewichtet mit 0,2)', moon);
+  const diff = moon.map((x, i) => x - base[i]);
+  const n = diff.length;
+  const md = diff.reduce((a, b) => a + b, 0) / n;
+  const sd = Math.sqrt(diff.reduce((a, b) => a + (b - md) ** 2, 0) / (n - 1));
+  console.log(`\nGepaarte Differenz (mit Mond – ohne Mond): Mittel ${md.toFixed(3)}, sd ${sd.toFixed(3)}, z = ${(md / (sd / Math.sqrt(n))).toFixed(2)}`);
+  const nullBoth = sample.map((e) => {
+    const age = 20 + rand() * 40;
+    return eventRank(e.birth, new Date(e.birth.getTime() + age * 365.2425 * DAY));
+  });
+  summarize('KONTROLLE mit Mond (zufällige Tage): muss um 0,500 liegen', nullBoth.map((x) => x.rM));
+  console.log(`\nRechenzeit: ${((Date.now() - t0) / 1000).toFixed(0)} s`);
+  process.exit(0);
+}
 const real = sample.map((e) => eventRank(e.birth, e.wedding).r);
 summarize('ERGEBNIS: echte Heiratstermine', real);
 

@@ -341,6 +341,26 @@
       }
     });
 
+    // Optional: schnelle Planeten (nur für Prüfungen; ctx.fast = { moon: Gewicht, ... }), ohne Haus-Wirkung
+    Object.keys(ctx.fast || {}).forEach((tp) => {
+      const lon = pos[tp].lon;
+      pts.forEach((pt) => {
+        const sep = Math.abs(A.diff180(lon, pt.lon));
+        A.ASPECTS.forEach((asp) => {
+          const maxOrb = 3 * ASP_ORB[asp.key];
+          const orb = Math.abs(sep - asp.angle);
+          if (orb > maxOrb) return;
+          const tone = TONE[asp.key];
+          const valence = tone === 'F' ? 1 : tone === 'H' ? -1 : (VALENCE_V[tp] || 0);
+          const base = ctx.fast[tp] * ASP_W[asp.key] * (1 - orb / maxOrb);
+          topicKeys.forEach((tk) => {
+            const w = shareOf(tk, pt.key);
+            if (w) add(out, tk, base * w, valence, { kind: 'aspect', transit: tp, natal: pt.key, aspect: asp, tone });
+          });
+        });
+      });
+    });
+
     // Finsternisse wirken rund 90 Tage vor und nach dem Termin
     (ctx.eclipses || []).forEach((e) => {
       const days = Math.abs(ctx.date - e.date) / DAY;
