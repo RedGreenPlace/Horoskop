@@ -39,7 +39,7 @@ assert(nal.length > 0 && nal.every((l) => l.text && l.title));
 assert(h.aspects.some((a) => a.details.some((d) => /im Geburtshoroskop/.test(d))), 'Geburtsaspekt-Bezug fehlt');
 assert(h.aspects.every((a) => typeof a.natalLon === 'number'));
 // Jede Kombination hat einen eigenen Text
-A.PLANETS.forEach((t) => [...A.PLANETS, 'asc', 'mc'].forEach((nk) => assert(I.THEME[t][nk] && I.THEME[t][nk].length > 20, `THEME ${t}>${nk}`)));
+A.PLANETS.forEach((t) => [...A.PLANETS, 'asc', 'mc'].forEach((nk) => ['F', 'H', 'V'].forEach((tone) => assert(I.themeFor(t, nk, tone) && I.themeFor(t, nk, tone).length > 20, `THEME ${t}>${nk}>${tone}`))));
 // Tagessynthese vorhanden und tagesabhängig
 assert(h.overview.length > 30);
 assert.notStrictEqual(h.overview, I.dailyHoroscope(hamburg, tomorrow, 'a').overview, 'Synthese nicht tagesabhängig');
@@ -61,13 +61,15 @@ assert(sj && sj.details.some((d) => /war am 26\.9\. um 05:27 Uhr exakt und kling
 assert(typeof run(hamburg, 'a').story === 'string');
 // Klartext-Modus: durchgehender Text ohne Fachbegriffe, mit Ursache, Auslöser und Uhrzeiten
 const JARGON = /(Pluto|Saturn|Uranus|Neptun|Merkur|Jupiter|Sextil|Trigon|Quadrat|Opposition|Konjunktion|Aszendent|Medium Coeli|\d\. Haus|Transit)/;
-A.PLANETS.forEach((t) => [...A.PLANETS, 'asc', 'mc'].forEach((nk) => assert(!JARGON.test(I.THEME[t][nk]), `Fachbegriff in THEME ${t}>${nk}: ${I.THEME[t][nk]}`)));
+A.PLANETS.forEach((t) => [...A.PLANETS, 'asc', 'mc'].forEach((nk) => ['F', 'H', 'V'].forEach((tone) => assert(!JARGON.test(I.themeFor(t, nk, tone)), `Fachbegriff in THEME ${t}>${nk}>${tone}`))));
+// Die drei Tonarten eines Paares sind verschieden
+A.PLANETS.forEach((t) => [...A.PLANETS, 'asc', 'mc'].forEach((nk) => assert(new Set(['F', 'H', 'V'].map((x) => I.themeFor(t, nk, x))).size === 3, `Tonarten gleich ${t}>${nk}`)));
 assert(hs.plain && hs.plain.text.includes('\n\n'));
 assert(!JARGON.test(hs.plain.headline + hs.plain.text + hs.moonPlain + hs.advice), 'Fachbegriff im Klartext');
 assert(hs.plain.text.includes('Was raus will, ist das Bedürfnis nach Wärme, Anerkennung und Geborgenheit.'));
 assert(hs.plain.text.includes('Zurückgehalten wird es von der Angst, die Kontrolle zu verlieren oder dich auszuliefern.'));
 assert(hs.plain.text.includes('Um 21:22 Uhr wird es leichter'), hs.plain.text);
-assert(/Um 06:55 Uhr: Der Wunsch nach Nähe/.test(hs.plain.text), hs.plain.text);
+assert(/Um 06:55 Uhr: Worte und Zuwendung passen nicht zusammen/.test(hs.plain.text), hs.plain.text);
 assert(/Ausblick: Am Mittwoch um 04:39 Uhr/.test(hs.plain.text), hs.plain.text);
 assert(/Kurz nach Vollmond/.test(hs.moonPlain), hs.moonPlain);
 // Am Folgetag liegt der Auslöser schon hinter dir und wird nicht als Zukunft dargestellt

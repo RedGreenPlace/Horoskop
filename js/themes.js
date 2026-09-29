@@ -1,0 +1,161 @@
+/*
+ * Kombinationstexte (Stufe A): für jeden laufenden Planeten (erste Ebene) und jeden Geburtspunkt
+ * (zweite Ebene) drei Texte: [leicht (Trigon/Sextil), angespannt (Quadrat/Opposition), verschmelzend (Konjunktion)].
+ * Alle Texte sind im Klartext geschrieben, ohne Fachbegriffe.
+ */
+(function (root) {
+  'use strict';
+
+  const T = {
+    moon: {
+      sun: ['Du fühlst dich lebendig und zeigst dich gern – die Stimmung trägt dein Selbstvertrauen.', 'Deine Stimmung und dein Selbstbild ziehen in verschiedene Richtungen – du zweifelst, wie du wirkst.', 'Gefühl und Selbstwert fallen heute zusammen – wie es dir geht, zeigt sich sofort in deiner Ausstrahlung.'],
+      moon: ['Du bist bei dir selbst und spürst genau, was du brauchst.', 'Deine Gefühle sind dünnhäutig – kleine Anlässe berühren mehr als sonst.', 'Ein emotional intensiver Tag: Bedürfnisse sind laut und lassen sich nicht überhören.'],
+      mercury: ['Gefühl und Verstand arbeiten zusammen – du findest die richtigen Worte für das, was dich bewegt.', 'Du grübelst mehr, als du fühlst – Gedanken und Gefühl passen heute nicht zusammen.', 'Was du fühlst, will ausgesprochen werden; Gespräche gehen heute direkt ans Eingemachte.'],
+      venus: ['Nähe und Zuneigung fließen leicht – ein guter Moment für ein warmes Wort.', 'Du sehnst dich nach Nähe, fühlst dich aber schnell übersehen oder zu bedürftig.', 'Zärtlichkeit, Sehnsucht nach Nähe und Lust auf Schönes sind heute besonders präsent.'],
+      mars: ['Deine Gefühle geben dir Schwung – du weißt, was du willst, und packst es an.', 'Reizbarkeit liegt dicht unter der Oberfläche – kleine Auslöser werden schnell zu Streit.', 'Gefühle und Tatendrang verschmelzen – du handelst heute aus dem Bauch.'],
+      jupiter: ['Eine großzügige, zuversichtliche Stimmung – du traust dir und anderen mehr zu.', 'Du willst zu viel auf einmal und bist schnell enttäuscht, wenn es nicht reicht.', 'Zuversicht und Herzlichkeit tragen die Stimmung – gute Laune steckt an.'],
+      saturn: ['Ruhe und Verlässlichkeit tun gut – du kannst dich heute auf dich selbst verlassen.', 'Eine gedrückte, ernste Stimmung – Pflichten wiegen schwerer, und Zuwendung fehlt.', 'Ernst und Rückzug bestimmen die Stimmung – du brauchst Halt und wenig Trubel.'],
+      uranus: ['Ein Hauch Abenteuer: spontane Einfälle machen die Stimmung leicht.', 'Unruhe und plötzliche Launen – Routine nervt, und du willst raus.', 'Das Gefühlsleben ist unberechenbar – Stimmungen kippen schnell.'],
+      neptune: ['Du bist einfühlsam und kreativ – Musik, Träume und Stille tun dir gut.', 'Du fühlst dich leicht überfordert und weißt nicht recht, was du willst.', 'Eine sehr durchlässige Stimmung – du nimmst die Gefühle anderer auf wie ein Schwamm.'],
+      pluto: ['Gefühle gehen tief, ohne dich zu überrollen – ein guter Moment, etwas Altes anzusehen.', 'Unter der Oberfläche brodelt es – alte Kränkungen und Kontrollbedürfnis melden sich.', 'Intensive, schwer greifbare Gefühle – etwas Tiefes will wahrgenommen werden.'],
+      asc: ['Du wirkst warm und zugänglich – andere spüren, wie es dir geht, und reagieren freundlich.', 'Du wirkst gereizter oder verschlossener, als du dich fühlst.', 'Deine Stimmung steht dir ins Gesicht geschrieben – andere lesen dich heute deutlich.'],
+      mc: ['Deine Stimmung trägt dich im Beruf – Kontakte und Arbeit gehen leichter.', 'Beruf und Gefühl reiben sich: Die Arbeit fordert, aber innerlich bist du woanders.', 'Deine Gefühle färben heute deine Haltung zu Arbeit und Zielen.'],
+    },
+    sun: {
+      sun: ['Du bist bei dir und hast Kraft für das, was dir wichtig ist.', 'Du misst dich an dem, was du sein wolltest, und spürst die Lücke.', 'Ein Tag, der dich an deine eigenen Ziele und deinen Weg erinnert.'],
+      moon: ['Kopf und Herz sind einig – du weißt, was du brauchst, und kannst es aussprechen.', 'Was du willst und was du fühlst, passt nicht zusammen – du bist hin- und hergerissen.', 'Bewusstsein und Gefühl treffen sich – ein Moment, um ehrlich zu klären, was du brauchst.'],
+      mercury: ['Klares Denken und gutes Zuhören – du kannst heute gut ordnen und erklären.', 'Du bist ungeduldig im Denken und verrennst dich schnell in eine Sicht der Dinge.', 'Dein Denken kreist um dich selbst – Pläne und Klarheit.'],
+      venus: ['Du wirkst sympathisch, und dein Sinn für Schönes macht den Tag angenehm.', 'Du willst gefallen und ärgerst dich, dass es dich Kraft kostet.', 'Beziehungen und Genuss stehen im Licht – was dir wichtig ist, wird deutlich.'],
+      mars: ['Energie und Klarheit gehen zusammen – du packst mit Überzeugung an.', 'Ungeduld und Machtkampf: Du willst dich durchsetzen und triffst auf Widerstand.', 'Viel Energie und Durchsetzungswille – du weißt, wofür du kämpfst.'],
+      jupiter: ['Dein Selbstvertrauen wächst – ein guter Tag, um etwas Neues zu wagen.', 'Du traust dir mehr zu, als gerade drin ist – Überheblichkeit ist ein Risiko.', 'Optimismus und Lebensfreude prägen den Tag – du siehst, was möglich ist.'],
+      saturn: ['Realistische Selbsteinschätzung: Du bleibst ruhig und tust, was zu tun ist.', 'Selbstzweifel und Pflichtgefühl bremsen dich – du fühlst dich kleiner, als du bist.', 'Ein nüchterner, ernster Tag – du prüfst, was du wirklich leisten willst.'],
+      uranus: ['Ein frischer Impuls, dich anders zu zeigen als gewohnt – und er gelingt.', 'Du willst ausbrechen und stößt auf die Erwartungen anderer.', 'Ein Impuls, alte Rollen abzuwerfen, taucht auf.'],
+      neptune: ['Du bist inspiriert und einfühlsam – Kreativität fließt leicht.', 'Dein Selbstbild verschwimmt – du weißt nicht recht, was du willst oder wer du sein sollst.', 'Inspiration und Zweifel liegen dicht beieinander – dein Selbstbild ist weich.'],
+      pluto: ['Innere Stärke: Du kannst etwas Altes loslassen, ohne dich zu verlieren.', 'Machtfragen und Kontrolle berühren dein Selbstwertgefühl – du willst dich nicht ausliefern.', 'Die Frage nach echter Veränderung und Macht über dein Leben steht im Raum.'],
+      asc: ['Du wirkst klar und präsent – andere nehmen dich gern wahr.', 'Du stehst im Licht und fühlst dich beobachtet.', 'Das Licht fällt auf dein Auftreten – du wirst heute deutlicher wahrgenommen.'],
+      mc: ['Deine Ziele sind klar, und dein Auftritt im Beruf wirkt überzeugend.', 'Beruflich erwartet man viel von dir, und du zweifelst, ob es reicht.', 'Deine Ziele und deine Rolle im Beruf rücken ins Licht.'],
+    },
+    mercury: {
+      sun: ['Du findest die richtigen Worte für das, was dir wichtig ist.', 'Du sagst mehr, als du wolltest, oder wirst missverstanden.', 'Du willst sagen, wer du bist, und verstehen, wo du stehst.'],
+      moon: ['Ein offenes Gespräch über Gefühle gelingt – Zuhören und Verstehen kommen leicht.', 'Gefühle und Worte passen nicht zusammen – du sagst, was du nicht meinst.', 'Was du fühlst, will formuliert werden – Gespräche gehen heute in die Tiefe.'],
+      mercury: ['Dein Denken läuft klar und wach – Pläne und Notizen gelingen.', 'Zerstreutheit und Grübeln – Gedanken laufen im Kreis.', 'Dein Denken dreht sich um sich selbst: Pläne, Notizen, Rückschau.'],
+      venus: ['Freundliche, charmante Worte öffnen Türen – gut für Gespräche über Nähe oder Geld.', 'Worte und Zuwendung passen nicht zusammen – Gespräche über Beziehung oder Geld haken.', 'Es geht um Gespräche über Nähe, Werte oder Geld.'],
+      mars: ['Du sprichst klar und entschlossen an, was zu tun ist.', 'Schnelle Zunge und scharfe Worte – Debatten drohen zu eskalieren.', 'Schnelle Gedanken und schnelle Entschlüsse – du sagst, was du denkst.'],
+      jupiter: ['Große Ideen und gute Gespräche – du siehst, was möglich ist.', 'Du versprichst oder planst zu viel und verlierst die Details.', 'Du denkst groß und planst weit – Ideen wollen erzählt werden.'],
+      saturn: ['Gründlich und geduldig: Fakten, Zahlen und Verträge gelingen.', 'Kritik und Strenge im Kopf – du siehst zuerst, was nicht klappt.', 'Ernstes, gründliches Denken – Verantwortung und Fakten stehen im Vordergrund.'],
+      uranus: ['Blitzideen und ungewohnte Lösungen bringen dich weiter.', 'Sprunghaftes Denken und unruhige Gespräche – Pläne werden plötzlich umgeworfen.', 'Das Denken bricht aus gewohnten Bahnen aus.'],
+      neptune: ['Intuition und Vorstellungskraft machen dich gesprächig und kreativ.', 'Nebel im Kopf – Absprachen sind ungenau, Nachrichten werden falsch verstanden.', 'Bilder, Ahnungen und Zwischentöne bestimmen das Denken; harte Fakten sind schwerer zu greifen.'],
+      pluto: ['Du durchschaust Zusammenhänge und sprichst Wesentliches an.', 'Gespräche werden bohrend, und du misstraust dem, was man dir sagt.', 'Du willst hinter die Fassade blicken – Gedanken werden durchdringend.'],
+      asc: ['Du drückst dich gut aus und wirkst sympathisch und wach.', 'Du wirkst nervöser oder redseliger, als dir lieb ist.', 'Wie du dich ausdrückst, prägt heute deinen Eindruck auf andere.'],
+      mc: ['Berufliche Gespräche und Präsentationen gelingen – gute Tage für klare Absprachen.', 'Im Job gibt es Missverständnisse oder Kritik an deiner Kommunikation.', 'Kommunikation im Beruf steht an: Absprachen, Präsentationen, Bewerbungen.'],
+    },
+    venus: {
+      sun: ['Du kommst gut an und gönnst dir selbst mehr Anerkennung.', 'Du willst gefallen und fühlst dich schnell übersehen.', 'Du strahlst Wärme aus, und das, was dir wichtig ist, wird sichtbar.'],
+      moon: ['Weichheit und Zärtlichkeit – zu Hause und in Nähe fühlst du dich geborgen.', 'Bedürftigkeit und Empfindlichkeit – Nähe fühlt sich zu wenig oder zu viel an.', 'Das Bedürfnis nach Geborgenheit und Zärtlichkeit ist groß.'],
+      mercury: ['Charmante Gespräche und gute Verhandlungen – Diplomatie zahlt sich aus.', 'Freundlich gemeinte Worte kommen falsch an, oder du weichst einer Klärung aus.', 'Gespräche werden weicher und beziehungsorientierter.'],
+      venus: ['Was dir guttut, ist klar – gönn dir Schönes und Nähe.', 'Deine Ansprüche an Nähe und Wertschätzung und das, was du bekommst, passen nicht zusammen.', 'Deine Themen Liebe und Werte leuchten auf – frag dich, was dir wirklich guttut.'],
+      mars: ['Anziehung und Leidenschaft – Nähe und Tatkraft ergänzen sich.', 'Begehren und Reibung: Zwischen Nähe und Eigenständigkeit gibt es Streit.', 'Anziehung und Begehren stehen im Mittelpunkt – Flirt oder Leidenschaft.'],
+      jupiter: ['Lebensfreude und Großzügigkeit – Einladungen und schöne Begegnungen sind möglich.', 'Genuss im Übermaß: Du isst, gibst aus oder versprichst mehr, als gut ist.', 'Lebensfreude und Genuss – ein Tag, an dem sich vieles reicher anfühlt.'],
+      saturn: ['Verbindlichkeit in Beziehung und Geld – Verlässliches wächst.', 'Nähe fühlt sich kühl oder pflichtvoll an – du zweifelst, ob du genug bekommst.', 'Beziehungen und Finanzen werden nüchtern auf Verlässlichkeit geprüft.'],
+      uranus: ['Überraschende, aufregende Begegnungen – Beziehungen bekommen frischen Wind.', 'Plötzliche Anziehung oder Distanz – Freiheitsdrang stört Nähe.', 'Der Wunsch nach mehr Freiheit in Beziehungen taucht auf.'],
+      neptune: ['Romantik und Hingabe – Schönes berührt dich tief.', 'Idealisierung: Du siehst, was du sehen willst, und es folgt Ernüchterung.', 'Sehnsucht nach der großen Liebe oder dem perfekten Moment.'],
+      pluto: ['Tiefe Verbundenheit – Nähe wird echt und verbindlich.', 'Besitzdenken, Eifersucht oder Machtspiele in Beziehungen.', 'Beziehungen werden intensiv; was dir wichtig ist, wird radikal geklärt.'],
+      asc: ['Du wirkst einnehmend und attraktiv – andere kommen dir freundlich entgegen.', 'Du willst gefallen und wirkst dadurch gezwungen.', 'Charme und Anziehung prägen dein Auftreten.'],
+      mc: ['Charme und Diplomatie helfen dir im Beruf – gute Tage für Repräsentation.', 'Im Beruf gefallen zu wollen kostet Kraft und bringt wenig.', 'Beruf und Ansehen: Beziehungen im Job und dein Ruf stehen im Licht.'],
+    },
+    mars: {
+      sun: ['Viel Energie und klare Ziele – du packst an, was du dir vorgenommen hast.', 'Ungeduld und Durchsetzungsdrang – du stößt auf Widerstand.', 'Tatendrang und Selbstbehauptung sind stark – du weißt, was du willst.'],
+      moon: ['Gefühle geben dir Schwung – du weißt, was du brauchst, und holst es dir.', 'Gereiztheit und schnelle Verletzlichkeit – Gefühle entladen sich plötzlich.', 'Emotionen entladen sich schneller – Leidenschaft oder Wut.'],
+      mercury: ['Schnelles, klares Denken und entschlossene Worte.', 'Streitlust und scharfe Worte – Gespräche eskalieren leicht.', 'Debattierlust und schnelle Entschlüsse – Worte treffen schärfer als gedacht.'],
+      venus: ['Anziehung und Tatkraft ergänzen sich – ein guter Tag für Leidenschaft.', 'Begehren und Reibung – du willst Nähe und Freiheit zugleich.', 'Begehren und Durchsetzung in Beziehungen – gefragt ist die Balance zwischen Nähe und Eigenständigkeit.'],
+      mars: ['Dein Antrieb ist stark und gut gelenkt – du bringst etwas ins Rollen.', 'Innere Unruhe und Ungeduld – Kraft wird zu Ärger, wenn sie nicht rauskann.', 'Dein Antrieb verdichtet sich – du weißt genau, was du willst.'],
+      jupiter: ['Mut und Zuversicht – große Schritte gelingen.', 'Übermut und Risikofreude – du überschätzt, was drin ist.', 'Mut zu großen Schritten und Lust auf Neues.'],
+      saturn: ['Ausdauer und Disziplin – du kommst Schritt für Schritt voran.', 'Gas und Bremse zugleich – Ausdauer wird verlangt, Frust ist möglich.', 'Anstrengung und Ausdauer: Es geht langsam, aber es geht voran.'],
+      uranus: ['Ein mutiger Ausbruch gelingt – neue Wege lassen sich einschlagen.', 'Unberechenbare Energie – plötzliche Aktionen, Hektik und erhöhte Unfallgefahr.', 'Plötzliche Impulse und Tatendrang – schwer zu bremsen.'],
+      neptune: ['Kraft und Inspiration verbinden sich – du kannst für eine Idee einstehen.', 'Der Antrieb verpufft – Kraft fließt ins Unklare, und du wirst schnell müde.', 'Antrieb und Träume vermischen sich – Ziele sind schwer zu fassen.'],
+      pluto: ['Große Kraft und Willensstärke – du kannst etwas Schweres durchziehen.', 'Machtkämpfe und Wut – die Kraft ist enorm, aber schwer zu lenken.', 'Enorme Energie und Willenskraft – lenke sie in ein großes Vorhaben.'],
+      asc: ['Du wirkst energisch und direkt – das hilft dir heute.', 'Du wirkst aggressiver oder ungeduldiger, als du meinst.', 'Du trittst energisch und kämpferisch auf.'],
+      mc: ['Ehrgeiz und Tatkraft im Beruf – du kommst voran.', 'Im Job gibt es Konkurrenz und Druck – Ungeduld schadet.', 'Ehrgeiz meldet sich – beruflich willst du vorankommen.'],
+    },
+    jupiter: {
+      sun: ['Dein Selbstvertrauen wächst – ein guter Tag für Neues.', 'Du überschätzt dich – Überheblichkeit kann dich teuer zu stehen kommen.', 'Selbstvertrauen und Lebensfreude – du siehst, was möglich ist.'],
+      moon: ['Emotionale Fülle und Geborgenheit – du bist großzügig mit dir und anderen.', 'Gefühle schwappen über – du isst, gibst oder versprichst zu viel.', 'Ein warmes, zuversichtliches Gefühl trägt dich.'],
+      mercury: ['Der Blick weitet sich – Lernen, Planen und Erzählen gelingen.', 'Du planst zu groß und übersiehst Details.', 'Große Ideen und weite Gedanken.'],
+      venus: ['Liebe, Freundschaft und Genuss werden reicher – Einladungen und Geschenke sind möglich.', 'Genuss im Übermaß – Geld, Essen oder Erwartungen laufen aus dem Ruder.', 'Lebensfreude, Liebe und Genuss in Fülle.'],
+      mars: ['Tatkraft mit Rückenwind – große Vorhaben wollen gestartet werden.', 'Übermut und Risikofreude – du willst zu viel auf einmal.', 'Mut und Zuversicht geben Tatendrang.'],
+      jupiter: ['Ein Wachstumszyklus schließt sich – Zeit, Bilanz zu ziehen und neu zu wachsen.', 'Du erwartest mehr, als möglich ist – Enttäuschung droht.', 'Ein neuer Wachstumsabschnitt beginnt.'],
+      saturn: ['Wachstum und Vorsicht arbeiten zusammen – solide Erweiterung gelingt.', 'Erwartungen und Realität passen nicht zusammen – Wachstum stockt, und du zweifelst.', 'Wachstum braucht Substanz – ernsthafte Planung ist gefragt.'],
+      uranus: ['Überraschende Chancen öffnen Türen.', 'Plötzliche Wendungen stören Wachstumspläne – Flexibilität ist gefragt.', 'Eine unerwartete Chance oder Wende bahnt sich an.'],
+      neptune: ['Große Ideale und Vertrauen – Inspiration trägt dich.', 'Selbsttäuschung und Übermaß – Glaube ohne Prüfung kann täuschen.', 'Träume und Glaube sind groß – Vorsicht vor der rosaroten Brille.'],
+      pluto: ['Große Wandlungschancen – Einfluss und Einsatz wachsen.', 'Machtthemen und Überzeugungen werden erschüttert.', 'Überzeugungen und Ziele werden tief verwandelt.'],
+      asc: ['Du wirkst offen, zuversichtlich und gewinnend.', 'Du trittst zu selbstsicher oder großspurig auf.', 'Offenheit und Zuversicht prägen dein Auftreten.'],
+      mc: ['Berufliche Chancen und Anerkennung – gut für den nächsten Karriereschritt.', 'Beruflich willst du zu viel und verhebst dich leicht.', 'Berufliches Wachstum und neue Möglichkeiten rücken näher.'],
+    },
+    saturn: {
+      sun: ['Du bleibst standhaft und leistest Verlässliches.', 'Selbstzweifel und Erschöpfung – du fühlst dich klein und überlastet.', 'Ernsthaftigkeit statt Zerstreuung – du spürst, was du wirklich leisten kannst und willst.'],
+      moon: ['Ruhe und Verlässlichkeit – du gibst deinen Gefühlen Halt.', 'Gedrückte Stimmung und Einsamkeit – du fühlst dich wenig getragen.', 'Gefühle wollen Struktur – du übernimmst Verantwortung für deine Bedürfnisse.'],
+      mercury: ['Gründliches, sorgfältiges Denken – Verträge und Zahlen gelingen.', 'Kritisches, gebremstes Denken – Sorgen nehmen zu.', 'Entscheidungen brauchen Fakten und Zeit.'],
+      venus: ['Beziehungen und Finanzen festigen sich – Verlässliches wächst.', 'Nähe fühlt sich kühl an – Einsamkeit oder Geldsorgen drücken.', 'Liebe und Geld werden nüchtern auf Verbindlichkeit geprüft.'],
+      mars: ['Ausdauer und Disziplin tragen dich – du hältst durch.', 'Gas und Bremse zugleich – Ausdauer wird verlangt, Frust ist möglich.', 'Anstrengung und Ausdauer sind gefragt.'],
+      jupiter: ['Solides Wachstum – Geduld zahlt sich aus.', 'Erwartungen und Realität passen nicht zusammen – Hoffnung stößt auf Grenzen.', 'Erwartungen und Realität werden abgeglichen; Wachstum gibt es nur mit Substanz.'],
+      saturn: ['Ein Lebenszyklus erreicht einen Meilenstein – du erntest, was du aufgebaut hast.', 'Ein Lebenszyklus erreicht eine Prüfung – Altes trägt nicht mehr, Neues fehlt noch.', 'Ein Meilenstein: Zeit für Bilanz und neue Verantwortung.'],
+      uranus: ['Freiheit und Struktur ergänzen sich – Neues wird tragfähig.', 'Struktur und Freiheit ringen miteinander – Altes bricht, Neues ist noch nicht stabil.', 'Alte Strukturen stehen zur Debatte.'],
+      neptune: ['Träume finden Form – Ideen werden machbar.', 'Träume werden von der Realität eingeholt – Ernüchterung oder Erschöpfung.', 'Ideale brauchen Form – Träume werden auf Machbarkeit geprüft.'],
+      pluto: ['Standfestigkeit in schwerer Zeit – du hältst durch.', 'Schwerer Druck und harte Realität – Angst vor Kontrollverlust.', 'Tiefer Druck und Verantwortung – Strukturen werden neu gegossen.'],
+      asc: ['Du wirkst ruhig und verlässlich.', 'Du wirkst verschlossen oder streng – und fühlst dich müde.', 'Du wirkst ernster und reservierter; dein Körper verlangt Beachtung.'],
+      mc: ['Beruflich zahlt sich Ausdauer aus – Verantwortung wird anerkannt.', 'Beruflicher Druck und hohe Erwartungen – du fühlst dich geprüft.', 'Berufliche Verantwortung und Reifeprüfung – Leistung wird gemessen.'],
+    },
+    uranus: {
+      sun: ['Frischer Mut, du selbst zu sein – Veränderung fühlt sich befreiend an.', 'Ein Impuls auszubrechen kollidiert mit deinen Rollen und den Erwartungen anderer.', 'Ein Drang nach Selbstbefreiung wird stärker.'],
+      moon: ['Freiheit tut dem Gefühlsleben gut – Abwechslung belebt.', 'Unruhe im Gefühlsleben – du brauchst mehr Freiheit zu Hause und in Beziehungen.', 'Das Gefühlsleben ist unberechenbar; Stimmung und Bedürfnisse wechseln.'],
+      mercury: ['Originelle Ideen und Erkenntnisse – das Denken wird frei.', 'Nervöse Unruhe und Zerstreuung – Gedanken springen.', 'Ungewöhnliche Ideen – das Denken bricht aus gewohnten Bahnen aus.'],
+      venus: ['Beziehungen und Werte bekommen frischen Wind – Neues macht neugierig.', 'Plötzliche Anziehung oder Distanz – Beziehungen geraten ins Wanken.', 'Beziehungen und Werte werden neu definiert.'],
+      mars: ['Mutige, plötzliche Aktionen gelingen – ein guter Moment für einen Neuanfang.', 'Unberechenbare Energie – Impulsivität führt zu Hektik und Streit.', 'Tatendrang und Ungeduld sind schwer zu bremsen.'],
+      jupiter: ['Überraschende Chancen und mutige Neuorientierung.', 'Sprunghaftigkeit macht Wachstum unruhig – du wechselst zu schnell.', 'Neue Horizonte und ein Wunsch nach Unabhängigkeit.'],
+      saturn: ['Erneuerung mit Bedacht – Altes wird sinnvoll abgelöst.', 'Alte Strukturen geraten ins Wanken – Sicherheit und Freiheit kämpfen gegeneinander.', 'Ein Umbruch in dem, was dich hält.'],
+      uranus: ['Ein Wunsch nach Erneuerung deines Lebensentwurfs – du gehst ihn an.', 'Ein Lebensumbruch: Es zieht dich fort von dem, was du kennst – und das macht Angst.', 'Ein tiefer Wunsch nach Erneuerung deines Lebensentwurfs meldet sich.'],
+      neptune: ['Visionen und Neuerung verbinden sich – neue Ideale entstehen.', 'Verwirrung zwischen Freiheitsdrang und Sehnsucht – du weißt nicht, was du willst.', 'Persönliche Visionen und kollektive Sehnsüchte verschmelzen.'],
+      pluto: ['Tiefe Erneuerung von innen – du verwandelst dich mit Mut.', 'Tiefe Umbrüche in Lebensweise und Werten – Widerstand nützt wenig.', 'Grundlegender Umbruch – Altes lässt sich nicht halten.'],
+      asc: ['Du wirkst individuell und frisch – ein neuer Look oder eine neue Rolle passt.', 'Du wirkst unberechenbar und stößt andere vor den Kopf.', 'Ein neues Auftreten liegt in der Luft.'],
+      mc: ['Beruflich öffnen sich überraschend neue Wege.', 'Berufliche Umbrüche und plötzliche Wendungen – Unsicherheit über die Richtung.', 'Der Wunsch nach mehr Autonomie im Beruf wächst.'],
+    },
+    neptune: {
+      sun: ['Inspiration und Einfühlung – du bist kreativ und offen.', 'Orientierungslosigkeit – du weißt nicht recht, wer du sein willst, und fühlst dich erschöpft.', 'Dein Selbstbild ist weich und durchlässig.'],
+      moon: ['Intuition und Mitgefühl – Stille, Musik und Träume tun gut.', 'Überempfindlichkeit und Überflutung – Grenzen zu ziehen fällt schwer.', 'Du bist sehr empfänglich – Stimmungen anderer gehen auf dich über.'],
+      mercury: ['Fantasie und Intuition machen dich kreativ.', 'Nebel im Kopf – Absprachen sind ungenau, und du verstehst schlecht.', 'Ahnungen und Bilder bestimmen das Denken.'],
+      venus: ['Romantik und Hingabe – Schönes berührt dich tief.', 'Idealisierung und Ernüchterung – du siehst, was du sehen willst.', 'Romantische Sehnsucht und der Wunsch nach Verschmelzung.'],
+      mars: ['Kraft und Inspiration gehen zusammen – du kannst dich für einen Traum einsetzen.', 'Der Antrieb verpufft – du bist müde oder unentschlossen.', 'Antrieb und Träume vermischen sich.'],
+      jupiter: ['Große Ideale und Vertrauen – Inspiration trägt dich.', 'Selbsttäuschung und Übermaß – Vorsicht bei Versprechen und Geld.', 'Große Träume und ein weiter Glaube.'],
+      saturn: ['Träume und Realität finden zusammen – etwas Tragfähiges entsteht.', 'Ernüchterung – Träume stoßen auf Grenzen.', 'Ideale werden auf Machbarkeit geprüft.'],
+      uranus: ['Visionen bekommen Flügel – Neues und Ideale finden zusammen.', 'Idealismus und Unruhe – Wünsche wechseln schnell und stören einander.', 'Visionen und Umbruch verschmelzen.'],
+      neptune: ['Eine spirituelle Neuorientierung und die Suche nach Sinn.', 'Sinnkrise – nichts fühlt sich sicher an, und du suchst Halt.', 'Eine tiefe Sinnsuche und Sehnsucht.'],
+      pluto: ['Tiefe Strömungen wandeln Altes sanft.', 'Die Auflösung von Halt und Sicherheit macht Angst.', 'Tiefe Auflösung und Wandlung – Altes zerfließt.'],
+      asc: ['Du wirkst weich und inspirierend.', 'Du wirkst schwer greifbar, und andere projizieren auf dich.', 'Du wirkst geheimnisvoll und schwer zu fassen.'],
+      mc: ['Berufliche Inspiration – ein Ziel, das dich trägt, wird sichtbar.', 'Berufliche Ziele werden diffus – du weißt nicht, wohin es gehen soll.', 'Berufung oder Orientierungslosigkeit – Fragen nach Sinn im Beruf.'],
+    },
+    pluto: {
+      sun: ['Innere Stärke – du kannst etwas Altes loslassen und gestärkt daraus hervorgehen.', 'Macht und Identität werden hinterfragt – du fühlst dich bedroht oder überwältigt.', 'Identität und Macht werden von Grund auf hinterfragt – Wandlung ist möglich.'],
+      moon: ['Tiefe Gefühle tragen dich – alte Verletzungen können heilen.', 'Tiefe emotionale Prozesse; alte Verletzungen und Bindungen treten hervor.', 'Intensive Gefühle – etwas Tiefes will wahrgenommen werden.'],
+      mercury: ['Du durchdringst Zusammenhänge klar und sprichst Wesentliches aus.', 'Grübeln und Besessenheit – Gedanken kreisen um Kontrolle und Misstrauen.', 'Das Denken wird durchdringend – wichtige Erkenntnisse sind möglich.'],
+      venus: ['Beziehungen werden tiefer und ehrlicher.', 'Eifersucht, Besitzdenken und Machtspiele in Beziehungen.', 'Beziehungen werden intensiv, Werte werden radikal geklärt.'],
+      mars: ['Große Willenskraft – du kannst Schweres durchziehen.', 'Machtkämpfe und Wut – die Kraft ist enorm und schwer zu lenken.', 'Enorme Kraft – dein Wille ist stark.'],
+      jupiter: ['Überzeugungen werden gestärkt und vertieft.', 'Überzeugungen werden erschüttert – Machtfragen stören das Wachstum.', 'Überzeugungen und Ziele werden tief verwandelt.'],
+      saturn: ['Strukturen werden solide neu aufgebaut.', 'Strukturen brechen weg – Druck und Angst vor Kontrollverlust.', 'Strukturen werden abgebaut und neu gegossen.'],
+      uranus: ['Erneuerung von Grund auf gelingt mit Kraft.', 'Radikaler Umbruch – Kontrolle geht verloren.', 'Ein radikaler Umbruch.'],
+      neptune: ['Tiefe Wandlung mit Sinn – du lässt los und findest Halt.', 'Auflösung und Kontrollverlust – der Boden verschwindet.', 'Tiefe Auflösung und spirituelle Wandlung.'],
+      pluto: ['Eine tiefe Transformation, die dich stärkt.', 'Eine tiefe Transformation, die dich an Grenzen führt.', 'Eine grundlegende Transformation deines Lebensweges.'],
+      asc: ['Du wirkst stark und magnetisch.', 'Du wirkst einschüchternd oder verschlossen.', 'Auftreten und Selbstbild wandeln sich; du wirkst intensiver.'],
+      mc: ['Berufliche Neuausrichtung mit Kraft – Macht und Einfluss wachsen.', 'Machtkämpfe und Druck im Beruf – etwas Altes muss enden.', 'Berufliche Neuausrichtung – Ende und Anfang zugleich.'],
+    },
+  };
+
+  const INDEX = { F: 0, H: 1, V: 2 };
+  // tone: 'F' (Trigon/Sextil), 'H' (Quadrat/Opposition), 'V' (Konjunktion)
+  function themeFor(transit, natal, tone) {
+    return T[transit][natal][INDEX[tone]];
+  }
+
+  const api = { TONE_THEME: T, themeFor };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.Themes = api;
+})(typeof window !== 'undefined' ? window : globalThis);

@@ -11,7 +11,7 @@ Persönliches Tageshoroskop aus Geburtsdatum, -zeit und -ort. Reine Browser-App 
 1. **Ort → Koordinaten + Zeitzone** über die Open-Meteo-Geocoding-API (kein API-Key). Alternativ manuell eintragbar.
 2. **Geburtszeit → UTC** inkl. historischer Sommerzeit (`Intl`-Zeitzonendaten).
 3. **Geburtshoroskop:** Planetenpositionen (Bahnelemente nach P. Schlyter), Aszendent, MC, Whole-Sign-Häuser (`js/astro.js`).
-4. **Tageshoroskop:** Planetenstände des gewählten Tages werden mit dem Geburtshoroskop verglichen (Aspekte: Konjunktion, Sextil, Quadrat, Trigon, Opposition). Für jede der 120 Kombinationen aus laufendem Planet und Geburtspunkt gibt es einen eigenen Text, dazu kommen Zeichen, Haus, Rückläufigkeit, Genauigkeit und eine regelbasierte Tagessynthese (`js/interpret.js`).
+4. **Tageshoroskop:** Planetenstände des gewählten Tages werden mit dem Geburtshoroskop verglichen (Aspekte: Konjunktion, Sextil, Quadrat, Trigon, Opposition). Für jede der 120 Kombinationen aus laufendem Planet und Geburtspunkt gibt es drei eigene Texte (leicht, angespannt, verschmelzend; `js/themes.js`, 360 Texte), dazu kommen Zeichen, Haus, Rückläufigkeit, Genauigkeit und eine regelbasierte Tagessynthese (`js/interpret.js`).
 
 Die Deutung nutzt außerdem Aspekte innerhalb des Geburtshoroskops, den Aszendentherrscher (Transite darauf zählen stärker), die Element- und Qualitätenverteilung sowie die exakte Uhrzeit jedes Aspekts.
 

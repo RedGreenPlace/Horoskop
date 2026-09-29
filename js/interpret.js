@@ -6,6 +6,9 @@
 (function (root) {
   'use strict';
   const A = root.Astro || (typeof require !== 'undefined' ? require('./astro.js') : null);
+  const Themes = root.Themes || (typeof require !== 'undefined' ? require('./themes.js') : null);
+  // Kombinationstext je laufendem Planet, Geburtspunkt und Tonart (F leicht, H angespannt, V verschmelzend)
+  const themeFor = (t, n, tone) => Themes.themeFor(t, n, tone);
 
   const TONE_OF = { conjunction: 'V', sextile: 'F', trine: 'F', square: 'H', opposition: 'H' };
 
@@ -22,151 +25,6 @@
     neptune: { F: 'Intuition und Inspiration sind ungewöhnlich stark.', H: 'Vorsicht vor Nebel: Illusionen, Erschöpfung oder Unklarheit trüben die Sicht.', V: 'Neptun macht empfänglich und träumerisch.' },
     pluto: { F: 'Tiefe Veränderungen laufen im Stillen in deinem Sinne ab.', H: 'Machtthemen und alte Muster drängen an die Oberfläche.', V: 'Pluto legt tiefe Schichten frei und treibt Wandlung an.' },
   };
-
-  // Eigene Deutung für jede Kombination: laufender Planet (Zeile) -> Geburtspunkt (Schlüssel)
-  const THEME = {
-    moon: {
-      sun: 'Deine Stimmung färbt heute, wie du dich zeigst und wie lebendig du dich fühlst.',
-      moon: 'Deine Gefühle sind heute besonders deutlich – Bedürfnisse lassen sich nicht überhören.',
-      mercury: 'Gefühl und Verstand sind eng verwoben; du denkst heute so, wie du dich fühlst.',
-      venus: 'Nähe, Zuneigung und das Bedürfnis nach Schönem sind heute besonders präsent.',
-      mars: 'Reizbarkeit und Tatkraft liegen heute dicht unter der Oberfläche.',
-      jupiter: 'Zuversicht, Großzügigkeit und der Wunsch nach mehr Weite melden sich.',
-      saturn: 'Pflichtgefühl, Ernst und das Bedürfnis nach Halt bestimmen die Stimmung.',
-      uranus: 'Spontane Impulse und Unruhe stören gern die Routine.',
-      neptune: 'Du bist heute besonders empfänglich und nimmst die Stimmung anderer wie ein Schwamm auf.',
-      pluto: 'Unter der Oberfläche brodelt etwas – intensive Gefühle wollen wahrgenommen werden.',
-      asc: 'Deine Stimmung prägt stark, wie du heute auf andere wirkst.',
-      mc: 'Deine Gefühlslage färbt heute deine Haltung zu Beruf und Zielen.',
-    },
-    sun: {
-      sun: 'Ein persönlicher Jahreszyklus beginnt neu – ein Tag, der dich an deine eigenen Ziele erinnert.',
-      moon: 'Bewusstsein und Gefühl begegnen sich – ein guter Moment, um herauszufinden, was du wirklich brauchst.',
-      mercury: 'Dein Denken wird klar: Du kannst heute gut ordnen, was dich beschäftigt.',
-      venus: 'Deine Ausstrahlung und dein Sinn für das, was dir wichtig ist, werden beleuchtet.',
-      mars: 'Deine Tatkraft rückt ins Licht – du spürst, wofür du heute kämpfen willst.',
-      jupiter: 'Dein Selbstvertrauen bekommt Nahrung, und du erkennst, wo Wachstum möglich ist.',
-      saturn: 'Du misst dich an deinen eigenen Maßstäben – realistisch und nüchtern.',
-      uranus: 'Ein Impuls, dich anders zu zeigen als gewohnt, taucht auf.',
-      neptune: 'Dein Selbstbild wird weicher; Inspiration und Zweifel liegen nah beieinander.',
-      pluto: 'Fragen nach Macht, Kontrolle und echter Veränderung berühren dein Selbstverständnis.',
-      asc: 'Das Licht fällt auf dein Auftreten – andere nehmen dich heute deutlicher wahr.',
-      mc: 'Die Sonne beleuchtet deine Ziele und deine Rolle im Beruf.',
-    },
-    mercury: {
-      sun: 'Du willst heute sagen und verstehen, wer du bist.',
-      moon: 'Was du fühlst, will formuliert werden – Gespräche gehen heute in die Tiefe.',
-      mercury: 'Dein Denken dreht sich um sich selbst: Pläne, Notizen, Rückschau.',
-      venus: 'Worte werden charmanter; ein Moment für Diplomatie und Gespräche über Geld oder Werte.',
-      mars: 'Gedanken werden schnell und Worte scharf – Debatten und Entschlüsse gewinnen an Tempo.',
-      jupiter: 'Du siehst das große Bild und schmiedest Pläne; die Details kommen später.',
-      saturn: 'Du denkst gründlich und konzentriert; Zahlen, Verträge und Fakten stehen im Vordergrund.',
-      uranus: 'Blitzideen und unkonventionelle Lösungen – das Denken springt.',
-      neptune: 'Ahnungen, Bilder und Zwischentöne bestimmen das Denken; harte Fakten sind schwerer zu greifen.',
-      pluto: 'Du willst hinter die Fassade blicken; Gespräche können bohrend werden.',
-      asc: 'Wie du dich ausdrückst, prägt heute deinen Eindruck auf andere.',
-      mc: 'Kommunikation im Beruf steht an: Absprachen, Präsentationen, Bewerbungen.',
-    },
-    venus: {
-      sun: 'Du kommst heute leichter an und gönnst dir selbst mehr Anerkennung.',
-      moon: 'Weichheit, Zärtlichkeit und der Wunsch nach Geborgenheit – zu Hause fühlt es sich schön an.',
-      mercury: 'Gespräche werden charmanter; ein guter Moment für Diplomatie und Verhandlungen.',
-      venus: 'Deine Themen Liebe und Werte leuchten auf – frag dich, was dir gerade guttut.',
-      mars: 'Anziehung und Begehren; Flirt und Leidenschaft, aber auch Reibung zwischen Nähe und Eigenständigkeit.',
-      jupiter: 'Lebensfreude und Großzügigkeit; Genuss ist möglich, ebenso leicht das Zuviel.',
-      saturn: 'Beziehungen und Finanzen werden nüchtern auf Verlässlichkeit geprüft.',
-      uranus: 'Überraschende Begegnungen, plötzliche Anziehung oder der Wunsch nach mehr Freiheit in Beziehungen.',
-      neptune: 'Romantische Sehnsucht und Idealisierung – schön, aber prüfe, was Wunsch und was Wirklichkeit ist.',
-      pluto: 'Beziehungen werden intensiver: tiefe Verbundenheit, aber auch Besitzdenken oder Eifersucht.',
-      asc: 'Du wirkst heute einnehmender und attraktiver als sonst.',
-      mc: 'Charme und Diplomatie helfen dir beruflich; ein guter Tag für Repräsentation.',
-    },
-    mars: {
-      sun: 'Tatendrang und Energie steigen, ebenso das Bedürfnis, dich durchzusetzen.',
-      moon: 'Emotionen entladen sich schneller – Gereiztheit oder Leidenschaft.',
-      mercury: 'Debattierlust und schnelle Entscheidungen; Worte treffen schärfer als gedacht.',
-      venus: 'Begehren und Durchsetzung in Beziehungen – gefragt ist die Balance zwischen Nähe und Eigenständigkeit.',
-      mars: 'Dein Antrieb verdichtet sich: Du weißt genau, was du willst.',
-      jupiter: 'Mut zu großen Schritten, aber auch Risikofreude und Übermut.',
-      saturn: 'Gas und Bremse zugleich: Ausdauer wird verlangt, Frust ist möglich.',
-      uranus: 'Unberechenbare Energie – plötzliche Aktionen, Ungeduld und Hektik.',
-      neptune: 'Der Antrieb verpufft leicht; Kraft fließt ins Unklare, wenn Ziele fehlen.',
-      pluto: 'Enorme Kraft, aber auch Machtkämpfe – lenke sie in ein großes Vorhaben.',
-      asc: 'Du trittst energisch und direkt auf.',
-      mc: 'Ehrgeiz meldet sich – beruflich willst du vorankommen.',
-    },
-    jupiter: {
-      sun: 'Dein Vertrauen in dich selbst wächst – ein Tag für Zuversicht und Erweiterung.',
-      moon: 'Emotionale Fülle und Geborgenheit; Großzügigkeit dir selbst und anderen gegenüber.',
-      mercury: 'Der Blick weitet sich; Lernen, Planen und Veröffentlichen gelingen.',
-      venus: 'Liebe, Freundschaft und Genuss werden reicher – Einladungen und Geschenke sind möglich.',
-      mars: 'Tatkraft mit Rückenwind; große Vorhaben wollen gestartet werden.',
-      jupiter: 'Ein Wachstumszyklus schließt sich – Zeit, Bilanz zu ziehen und neu zu wachsen.',
-      saturn: 'Wachstum und Vorsicht müssen sich verständigen: solide Erweiterung statt Risiko.',
-      uranus: 'Überraschende Chancen; plötzlich öffnen sich Türen.',
-      neptune: 'Ideale und Vertrauen sind stark – Glaube ohne Prüfung kann täuschen.',
-      pluto: 'Große Wandlungschancen; Einfluss und Einsatz wachsen.',
-      asc: 'Du wirkst offen, zuversichtlich und gewinnend.',
-      mc: 'Berufliche Chancen und Anerkennung sind möglich – gut für den nächsten Karriereschritt.',
-    },
-    saturn: {
-      sun: 'Du spürst, was du wirklich leisten kannst und willst – Ernsthaftigkeit statt Zerstreuung.',
-      moon: 'Gefühle wollen Struktur; du übernimmst Verantwortung für deine eigenen Bedürfnisse.',
-      mercury: 'Gründliches, sorgfältiges Denken; Entscheidungen brauchen Fakten.',
-      venus: 'Liebe und Geld werden nüchtern auf Verbindlichkeit geprüft.',
-      mars: 'Gas und Bremse zugleich: Ausdauer wird verlangt, Frust ist möglich.',
-      jupiter: 'Erwartungen und Realität werden abgeglichen; Wachstum gibt es nur mit Substanz.',
-      saturn: 'Ein Lebenszyklus erreicht einen Meilenstein – Zeit für Bilanz und neue Verantwortung.',
-      uranus: 'Struktur und Freiheit ringen miteinander: Altes bricht, Neues muss tragfähig werden.',
-      neptune: 'Träume werden auf Machbarkeit geprüft; Ideale brauchen Form.',
-      pluto: 'Tiefer Druck und harte Realität, aber auch enorme Standfestigkeit.',
-      asc: 'Du wirkst ernster und reservierter; Auftreten und Körper verlangen Beachtung.',
-      mc: 'Berufliche Verantwortung und Reifeprüfung – Leistung wird gemessen.',
-    },
-    uranus: {
-      sun: 'Ein Impuls zur Selbstbefreiung: Der Wunsch, aus alten Rollen auszubrechen, wird stärker.',
-      moon: 'Das Gefühlsleben ist unruhig; du brauchst mehr Freiheit zu Hause und in Beziehungen.',
-      mercury: 'Ungewöhnliche Ideen – das Denken bricht aus gewohnten Bahnen aus.',
-      venus: 'Beziehungen und Werte werden neu definiert; plötzliche Anziehung oder Distanz.',
-      mars: 'Unberechenbare Energie – Impulsivität und plötzliche Aktionen.',
-      jupiter: 'Überraschende Chancen und mutige Neuorientierung.',
-      saturn: 'Alte Strukturen geraten ins Wanken.',
-      uranus: 'Ein tiefer Wunsch nach Erneuerung deines Lebensentwurfs meldet sich.',
-      neptune: 'Persönliche Visionen und kollektive Sehnsüchte verschmelzen; neue Ideale entstehen.',
-      pluto: 'Tiefe Umbrüche in Lebensweise und Werten – Erneuerung von innen.',
-      asc: 'Du wirkst unberechenbarer und individueller; ein neues Auftreten liegt in der Luft.',
-      mc: 'Berufliche Umbrüche und plötzliche Wendungen; der Wunsch nach mehr Autonomie wächst.',
-    },
-    neptune: {
-      sun: 'Dein Selbstbild wird durchlässig – Inspiration, aber auch Orientierungslosigkeit.',
-      moon: 'Empfindsamkeit, Träume und Hellhörigkeit – schütze dich vor Überflutung.',
-      mercury: 'Fantasie und Intuition; Details und klare Absprachen geraten leicht ins Schwimmen.',
-      venus: 'Romantische Sehnsucht, Hingabe und Idealisierung.',
-      mars: 'Der Antrieb wird diffus; Kraft fließt in Fantasie oder Rückzug.',
-      jupiter: 'Große Ideale und Glaubensfragen – Vorsicht vor Selbsttäuschung und Übermaß.',
-      saturn: 'Träume treffen auf Realität: Ernüchterung oder ein tragfähiger Neubau.',
-      uranus: 'Visionen und Umbruch verschmelzen.',
-      neptune: 'Eine spirituelle Neuorientierung und die Suche nach Sinn.',
-      pluto: 'Tiefe Strömungen lösen Altes auf und wandeln es.',
-      asc: 'Du wirkst weicher und schwer greifbar; andere projizieren auf dich.',
-      mc: 'Berufliche Ziele werden diffus oder inspiriert – Berufung oder Orientierungslosigkeit.',
-    },
-    pluto: {
-      sun: 'Identität und Macht werden von Grund auf hinterfragt – Wandlung ist möglich.',
-      moon: 'Tiefe emotionale Prozesse; alte Verletzungen und Bindungen treten hervor.',
-      mercury: 'Das Denken wird durchdringend – Besessenheit oder wichtige Erkenntnisse.',
-      venus: 'Beziehungen werden intensiv, Werte werden radikal geklärt.',
-      mars: 'Enorme Energie mit Konflikten und Machtfragen – dein Wille ist stark.',
-      jupiter: 'Überzeugungen und Ziele werden tief verwandelt.',
-      saturn: 'Strukturen werden abgebaut und neu gegossen.',
-      uranus: 'Ein radikaler Umbruch.',
-      neptune: 'Tiefe Auflösung und spirituelle Wandlung.',
-      asc: 'Auftreten und Selbstbild wandeln sich; du wirkst intensiver.',
-      mc: 'Berufliche Neuausrichtung – Macht, Verantwortung, Ende und Anfang.',
-    },
-  };
-  // Pluto -> Pluto ergänzt
-  THEME.pluto.pluto = 'Eine grundlegende Transformation deines Lebensweges.';
 
   // Wie der laufende Planet im betroffenen Haus wirkt
   const INTO = {
@@ -453,7 +311,7 @@
       : `Im Mittelpunkt steht ${ACC[focus]}.`);
     let rel = null;
     if (bg) {
-      parts.push(`Im Hintergrund läuft ${name(bg.transit)} ${bg.aspect.phrase} ${DEIN[bg.natal]}: ${THEME[bg.transit][bg.natal]}`);
+      parts.push(`Im Hintergrund läuft ${name(bg.transit)} ${bg.aspect.phrase} ${DEIN[bg.natal]}: ${themeFor(bg.transit, bg.natal, bg.tone)}`);
       if (trig) {
         const bgTone = bg.tone === 'V' ? (bg.value < 0 ? 'H' : 'F') : bg.tone;
         rel = trig.tone === 'V' ? 'fuse' : trig.tone === 'F' ? (bgTone === 'H' ? 'soften' : 'boost') : (bgTone === 'H' ? 'sharpen' : 'disturb');
@@ -464,11 +322,11 @@
       }
     } else {
       const lead = top[0];
-      parts.push(`${THEME[lead.transit][lead.natal]} ${TRANSIT[lead.transit][lead.tone]}`);
+      parts.push(`${themeFor(lead.transit, lead.natal, lead.tone)} ${TRANSIT[lead.transit][lead.tone]}`);
       rest.splice(0, 1);
     }
     const conns = ['Zugleich wirkt', 'Dazu kommt'];
-    rest.forEach((a, i) => parts.push(`${conns[i]} ${name(a.transit)} ${a.aspect.phrase} ${DEIN[a.natal]}: ${THEME[a.transit][a.natal]}`));
+    rest.forEach((a, i) => parts.push(`${conns[i]} ${name(a.transit)} ${a.aspect.phrase} ${DEIN[a.natal]}: ${themeFor(a.transit, a.natal, a.tone)}`));
     return { text: parts.join(' '), advice: rel ? REL_ADVICE[rel] : null, relation: rel };
   }
 
@@ -535,7 +393,7 @@
     const top = aspects.slice(0, 6).map((a) => ({
       ...a,
       title: `${A.PLANET_NAMES[a.transit]} ${a.aspect.symbol} ${A.PLANET_NAMES[a.natal]}`,
-      text: `${THEME[a.transit][a.natal]} ${TRANSIT[a.transit][a.tone]}`,
+      text: `${themeFor(a.transit, a.natal, a.tone)} ${TRANSIT[a.transit][a.tone]}`,
       details: details(a, natal, transit, ruler, nAsp, opts),
     }));
 
@@ -814,11 +672,11 @@
       const bgTone = bg.tone === 'V' ? (bg.value < 0 ? 'H' : 'F') : bg.tone;
       if (bgTone === 'H') p1.push(`Was raus will, ist ${NEED[bg.natal]}. Zurückgehalten wird es von ${HOLD[bg.transit]}.`);
       else p1.push(`${cap(NEED[bg.natal])} findet heute Unterstützung, getragen von ${SUPPORT[bg.transit]}.`);
-      p1.push(THEME[bg.transit][bg.natal]);
+      p1.push(themeFor(bg.transit, bg.natal, bg.tone));
       if (trig) rel = trig.tone === 'V' ? 'fuse' : trig.tone === 'F' ? (bgTone === 'H' ? 'soften' : 'boost') : (bgTone === 'H' ? 'sharpen' : 'disturb');
     } else {
       const lead = sel.top[0];
-      p1.push(THEME[lead.transit][lead.natal]);
+      p1.push(themeFor(lead.transit, lead.natal, lead.tone));
     }
     paras.push(p1.join(' '));
 
@@ -828,13 +686,8 @@
     const inDay = (t) => t && t >= bounds[0] && t <= bounds[1];
     const items = [];
     const isSame = (e, a) => a && e.transit === a.transit && e.natal === a.natal && e.aspect.angle === a.aspect.angle;
-    // Tonabhängiger Satz zu einem Ereignis: Bedürfnis + Hemmnis bzw. Halt
-    const eventLine = (e) => {
-      if (e.transit === 'moon') return THEME.moon[e.natal]; // Mondkontakte färben die Stimmung
-      if (e.tone === 'H') return `${cap(NEED[e.natal])} – zurückgehalten von ${HOLD[e.transit]}.`;
-      if (e.tone === 'F') return `${cap(NEED[e.natal])} – getragen von ${SUPPORT[e.transit]}.`;
-      return `${cap(NEED[e.natal])} steht im Mittelpunkt.`;
-    };
+    // Paarspezifischer, tonabhängiger Satz zu einem Ereignis
+    const eventLine = (e) => themeFor(e.transit, e.natal, e.tone);
     if (bg && trig) {
       const t = canTime ? A.exactTime(trig.transit, trig.natalLon, trig.aspect.angle, opts.when) : null;
       const when = inDay(t) ? whenPhrase(t, opts) : 'im Lauf des Tages';
@@ -935,7 +788,7 @@
     });
   }
 
-  const api = { dailyHoroscope, natalProfile, natalAspectLines, rhythm, THEME, hash };
+  const api = { dailyHoroscope, natalProfile, natalAspectLines, rhythm, themeFor, hash };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Interpret = api;
 })(typeof window !== 'undefined' ? window : globalThis);
