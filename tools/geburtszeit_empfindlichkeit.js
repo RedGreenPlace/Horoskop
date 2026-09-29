@@ -9,7 +9,7 @@ const base = (() => { // Ortszeit -> UTC über Intl
   const off = (ms) => { const p = new Intl.DateTimeFormat('en-US', { timeZone: zone, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' }).formatToParts(new Date(ms)).reduce((o, x) => (o[x.type] = +x.value, o), {}); return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - ms; };
   return new Date(t - off(t - off(t)));
 })();
-const chart = (shift) => A.natalChart(new Date(base.getTime() + shift * 60000), +lat, +lon);
+const chart = (shift) => A.natalChart(new Date(base.getTime() + shift * 60000), +lat, +lon, true);
 const day = (natal, i) => {
   const w = new Date(Date.UTC(2026, 8, 1 + i, 17, 0));
   const h = I.dailyHoroscope(natal, A.planetPositions(w), `s${i}`, { when: w, timeZone: zone });

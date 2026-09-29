@@ -1,7 +1,7 @@
 // Wie oft ändert sich die Deutung, wenn alle laufenden Planeten um ein paar Hundertstel/Zehntel Grad verschoben werden?
 const A = require('../js/astro.js');
 const I = require('../js/interpret.js');
-const natal = A.natalChart(new Date(Date.UTC(1996, 2, 2, 2, 15)), 51.5364, 7.2228);
+const natal = A.natalChart(new Date(Date.UTC(1996, 2, 2, 2, 15)), 51.5364, 7.2228, true);
 const N = 120;
 let rnd = 99; const rand = () => (rnd = (rnd * 1664525 + 1013904223) % 4294967296) / 4294967296;
 const run = (i, eps) => {

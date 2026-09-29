@@ -1,7 +1,7 @@
 // Misst die Wiederholung der Klartexte über 60 aufeinanderfolgende Tage.
 const A = require('../js/astro.js');
 const I = require('../js/interpret.js');
-const natal = A.natalChart(new Date(Date.UTC(1996, 2, 2, 2, 15)), 51.5364, 7.2228);
+const natal = A.natalChart(new Date(Date.UTC(1996, 2, 2, 2, 15)), 51.5364, 7.2228, true);
 const N = 60, texts = [], firsts = [], heads = [];
 for (let i = 0; i < N; i++) {
   const w = new Date(Date.UTC(2026, 8, 1 + i, 17, 0));

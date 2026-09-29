@@ -708,6 +708,15 @@
   }
 
   // Durchgehender Text: Worum es geht, was hochwill, was es hält, wann es sich löst, Tagesverlauf, Ausblick
+  // Die genaue Uhrzeit nennen wir nur, wenn sie sich bei ±15 Minuten Unsicherheit der Geburtszeit um höchstens
+  // 30 Minuten verschiebt. Aszendent und MC wandern 15° pro Stunde, der Mond etwa 0,5° pro Stunde.
+  function exactTimeReliable(a, natal, transit) {
+    if (!natal.timeKnown) return false;
+    const perHour = { asc: 15, mc: 15, moon: 0.55 }[a.natal] || 0.04;
+    const speed = Math.max(Math.abs(transit[a.transit].speed), 0.05);
+    return (perHour * 0.25 / speed) * 1440 <= 30;
+  }
+
   // Stufe des Hintergrundeinflusses: Höhepunkt / nah / weit, je anlaufend oder abklingend.
   // Der Abstand zum Höhepunkt wird aus Orbis und tatsächlicher Tagesgeschwindigkeit geschätzt.
   function stageSentence(a, speed) {
@@ -767,7 +776,7 @@
     const eventLine = (e) => themeFor(e.transit, e.natal, e.tone);
     if (bg && trig) {
       const t = canTime ? A.exactTime(trig.transit, trig.natalLon, trig.aspect.angle, opts.when) : null;
-      const when = inDay(t) ? whenPhrase(t, opts) : 'im Lauf des Tages';
+      const when = inDay(t) ? (exactTimeReliable(trig, natal, transit) ? `um ${fmtTime(t, opts)} Uhr` : whenPhrase(t, opts)) : 'im Lauf des Tages';
       const combo = [tn(bg), tn(trig)].sort().join('');
       const pairLine = Verf.pair(bg.transit, trig.transit, combo === 'HF' ? 'FH' : combo, hash(`${seed}|pair`));
       items.push({ t: inDay(t) ? t : new Date(0), when, text: `${cap(when)} ${PLAIN_TRIG[trig.transit][rel]}${pairLine ? ` ${pairLine}` : ''}` });
@@ -814,7 +823,8 @@
       }
     }
     items.sort((a, b) => a.t - b.t);
-    items.forEach((x, i) => { if (i && x.when && x.when === items[i - 1].when && x.text.startsWith(cap(x.when))) x.text = `Ebenfalls ${x.when}${x.text.slice(x.when.length)}`; });
+    let run = 0;
+    items.forEach((x, i) => { run = i && x.when && x.when === items[i - 1].when ? run + 1 : 0; if (run && x.text.startsWith(cap(x.when))) x.text = `${run === 1 ? 'Wenig später' : 'Danach'}${x.text.slice(x.when.length)}`; });
     if (items.length) paras.push(items.map((x) => x.text).join(' '));
     if (chain.length) paras.push(chain.join(' '));
     const qTone = bg ? (bg.tone === 'V' ? 'V' : bg.tone) : sel.top[0].tone;

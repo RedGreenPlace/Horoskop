@@ -21,7 +21,7 @@ for (const k of Object.keys(V.PATTERNS)) for (const d of Object.keys(V.DOMAIN)) 
   const s = V.pattern(k, d, v); assert(!/undefined|\{/.test(s), s); assert(!JARGON.test(s), s); n++;
 }
 // Integration: Text über 60 Tage ohne Fehler und ohne Fachbegriffe
-const natal = A.natalChart(new Date(Date.UTC(1996, 2, 2, 2, 15)), 51.5364, 7.2228);
+const natal = A.natalChart(new Date(Date.UTC(1996, 2, 2, 2, 15)), 51.5364, 7.2228, true);
 for (let d = 0; d < 60; d++) {
   const w = new Date(Date.UTC(2026, 8, 1 + d, 17, 0));
   const h = I.dailyHoroscope(natal, A.planetPositions(w), `s${d}`, { when: w, timeZone: 'Europe/Berlin' });

@@ -86,3 +86,16 @@ console.log(h.aspects[0].title, '\n ', h.aspects[0].text, '\n ', h.aspects[0].de
 // Klartext nennt Tageszeiten statt Uhrzeiten; exakte Zeiten stehen nur im aufklappbaren Fachteil
 assert(!/\d\d:\d\d/.test(hs.plain.text) && !/\d\d:\d\d/.test(h2.plain.text), 'Uhrzeit im Klartext');
 console.log('Tageszeit-Test bestanden');
+
+// Genaue Uhrzeit nur für den Hauptauslöser und nur, wenn sie von der Geburtszeit kaum abhängt
+{
+  const chart = A.natalChart(new Date(Date.UTC(1996, 2, 2, 2, 15)), 51.5364, 7.2228, true);
+  let exact = 0;
+  for (let i = 0; i < 120; i++) {
+    const w = new Date(Date.UTC(2026, 8, 1 + i, 17, 0));
+    const t = I.dailyHoroscope(chart, A.planetPositions(w), `d${i}`, { when: w, timeZone: 'Europe/Berlin' }).plain.text;
+    if (/Um \d\d:\d\d Uhr (wirst|heizt|kommt|hilft|helfen|geben|gibt|wird|liegen|verstärken|machen|reiben|bremst|stört|stören|sorgen|fallen|verdichten|kreist|geht|trägt)/.test(t)) exact++;
+  }
+  assert(exact > 0 && exact < 40, `exakte Auslöserzeiten: ${exact}`);
+}
+console.log('Test der Auslöser-Uhrzeit bestanden');

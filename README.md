@@ -34,5 +34,5 @@ Nur zur Unterhaltung, keine Beratung.
 ## Genauigkeit und Empfindlichkeit
 
 - `node tools/genauigkeit.js` vergleicht die Planetenberechnung mit 1.000 PyEphem-Referenzwerten (1900–2100, `data/ephem_referenz.json`, erzeugt mit `tools/referenz_erzeugen.py`): Abweichung im Mittel unter 0,03°, größter Wert Mond 0,10°. Pluto war zuvor bis 2° falsch (Sicht von der Sonne statt von der Erde) und ist korrigiert.
-- `node tools/geburtszeit_empfindlichkeit.js` zeigt, wie oft sich die Deutung bei verschobener Geburtszeit ändert (bei ±15 Minuten der erste Absatz an etwa 18 % der Tage).
+- `node tools/geburtszeit_empfindlichkeit.js` zeigt, wie oft sich die Deutung bei verschobener Geburtszeit ändert (bei ±15 Minuten ändert sich der erste Absatz an etwa 30–38 % der Tage, bei ±60 Minuten an mehr als der Hälfte).
 - `node tools/orb_empfindlichkeit.js` verschiebt alle Planeten leicht und zählt, wie oft sich der Text ändert.
