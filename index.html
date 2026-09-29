@@ -56,6 +56,17 @@
       <p id="error" class="error" role="alert" hidden></p>
     </form>
 
+    <details class="card themen-setup" id="themenSetup">
+      <summary>Meine Themen auswählen</summary>
+      <p class="hint">Unter dem Tagestext erscheint dann eine Zeile zu jedem Thema. Die Auswahl bleibt in deinem Browser.</p>
+      <label class="check"><input id="thKi" type="checkbox"> KI (Bezugsdatum: Start von ChatGPT, 30.11.2022)</label>
+      <label class="check"><input id="thKind" type="checkbox"> Mein Kind</label>
+      <div class="grid">
+        <label>Name<input id="thKindName" type="text" placeholder="Vorname"></label>
+        <label>Geburtstag<input id="thKindDate" type="date"></label>
+      </div>
+    </details>
+
     <section id="result" hidden>
       <article class="card day">
         <p class="eyebrow" id="dayLabel"></p>
@@ -64,6 +75,12 @@
         <p id="moonLine" class="moon"></p>
         <p id="notes" class="notes"></p>
         <p class="advice"><strong>Rat des Tages:</strong> <span id="advice"></span></p>
+      </article>
+
+      <article id="themenCard" class="card" hidden>
+        <h3>Meine Themen</h3>
+        <ul id="themenLines" class="profile"></ul>
+        <p id="themenNote" class="hint"></p>
       </article>
 
       <div id="areas" class="areas"></div>
@@ -99,6 +116,7 @@
   <script src="js/feinheit.js"></script>
   <script src="js/verflechtung.js"></script>
   <script src="js/fragen.js"></script>
+  <script src="js/themen.js"></script>
   <script src="js/interpret.js"></script>
   <script src="js/app.js"></script>
 </body>

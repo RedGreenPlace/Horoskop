@@ -4,6 +4,8 @@
   const I = window.Interpret;
   const $ = (id) => document.getElementById(id);
   const STORE = 'horoskop.profile.v1';
+  const THEMEN_STORE = 'horoskop.themen.v1';
+  const Th = window.Themen;
 
   // ---------- kleine DOM-Helfer (kein innerHTML, damit Ortsnamen nie als HTML gelten) ----------
   function el(tag, props, ...children) {
@@ -206,6 +208,47 @@
     $('wheel').replaceChildren(root);
   }
 
+  // ---------- Meine Themen ----------
+  let lastTransit = null;
+  function themenFromForm() {
+    const list = [];
+    if ($('thKi').checked) list.push({ type: 'ki' });
+    if ($('thKind').checked && $('thKindDate').value) {
+      const [y, m, d] = $('thKindDate').value.split('-').map(Number);
+      list.push({ type: 'kind', name: $('thKindName').value.trim() || 'Dein Kind', date: new Date(Date.UTC(y, m - 1, d, 12, 0)) });
+    }
+    return list;
+  }
+  function saveThemen() {
+    try {
+      localStorage.setItem(THEMEN_STORE, JSON.stringify({ ki: $('thKi').checked, kind: $('thKind').checked, name: $('thKindName').value, date: $('thKindDate').value }));
+    } catch (e) { /* Speicher evtl. gesperrt */ }
+  }
+  function loadThemen() {
+    try {
+      const t = JSON.parse(localStorage.getItem(THEMEN_STORE) || 'null');
+      if (!t) return;
+      $('thKi').checked = !!t.ki; $('thKind').checked = !!t.kind;
+      $('thKindName').value = t.name || ''; $('thKindDate').value = t.date || '';
+      if (t.ki || t.kind) $('themenSetup').open = true;
+    } catch (e) { /* ohne gespeicherte Auswahl starten */ }
+  }
+  function renderThemen() {
+    const topics = themenFromForm();
+    $('themenCard').hidden = !topics.length || !lastTransit;
+    if (!topics.length || !lastTransit) return;
+    const rows = [];
+    topics.forEach((t) => {
+      const found = Th.lines(t, lastTransit, 2);
+      const name = t.name || Th.TYPES[t.type].label;
+      if (found.length) found.forEach((l) => rows.push(el('li', {}, l.text)));
+      else rows.push(el('li', {}, `${name}: Heute ist nichts Auffälliges dabei.`));
+    });
+    $('themenLines').replaceChildren(...rows);
+    $('themenNote').textContent = topics.map((t) => Th.TYPES[t.type].note).join(' ') + ' Deutung als Anregung, kein Beleg.';
+  }
+  ['thKi', 'thKind', 'thKindName', 'thKindDate'].forEach((id) => $(id).addEventListener('change', () => { saveThemen(); renderThemen(); }));
+
   // ---------- Ausgabe ----------
   function render(ctx) {
     const { natal, transit, forDate, name } = ctx;
@@ -260,6 +303,8 @@
     }
     $('planetTable').replaceChildren(...rows);
 
+    lastTransit = transit;
+    renderThemen();
     drawWheel(natal, transit);
     $('result').hidden = false;
   }
@@ -312,5 +357,6 @@
 
   $('form').addEventListener('submit', submit);
   $('forDate').value = todayStr();
+  loadThemen();
   if (loadProfile()) submit(null);
 })();

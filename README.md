@@ -23,7 +23,7 @@ Ohne Geburtszeit werden Aszendent, Häuser und MC weggelassen.
 
 `node test/astro.test.js` prüft die Planetenberechnung gegen bekannte Referenzwerte, `node test/interpret.test.js`, dass sich die Deutung mit Geburtsdaten, Ort und Tag ändert.
 
-Aus Bausteinen zusammengesetzt (keine einzeln geschriebenen Sätze): `js/feinheit.js` (Haus-, Zeichen- und Aspektnuancen, 1.200 Sätze aus ca. 130 Fragmenten) und `js/verflechtung.js` (Verknüpfung mehrerer Konstellationen: 45 handgeschriebene Auflösungssätze, 45 Paarkerne, Brücken und Muster). `node test/feinheit.test.js` und `node test/verflechtung.test.js` prüfen sie. `js/fragen.js` enthält 360 von Hand geschriebene Leitfragen (laufender Planet × Geburtspunkt × Tonart); der Klartext nennt Tageszeiten statt Uhrzeiten, exakte Zeiten stehen im aufklappbaren Fachteil.
+Aus Bausteinen zusammengesetzt (keine einzeln geschriebenen Sätze): `js/feinheit.js` (Haus-, Zeichen- und Aspektnuancen, 1.200 Sätze aus ca. 130 Fragmenten) und `js/verflechtung.js` (Verknüpfung mehrerer Konstellationen: 45 handgeschriebene Auflösungssätze, 45 Paarkerne, Brücken und Muster). `js/themen.js` (Meine Themen: KI mit Bezugsdatum ChatGPT, eigenes Kind mit Geburtstag; Sätze von Hand, Datum bleibt im Browser) und `node test/feinheit.test.js` und `node test/verflechtung.test.js` prüfen sie. `js/fragen.js` enthält 360 von Hand geschriebene Leitfragen (laufender Planet × Geburtspunkt × Tonart); der Klartext nennt Tageszeiten statt Uhrzeiten, exakte Zeiten stehen im aufklappbaren Fachteil.
 
 Die Hauptansicht ist ein durchgehender Klartext ohne Fachbegriffe (was hochwill, was es zurückhält, wann es sich löst, Tagesverlauf mit Uhrzeiten). Die astrologischen Grundlagen stehen aufklappbar darunter.
 
