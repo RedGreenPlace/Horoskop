@@ -9,6 +9,7 @@
   const Themes = root.Themes || (typeof require !== 'undefined' ? require('./themes.js') : null);
   // Kombinationstext je laufendem Planet, Geburtspunkt und Tonart (F leicht, H angespannt, V verschmelzend)
   const themeFor = (t, n, tone) => Themes.themeFor(t, n, tone);
+  const Fragen = root.Fragen || (typeof require !== 'undefined' ? require('./fragen.js') : null);
   const Verf = root.Verflechtung || (typeof require !== 'undefined' ? require('./verflechtung.js') : null);
   const Fein = root.Feinheit || (typeof require !== 'undefined' ? require('./feinheit.js') : null);
 
@@ -651,12 +652,27 @@
     return out.sort((a, b) => a.t - b.t);
   }
 
+  // Tageszeit statt Uhrzeit: neun Abschnitte für den heutigen Tag, sechs für spätere Tage
+  const DAY_PARTS = [
+    [0, 5, 'in der Nacht', 'nacht'],
+    [5, 8, 'früh am Morgen', 'morgen'],
+    [8, 11, 'am Vormittag', 'vormittag'],
+    [11, 14, 'mittags', 'mittag'],
+    [14, 16, 'am frühen Nachmittag', 'nachmittag'],
+    [16, 18, 'am späten Nachmittag', 'nachmittag'],
+    [18, 20, 'am frühen Abend', 'abend'],
+    [20, 22, 'am Abend', 'abend'],
+    [22, 24, 'spät am Abend', 'nacht'],
+  ];
   function whenPhrase(t, opts) {
-    const hm = fmtTime(t, opts);
-    if (sameDay(t, opts.when, opts)) return `um ${hm} Uhr`;
+    const [h, m] = fmtTime(t, opts).split(':').map(Number);
+    const hour = h + m / 60;
+    const part = DAY_PARTS.find((x) => hour >= x[0] && hour < x[1]);
+    if (sameDay(t, opts.when, opts)) return part[2];
     const next = sameDay(t, new Date(opts.when.getTime() + 24 * 3600000), opts);
-    if (next) return +hm.slice(0, 2) < 5 ? `morgen früh um ${hm} Uhr` : `morgen um ${hm} Uhr`;
-    return `am ${t.toLocaleDateString('de-DE', { weekday: 'long', ...tzOpt(opts) })} um ${hm} Uhr`;
+    if (next) return { nacht: 'morgen früh', morgen: 'morgen früh', vormittag: 'morgen Vormittag', mittag: 'morgen Mittag', nachmittag: 'morgen Nachmittag', abend: 'morgen Abend' }[part[3]];
+    const wd = t.toLocaleDateString('de-DE', { weekday: 'long', ...tzOpt(opts) });
+    return `${wd}${part[3]}`;
   }
 
   // Zeitpunkt, an dem der Mond im Zeitfenster das Zeichen wechselt (sonst null)
@@ -801,7 +817,8 @@
     if (items.length) paras.push(items.map((x) => x.text).join(' '));
     if (chain.length) paras.push(chain.join(' '));
     const qTone = bg ? (bg.tone === 'V' ? 'V' : bg.tone) : sel.top[0].tone;
-    paras.push(`Frage an dich: ${PSYCH_NATAL[focus][qTone]}`);
+    const qSrc = bg || sel.top[0];
+    paras.push(`Frage an dich: ${Fragen.questionFor(qSrc.transit, qSrc.natal, qTone)}`);
     if (outlook) paras.push(paras.join(' ').includes(outlook.line) ? outlook.head : `${outlook.head} ${outlook.line}`);
 
     const focusHead = cap(`es geht um ${PLAIN_FOCUS[focus]}`);
