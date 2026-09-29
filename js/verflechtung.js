@@ -148,7 +148,7 @@
     brennpunkt_2h1f: ['{N} steht im Brennpunkt: Zwei Seiten drücken, eine öffnet.', 'Bei {N} kommt heute vieles zusammen: Zweimal Widerstand, aber eine Hilfe.', 'Für {N} gilt: Zwei Belastungen und eine Stütze.'],
     brennpunkt_3h: ['{N} steht im Brennpunkt: Von mehreren Seiten kommt Druck.', 'Bei {N} zieht sich heute alles zusammen, und nichts fängt es ab.', 'Für {N} gilt: Mehrere Belastungen ohne Ausgleich.'],
     brennpunkt_3f: ['{N} steht im Brennpunkt: Von mehreren Seiten kommt Unterstützung.', 'Bei {N} kommt heute vieles zusammen, und alles hilft.', 'Für {N} gilt: Mehrfacher Rückenwind.'],
-    gegensatz_bruecke: ['Zwei Seiten in dir ziehen in verschiedene Richtungen, und eine dritte Kraft hilft, sie zusammenzubringen.', 'Es gibt zwei Baustellen, aber auch eine Hand, die sie verbindet.'],
+    gegensatz_bruecke: ['Zwei Seiten in dir ziehen heute in verschiedene Richtungen, daneben gibt es auch Rückenwind.', 'Es gibt heute zwei Baustellen, aber auch etwas, das dich trägt.'],
     nur_rueckenwind: ['Heute gibt es kaum Widerstand: Vieles läuft dir zu.', 'Der Tag hat wenig Reibung und viel Unterstützung.'],
     nur_druck: ['Heute gibt es wenig Ausgleich: Du musst ihn dir selbst schaffen.', 'Der Tag hat viel Reibung und wenig Entlastung – sei nachsichtig mit dir.'],
   };

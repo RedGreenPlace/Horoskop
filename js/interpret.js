@@ -735,6 +735,7 @@
     const inDay = (t) => t && t >= bounds[0] && t <= bounds[1];
     const items = [];
     let wovenSet = [];
+    let chain = [];
     const isSame = (e, a) => a && e.transit === a.transit && e.natal === a.natal && e.aspect.angle === a.aspect.angle;
     // Paarspezifischer, tonabhängiger Satz zu einem Ereignis
     const eventLine = (e) => themeFor(e.transit, e.natal, e.tone);
@@ -747,6 +748,7 @@
       // Weitere Konstellationen verflechten: am selben Punkt per Brücke, an anderen per Auflösung
       let prev = trig;
       const woven = [];
+      chain = [];
       const seen = new Set();
       (sel.rest || []).forEach((e) => {
         if (isSame(e, trig) || isSame(e, bg)) return;
@@ -758,9 +760,9 @@
           let auf = [tn(e), tn(prev)].includes('H') ? Verf.aufloesung(e.natal, prev.natal) : null;
           if (auf && seen.has(auf)) auf = null;
           if (auf) seen.add(auf);
-          line = `Dazu kommt: ${line}${auf ? ` ${auf}` : ''}`;
+          line = `Dazu kommt heute: ${line}${auf ? ` ${auf}` : ''}`;
         }
-        items[items.length - 1].text += ` ${line}`;
+        chain.push(line);
         prev = e;
       });
       wovenSet = woven;
@@ -784,6 +786,7 @@
     }
     items.sort((a, b) => a.t - b.t);
     if (items.length) paras.push(items.map((x) => x.text).join(' '));
+    if (chain.length) paras.push(chain.join(' '));
     const qTone = bg ? (bg.tone === 'V' ? 'V' : bg.tone) : sel.top[0].tone;
     paras.push(`Frage an dich: ${PSYCH_NATAL[focus][qTone]}`);
     if (outlook) paras.push(outlook);
