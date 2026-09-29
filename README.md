@@ -24,3 +24,7 @@ Ohne Geburtszeit werden Aszendent, Häuser und MC weggelassen.
 Die Hauptansicht ist ein durchgehender Klartext ohne Fachbegriffe (was hochwill, was es zurückhält, wann es sich löst, Tagesverlauf mit Uhrzeiten). Die astrologischen Grundlagen stehen aufklappbar darunter.
 
 Nur zur Unterhaltung, keine Beratung.
+
+## Rückblick-Test (Lebensphasen)
+
+`node tools/rueckblick.js 1996-03-02 03:15 51.5364 7.2228 Europe/Berlin 5 2026-09-29` rechnet für zwölf Themen (`js/lifeevents.js`), wann langsame Planeten die dazugehörigen Geburtspunkte und Häuser berühren, und nennt die stärksten Phasen. Mit `--check 2023-05-14:partnership` lässt sich prüfen, wie stark ein Thema an einem bekannten Datum war. Der Scanner zeigt Phasen erhöhter Intensität, keine konkreten Ereignisse. `node test/lifeevents.test.js` prüft ihn.
