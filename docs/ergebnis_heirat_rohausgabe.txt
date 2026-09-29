@@ -1,0 +1,22 @@
+Rohdaten: {"personen":16458,"mehrereGeburtsdaten":102,"keineGueltigeHeirat":94} | Ereignisse nach Filter: 16262
+Stichprobe: 300 Ereignisse gespeichert in data/heirat_stichprobe.tsv (Saatkorn 20260929)
+
+ERGEBNIS: echte Heiratstermine
+  n = 300, mittlerer Rang = 0.479 (Erwartung ohne Zusammenhang: 0,500), sd = 0.284
+  95%-Bootstrap-Intervall: 0.447 bis 0.512 | z = -1.25, p (zweiseitig) = 0.211
+  Ereignisse mit Rang >= 0,90: 26 von 300 (8.7 %, erwartet 10 %), p (einseitig) ≈ 0.779
+  Verteilung der Ränge (Fünftel, gleichverteilt wäre 60 je Fünftel): 63 | 64 | 68 | 53 | 52
+
+KONTROLLE (Nullkalibrierung): zufällige Tage statt Heirat – muss um 0,500 liegen
+  n = 300, mittlerer Rang = 0.507 (Erwartung ohne Zusammenhang: 0,500), sd = 0.280
+  95%-Bootstrap-Intervall: 0.475 bis 0.538 | z = 0.42, p (zweiseitig) = 0.672
+  Ereignisse mit Rang >= 0,90: 31 von 300 (10.3 %, erwartet 10 %), p (einseitig) ≈ 0.424
+  Verteilung der Ränge (Fünftel, gleichverteilt wäre 60 je Fünftel): 55 | 57 | 70 | 59 | 59
+
+KONTROLLE (Positivkontrolle): Tage mit dem höchsten Wert – muss deutlich über 0,500 liegen
+  n = 60, mittlerer Rang = 0.977 (Erwartung ohne Zusammenhang: 0,500), sd = 0.028
+  95%-Bootstrap-Intervall: 0.969 bis 0.983 | z = 131.01, p (zweiseitig) = 0.000
+  Ereignisse mit Rang >= 0,90: 59 von 60 (98.3 %, erwartet 10 %), p (einseitig) ≈ 0.000
+  Verteilung der Ränge (Fünftel, gleichverteilt wäre 12 je Fünftel): 0 | 0 | 0 | 0 | 60
+
+Rechenzeit: 108 s
