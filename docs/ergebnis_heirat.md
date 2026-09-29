@@ -26,3 +26,8 @@ Primärer Test (Mittelwert gegen 0,5, zweiseitig): z = −1,25, p = 0,21 → **k
 - Nur Heirat, nur ein Themenwert, unverändert in der Gewichtung. Andere Techniken (Solar Arc, Solar Return, andere Gewichte) und andere Themen (Kindergeburt, Beruf, …) wurden nicht getestet.
 - Prominente sind nicht repräsentativ; Wikidata-Angaben können fehlerhaft sein.
 - Drei persönliche Ereignisse (Heirat 2020, Kindergeburt 2024) lagen ebenfalls auf Zufallsniveau; das stimmt mit diesem Ergebnis überein.
+
+
+## Nachtrag: Wiederholung nach Korrektur der Pluto-Berechnung
+
+Die Pluto-Position war zuvor bis zu 2° falsch (fehlende Umrechnung auf die Sicht von der Erde). Nach der Korrektur wurde die Prüfung mit derselben Stichprobe und demselben Saatkorn wiederholt: mittlerer Rang 0,484 (vorher 0,479), p = 0,31 (vorher 0,21). Am Ergebnis ändert sich nichts: kein Zusammenhang nachweisbar. Rohausgabe: `docs/ergebnis_heirat_rohausgabe_nach_pluto_korrektur.txt`.
