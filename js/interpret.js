@@ -751,7 +751,7 @@
     if (bg) {
       const bgTone = bg.tone === 'V' ? (bg.value < 0 ? 'H' : 'F') : bg.tone;
       if (bgTone === 'H') p1.push(`Was raus will, ist ${NEED[bg.natal]}. Zurückgehalten wird es von ${HOLD[bg.transit]}.`);
-      else p1.push(`${cap(NEED[bg.natal])}${NEED[bg.natal].includes(',') ? ',' : ''} findet heute Unterstützung, getragen von ${SUPPORT[bg.transit]}.`);
+      else p1.push(`${cap(NEED[bg.natal])}${['moon', 'uranus'].includes(bg.natal) ? '' : ','} findet heute Unterstützung, getragen von ${SUPPORT[bg.transit]}.`);
       p1.push(themeFor(bg.transit, bg.natal, bg.tone));
       const nuance = Fein.aspectNuance(bg.transit, bg.natal, bg.aspect.key);
       if (nuance) p1.push(nuance);
