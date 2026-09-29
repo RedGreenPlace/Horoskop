@@ -692,6 +692,15 @@
   }
 
   // Durchgehender Text: Worum es geht, was hochwill, was es hält, wann es sich löst, Tagesverlauf, Ausblick
+  // Stufe des Hintergrundeinflusses: Höhepunkt / nah / weit, je anlaufend oder abklingend
+  function stageSentence(a) {
+    const unit = ['sun', 'moon', 'mercury', 'venus', 'mars'].includes(a.transit) ? 'Tagen' : 'Wochen';
+    if (a.orb <= 0.25) return 'Diese Phase hat jetzt ihren Höhepunkt.';
+    const near = a.orb <= 0.5 * a.maxOrb;
+    if (a.applying) return near ? `Es läuft auf seinen Höhepunkt zu und wird in den nächsten ${unit} deutlicher.` : `Es beginnt sich erst zu zeigen und baut sich in den kommenden ${unit} auf.`;
+    return near ? `Der Höhepunkt ist gerade vorbei, es wirkt in den nächsten ${unit} noch nach.` : 'Es klingt allmählich ab, der Höhepunkt liegt hinter dir.';
+  }
+
   function plainStory(natal, all, opts, seed, transit) {
     const sel = pickStory(all);
     if (!sel) return null;
@@ -721,6 +730,7 @@
       p1.push(themeFor(bg.transit, bg.natal, bg.tone));
       const nuance = Fein.aspectNuance(bg.transit, bg.natal, bg.aspect.key);
       if (nuance) p1.push(nuance);
+      p1.push(stageSentence(bg));
       modifiers(bg, natal, transit, seed).forEach((m) => p1.push(m));
       if (trig) rel = trig.tone === 'V' ? 'fuse' : trig.tone === 'F' ? (bgTone === 'H' ? 'soften' : 'boost') : (bgTone === 'H' ? 'sharpen' : 'disturb');
     } else {

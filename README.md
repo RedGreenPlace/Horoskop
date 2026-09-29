@@ -30,3 +30,9 @@ Nur zur Unterhaltung, keine Beratung.
 ## Rückblick-Test (Lebensphasen)
 
 `node tools/rueckblick.js 1996-03-02 03:15 51.5364 7.2228 Europe/Berlin 5 2026-09-29` rechnet für zwölf Themen (`js/lifeevents.js`), wann langsame Planeten die dazugehörigen Geburtspunkte und Häuser berühren, und nennt die stärksten Phasen. Mit `--check 2023-05-14:partnership` lässt sich prüfen, wie stark ein Thema an einem bekannten Datum war. Berücksichtigt werden langsame Transite, Sonnen- und Mondfinsternisse (an 33 bekannten Terminen 2018–2026 geprüft), die fortgeschriebenen Geburtsplaneten (Sekundärprogression) und der Mondknoten; jede Phase bekommt eine psychologische Leitfrage und „typisch für so eine Phase“-Ereignisse (Beginn, Festigung, Ende, Umbruch, Plötzliches, Auflösung je Thema; eigene Zuordnung, nicht geprüft). Der Scanner zeigt Phasen erhöhter Intensität, keine konkreten Ereignisse. Nicht enthalten: Chiron, Solar Return, Mond ohne Kurs. **Prüfung:** An 300 echten Heiratsterminen (Wikidata) lag der Partnerschafts-Wert nicht höher als bei verschobenen Geburtsdaten (mittlerer Rang 0,479, p = 0,21; Prüfplan und Ergebnis in `docs/`). Der Rückblick ist deshalb als Deutung zur Selbstreflexion zu verstehen, nicht als Vorhersage. `node test/lifeevents.test.js` prüft ihn.
+
+## Genauigkeit und Empfindlichkeit
+
+- `node tools/genauigkeit.js` vergleicht die Planetenberechnung mit 1.000 PyEphem-Referenzwerten (1900–2100, `data/ephem_referenz.json`, erzeugt mit `tools/referenz_erzeugen.py`): Abweichung im Mittel unter 0,03°, größter Wert Mond 0,10°. Pluto war zuvor bis 2° falsch (Sicht von der Sonne statt von der Erde) und ist korrigiert.
+- `node tools/geburtszeit_empfindlichkeit.js` zeigt, wie oft sich die Deutung bei verschobener Geburtszeit ändert (bei ±15 Minuten der erste Absatz an etwa 18 % der Tage).
+- `node tools/orb_empfindlichkeit.js` verschiebt alle Planeten leicht und zählt, wie oft sich der Text ändert.
