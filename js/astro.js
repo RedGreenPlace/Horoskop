@@ -202,7 +202,7 @@
    */
   function natalChart(date, lat, lon, timeKnown) {
     const planets = planetPositions(date);
-    const chart = { planets, timeKnown: !!timeKnown, asc: null, mc: null };
+    const chart = { planets, timeKnown: !!timeKnown, asc: null, mc: null, birth: date };
     if (timeKnown) {
       const a = angles(date, lat, lon);
       chart.asc = a.asc;
@@ -342,10 +342,79 @@
     return best === null ? null : new Date(best);
   }
 
+  // ---------- Mondbreite, Mondknoten, Finsternisse, Fortschreibung ----------
+  // Ekliptikale Breite des Mondes (Grad), Bahnelemente nach Schlyter samt Störungsgliedern
+  function moonGeometry(d) {
+    const sun = elements('sun', d);
+    const el = elements('moon', d);
+    const mo = orbit(el);
+    const Mm = el.M;
+    const Lm = el.M + el.w + el.N;
+    const D = Lm - (sun.M + sun.w);
+    const F = Lm - el.N;
+    const lat = mo.lat - 0.173 * sind(F - 2 * D) - 0.055 * sind(Mm - F - 2 * D) - 0.046 * sind(Mm + F - 2 * D) + 0.033 * sind(F + 2 * D) + 0.017 * sind(2 * Mm + F);
+    return { lat, parallax: Math.asin(1 / mo.r) / RAD }; // Grad
+  }
+  const moonLatitude = (d) => moonGeometry(d).lat;
+
+  // Mittlerer aufsteigender Mondknoten (Nordknoten)
+  function meanNode(date) {
+    return norm(125.1228 - 0.0529538083 * daysSince2000(date));
+  }
+
+  /**
+   * Sonnen- und Mondfinsternisse im Zeitraum [from, to]. Gesucht werden Neu- und Vollmonde; bei genügend
+   * kleiner Mondbreite entsteht eine Finsternis (Sonne: |β| < 1,55°, Mond mit Kernschatten: |β| < 1,05°).
+   * Rein halbschattige Mondfinsternisse werden bewusst nicht gezählt.
+   */
+  function eclipses(from, to) {
+    const H = 3600000;
+    const step = 6 * H;
+    const out = [];
+    const elong = (ms) => {
+      const L = longitudes(daysSince2000(new Date(ms)));
+      return norm(L.moon - L.sun);
+    };
+    let t = from.getTime() - 2 * 24 * H;
+    let prev = elong(t);
+    for (t += step; t <= to.getTime() + 2 * 24 * H; t += step) {
+      const cur = elong(t);
+      [[0, 'solar'], [180, 'lunar']].forEach(([target, kind]) => {
+        const a = diff180(prev, target);
+        const b = diff180(cur, target);
+        if (a < 0 && b >= 0 && Math.abs(a) < 30 && Math.abs(b) < 30) {
+          let lo = t - step;
+          let hi = t;
+          for (let k = 0; k < 25; k++) {
+            const mid = (lo + hi) / 2;
+            if (diff180(elong(mid), target) < 0) lo = mid; else hi = mid;
+          }
+          const tm = (lo + hi) / 2;
+          const d = daysSince2000(new Date(tm));
+          const { lat, parallax: pi } = moonGeometry(d);
+          // Grenzbreite: Sonnenfinsternis = Halbschatten trifft die Erde; Mondfinsternis = Mond berührt den Kernschatten
+          const limit = kind === 'solar' ? 0.2642 + 1.2725 * pi : (pi - 0.2642) * 1.02 + 0.2725 * pi;
+          if (Math.abs(lat) < limit) {
+            const L = longitudes(d);
+            const date = new Date(tm);
+            if (date >= from && date <= to) out.push({ date, kind, lon: kind === 'solar' ? L.sun : L.moon, lat });
+          }
+        }
+      });
+      prev = cur;
+    }
+    return out.sort((x, y) => x.date - y.date);
+  }
+
+  // Sekundärprogression: ein Tag nach der Geburt entspricht einem Lebensjahr
+  function progressedDate(birth, when) {
+    return new Date(birth.getTime() + (when.getTime() - birth.getTime()) / 365.2422);
+  }
+
   const api = {
     SIGNS, SIGNS_IN, SIGNS_INTO, SIGN_GLYPHS, PLANETS, PLANET_NAMES, PLANET_GLYPHS, ASPECTS,
     julianDay, planetPositions, natalChart, transitAspects, natalAspects, chartRuler, distribution, exactTime, longitudeAt,
-    RULERS, ELEMENTS, QUALITIES, angles, signIndex, formatLon,
+    RULERS, ELEMENTS, QUALITIES, moonLatitude, meanNode, eclipses, progressedDate, angles, signIndex, formatLon,
     wholeSignHouse, norm, diff180,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

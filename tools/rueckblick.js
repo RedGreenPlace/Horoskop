@@ -33,8 +33,10 @@ const fmt = (x) => x.toLocaleDateString('de-DE', { day: '2-digit', month: '2-dig
 console.log(`Rückblick ${fmt(from)} bis ${fmt(to)} – Geburt ${date} ${time} (${tz})\n`);
 const ch = L.chapters(natal, from, to, { limit: 12, perTopic: 2 }).sort((a, b) => a.peak - b.peak);
 ch.forEach((c) => {
-  console.log(`${fmt(c.peak)}  ${c.label} – ${c.tone}  (Phase ${fmt(c.start)} bis ${fmt(c.end)}, Stärke ${c.strength.toFixed(2)})`);
+  const flag = (c.began ? ' (begann schon vorher)' : '') + (c.ongoing ? ' (läuft weiter)' : '');
+  console.log(`${fmt(c.peak)}  ${c.label} – ${c.tone}  (Phase ${fmt(c.start)} bis ${fmt(c.end)}${flag}, Stärke ${c.strength.toFixed(2)})`);
   c.drivers.forEach((x) => console.log(`    · ${x.text}`));
+  console.log(`    ? Innere Frage: ${c.psych}`);
 });
 checks.forEach((c) => {
   const [ds, tk] = c.split(':');

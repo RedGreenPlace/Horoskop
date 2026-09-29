@@ -43,6 +43,24 @@ const r = L.rankAt(natal, top.topic, top.peak, from, to);
 assert(r >= 0.85, 'Rang des Höhepunkts: ' + r);
 console.log('OK   Rang des stärksten Kapitels:', (r * 100).toFixed(0), '%');
 
+// Neue Bausteine: Psychologie, Finsternisse, Progression, Mondknoten
+ch.forEach((c) => assert(c.psych && c.psych.length > 20 && c.summary.includes('Innere Frage:'), 'Leitfrage fehlt'));
+assert(ch.every((c) => typeof c.began === 'boolean' && typeof c.ongoing === 'boolean'));
+assert(L.natalPoints(natal).some((p) => p.key === 'node'), 'Mondknoten fehlt');
+const ctx = L.makeCtx(natal, from, to);
+assert(ctx.eclipses.length >= 8, 'Finsternisse fehlen: ' + ctx.eclipses.length);
+const kinds = new Set();
+const pts2 = L.natalPoints(natal);
+for (let t = from.getTime(); t <= to.getTime(); t += 5 * 864e5) {
+  const d = new Date(t);
+  const c = L.contributions(natal, A.planetPositions(d), pts2, { ...ctx, date: d });
+  Object.values(c).forEach((x) => x.items.forEach((i) => kinds.add(i.kind)));
+}
+['aspect', 'eclipse', 'progression', 'house'].forEach((k) => assert(kinds.has(k), 'Beitragsart nie aufgetreten: ' + k));
+Object.values(L.PSYCH).forEach((t) => assert(t.R && t.B && t.W));
+assert.strictEqual(Object.keys(L.PSYCH).length, 12);
+console.log('OK   Beitragsarten:', [...kinds].join(', '));
+
 // Ohne Geburtszeit: läuft ohne Aszendent, MC und Häuser
 const noTime = A.natalChart(new Date(Date.UTC(1996, 2, 2, 11, 0)), 51.5364, 7.2228, false);
 const c2 = L.chapters(noTime, from, to, { limit: 5 });

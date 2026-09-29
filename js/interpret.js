@@ -590,6 +590,21 @@
       fuse: 'wird es konkret und drängt zum Handeln.',
     },
   };
+  // Psychologische Leitfrage je betroffenem Bereich und Charakter (F leicht, H angespannt, V verschmelzend)
+  const PSYCH_NATAL = {
+    sun: { F: 'Was möchtest du zeigen, wenn du sicher wärst, dass es willkommen ist?', H: 'Wessen Bild von dir versuchst du gerade zu erfüllen?', V: 'Was ist dir an dir selbst wirklich wichtig?' },
+    moon: { F: 'Was brauchst du gerade, und wem kannst du es sagen?', H: 'Welches Bedürfnis hast du zurückgehalten, damit sich niemand ärgert?', V: 'Was fühlst du, wenn du nichts erklären musst?' },
+    mercury: { F: 'Was möchtest du sagen, und wem?', H: 'Was denkst du, sprichst es aber nicht aus?', V: 'Welcher Gedanke kreist, und was will er dir sagen?' },
+    venus: { F: 'Wo darfst du dir Gutes gönnen, ohne Gegenleistung?', H: 'Was erwartest du von anderen, ohne es auszusprechen?', V: 'Was ist dir in Beziehungen wirklich wichtig?' },
+    mars: { F: 'Wofür lohnt sich deine Kraft?', H: 'Worüber bist du wütend, ohne es zuzugeben?', V: 'Was willst du wirklich – und traust du dich, dafür einzustehen?' },
+    jupiter: { F: 'Was würdest du wagen, wenn es gelingen dürfte?', H: 'Wo versprichst du dir mehr, als du selbst gibst?', V: 'Worauf hoffst du wirklich?' },
+    saturn: { F: 'Welche Verantwortung trägst du gern?', H: 'Welche Pflicht trägst du, die nicht deine ist?', V: 'Was trägt dich, wenn du ehrlich zu dir bist?' },
+    uranus: { F: 'Was möchtest du anders machen als bisher?', H: 'Wovon möchtest du dich befreien, und was hält dich?', V: 'Was fühlt sich gerade eng an?' },
+    neptune: { F: 'Wovon träumst du, und was wäre ein erster kleiner Schritt?', H: 'Was möchtest du nicht genau ansehen?', V: 'Wonach sehnst du dich, ohne es zu benennen?' },
+    pluto: { F: 'Was darfst du loslassen, weil du es nicht mehr brauchst?', H: 'Was kontrollierst du, weil du Angst hast, es zu verlieren?', V: 'Was will sich in dir wandeln?' },
+    asc: { F: 'Wie möchtest du wirken?', H: 'Was zeigst du nach außen, und was fühlst du wirklich?', V: 'Wie erlebt dich dein Umfeld gerade?' },
+    mc: { F: 'Wohin soll es beruflich gehen?', H: 'Was erwartest du beruflich von dir, und woher kommt das?', V: 'Was möchtest du in der Welt bewirken?' },
+  };
   const PLAIN_TONE = { F: 'Das geht leicht von der Hand.', H: 'Das kostet Kraft.', V: 'Das lässt sich nicht übergehen.' };
   const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
 
@@ -712,6 +727,8 @@
     }
     items.sort((a, b) => a.t - b.t);
     if (items.length) paras.push(items.map((x) => x.text).join(' '));
+    const qTone = bg ? (bg.tone === 'V' ? 'V' : bg.tone) : sel.top[0].tone;
+    paras.push(`Frage an dich: ${PSYCH_NATAL[focus][qTone]}`);
     if (outlook) paras.push(outlook);
 
     const focusHead = cap(`es geht um ${PLAIN_FOCUS[focus]}`);

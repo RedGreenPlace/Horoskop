@@ -47,4 +47,22 @@ assert.strictEqual(dist.qualities.reduce((x, y) => x + y, 0), dist.total);
 const na = A.natalAspects(ch);
 assert(na.length > 0 && na.every((e) => e.orb <= e.maxOrb));
 assert(na.every((e) => !(['uranus', 'neptune', 'pluto'].includes(e.a) && ['uranus', 'neptune', 'pluto'].includes(e.b))));
+// Finsternisse 2018–2026: bekannte Termine erkannt, keine halbschattigen Mondfinsternisse (Ausnahme unten)
+const truth = {
+  solar: ['2018-02-15', '2018-07-13', '2018-08-11', '2019-01-06', '2019-07-02', '2019-12-26', '2020-06-21', '2020-12-14', '2021-06-10', '2021-12-04', '2022-04-30', '2022-10-25', '2023-04-20', '2023-10-14', '2024-04-08', '2024-10-02', '2025-03-29', '2025-09-21', '2026-02-17', '2026-08-12'],
+  lunar: ['2018-01-31', '2018-07-27', '2019-01-21', '2019-07-16', '2021-05-26', '2021-11-19', '2022-05-16', '2022-11-08', '2023-10-28', '2025-03-14', '2025-09-07', '2026-03-03', '2026-08-28'],
+};
+const ecl = A.eclipses(new Date(Date.UTC(2018, 0, 1)), new Date(Date.UTC(2026, 11, 31)));
+['solar', 'lunar'].forEach((kind) => {
+  const got = ecl.filter((e) => e.kind === kind).map((e) => e.date.getTime());
+  truth[kind].forEach((t) => assert(got.some((g) => Math.abs(g - new Date(t).getTime()) <= 2 * 864e5), `Finsternis fehlt: ${kind} ${t}`));
+  got.forEach((g) => assert(truth[kind].some((t) => Math.abs(g - new Date(t).getTime()) <= 2 * 864e5) || (kind === 'lunar' && Math.abs(g - Date.UTC(2024, 8, 18)) <= 2 * 864e5), `Unerwartete Finsternis: ${kind} ${new Date(g).toISOString()}`));
+});
+console.log(`OK   Finsternisse 2018–2026: ${truth.solar.length + truth.lunar.length} bekannte erkannt, keine falschen`);
+// Mondknoten: mittlerer aufsteigender Knoten am J2000.0 = 125,0445° (Meeus)
+near('Mondknoten J2000', A.meanNode(new Date(Date.UTC(2000, 0, 1, 12, 0))), 125.0445, 0.05);
+// Progression: 30 Jahre nach der Geburt = 30 Tage nach der Geburt
+const b0 = new Date(Date.UTC(1996, 2, 2, 2, 15));
+const pd = A.progressedDate(b0, new Date(b0.getTime() + 30 * 365.2422 * 864e5));
+assert(Math.abs(pd.getTime() - (b0.getTime() + 30 * 864e5)) < 60000);
 console.log('Alle Tests bestanden');

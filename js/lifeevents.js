@@ -1,6 +1,7 @@
 /*
- * Lebensereignis-Scanner (Test): rechnet über einen Zeitraum für zwölf Themen aus, wann langsame Planeten
- * die dazugehörigen Geburtspunkte und Häuser berühren, und bündelt die stärksten Phasen zu Kapiteln.
+ * Lebensereignis-Scanner (Test): rechnet über einen Zeitraum für zwölf Themen aus, wann langsame Planeten,
+ * Finsternisse und die fortgeschriebenen Geburtsplaneten (Sekundärprogression) die dazugehörigen Geburtspunkte
+ * und Häuser berühren, und bündelt die stärksten Phasen zu Kapiteln mit Klartext und psychologischer Leitfrage.
  * Er zeigt Phasen erhöhter Intensität und ihr Thema – nicht die konkreten Ereignisse.
  */
 (function (root) {
@@ -8,30 +9,122 @@
   const A = root.Astro || (typeof require !== 'undefined' ? require('./astro.js') : null);
   const Themes = root.Themes || (typeof require !== 'undefined' ? require('./themes.js') : null);
 
-  // Nur langsame Planeten: Sonne, Merkur, Venus und Mond sind für Lebensereignisse zu kurzlebig
+  // Nur langsame Planeten: Sonne, Merkur, Venus und Mond sind als Transit für Lebensereignisse zu kurzlebig
   const TRANSIT_W = { pluto: 1, saturn: 1, uranus: 0.9, neptune: 0.8, jupiter: 0.8, mars: 0.35 };
   const ORB = { pluto: 3, saturn: 3, uranus: 3, neptune: 3, jupiter: 3, mars: 2 };
+  // Fortgeschriebene Planeten (ein Tag = ein Lebensjahr): enge Orbs, weil sie sich sehr langsam bewegen
+  const PROG_W = { sun: 0.7, moon: 0.6, mercury: 0.35, venus: 0.4, mars: 0.4 };
+  const PROG_ORB = 1;
+  const ECLIPSE_W = 1.2;
+  const ECLIPSE_ORB = 3;
+  const ECLIPSE_DAYS = 90; // Wirkdauer vor und nach einer Finsternis (linear abnehmend)
   const ASP_W = { conjunction: 1, opposition: 1, square: 0.9, trine: 0.7, sextile: 0.5 };
   const ASP_ORB = { conjunction: 1, opposition: 1, square: 0.9, trine: 0.8, sextile: 0.6 };
   const TONE = { conjunction: 'V', sextile: 'F', trine: 'F', square: 'H', opposition: 'H' };
-  const VALENCE_V = { jupiter: 0.7, saturn: -0.6, pluto: -0.5, mars: -0.4, uranus: 0, neptune: 0 };
+  const VALENCE_V = { jupiter: 0.7, saturn: -0.6, pluto: -0.5, mars: -0.4, uranus: 0, neptune: 0, sun: 0.3, moon: 0, mercury: 0, venus: 0.5, eclipse: 0 };
   const HOUSE_W = 0.35; // Grundwirkung, solange ein langsamer Planet durch ein Themenhaus zieht
-  // Für Deszendent und IC gibt es keine eigenen Texte: sinngemäß Venus (Beziehung) und Mond (Geborgenheit)
-  const TEXT_KEY = { desc: 'venus', ic: 'moon' };
+  // Für Deszendent, IC und Mondknoten gibt es keine eigenen Texte: sinngemäß Venus, Mond und Sonne
+  const TEXT_KEY = { desc: 'venus', ic: 'moon', node: 'sun' };
+  const ASPECT = {};
+  A.ASPECTS.forEach((a) => { ASPECT[a.key] = a; });
 
   const TOPICS = {
-    partnership: { label: 'Partnerschaft', examples: 'Kennenlernen, Zusammenziehen, Heirat, Trennung', targets: { venus: 1, desc: 0.9, moon: 0.6, mars: 0.4, sun: 0.4 }, houses: { 7: 1, 5: 0.4, 8: 0.4 } },
-    family: { label: 'Familie', examples: 'Kind, Tod oder Krankheit von Angehörigen, Bruch mit Eltern', targets: { moon: 1, ic: 1, sun: 0.4, saturn: 0.4, venus: 0.3 }, houses: { 4: 1, 10: 0.3 } },
-    career: { label: 'Beruf', examples: 'Jobwechsel, Kündigung, Beförderung, Selbstständigkeit', targets: { mc: 1, saturn: 0.7, sun: 0.6, jupiter: 0.5, mars: 0.3 }, houses: { 10: 1, 6: 0.5, 2: 0.3 } },
+    partnership: { label: 'Partnerschaft', examples: 'Kennenlernen, Zusammenziehen, Heirat, Trennung', targets: { venus: 1, desc: 0.9, moon: 0.6, mars: 0.4, sun: 0.4, node: 0.3 }, houses: { 7: 1, 5: 0.4, 8: 0.4 } },
+    family: { label: 'Familie', examples: 'Kind, Tod oder Krankheit von Angehörigen, Bruch mit Eltern', targets: { moon: 1, ic: 1, sun: 0.4, saturn: 0.4, venus: 0.3, node: 0.3 }, houses: { 4: 1, 10: 0.3 } },
+    career: { label: 'Beruf', examples: 'Jobwechsel, Kündigung, Beförderung, Selbstständigkeit', targets: { mc: 1, saturn: 0.7, sun: 0.6, jupiter: 0.5, mars: 0.3, node: 0.3 }, houses: { 10: 1, 6: 0.5, 2: 0.3 } },
     education: { label: 'Ausbildung', examples: 'Studium, Abschluss, Prüfung, Umschulung', targets: { mercury: 1, jupiter: 0.6, mc: 0.3, sun: 0.3 }, houses: { 3: 1, 9: 1 } },
     money: { label: 'Geld', examples: 'Erbe, große Anschaffung, Schulden, Gehaltssprung', targets: { venus: 0.8, jupiter: 0.6, saturn: 0.5, pluto: 0.4 }, houses: { 2: 1, 8: 0.8 } },
     housing: { label: 'Wohnen', examples: 'Umzug, Hauskauf, Auswandern', targets: { moon: 0.9, ic: 1, uranus: 0.3, jupiter: 0.3 }, houses: { 4: 1 } },
     health: { label: 'Gesundheit', examples: 'Krankheit, OP, Erschöpfung, Unfall', targets: { sun: 0.8, mars: 0.8, asc: 0.8, saturn: 0.5, moon: 0.3 }, houses: { 6: 1, 1: 0.5, 12: 0.4 } },
-    meaning: { label: 'Sinn und Innenleben', examples: 'Sinnkrise, spirituelle Wende, Therapie, Neuorientierung', targets: { neptune: 0.7, pluto: 0.7, sun: 0.6, moon: 0.6, saturn: 0.3 }, houses: { 12: 1, 8: 0.5, 9: 0.4 } },
+    meaning: { label: 'Sinn und Innenleben', examples: 'Sinnkrise, spirituelle Wende, Therapie, Neuorientierung', targets: { neptune: 0.7, pluto: 0.7, sun: 0.6, moon: 0.6, saturn: 0.3, node: 0.5 }, houses: { 12: 1, 8: 0.5, 9: 0.4 } },
     friends: { label: 'Freundschaften', examples: 'Neue Freunde, Bruch, Gemeinschaft', targets: { venus: 0.5, mercury: 0.5, uranus: 0.6, moon: 0.3 }, houses: { 11: 1 } },
-    identity: { label: 'Identität', examples: 'Neuer Look, neue Rolle, Namenswechsel', targets: { asc: 1, sun: 0.8, moon: 0.3, mars: 0.3 }, houses: { 1: 1 } },
+    identity: { label: 'Identität', examples: 'Neuer Look, neue Rolle, Namenswechsel', targets: { asc: 1, sun: 0.8, moon: 0.3, mars: 0.3, node: 0.4 }, houses: { 1: 1 } },
     creative: { label: 'Kreatives', examples: 'Projektstart, Veröffentlichung, Erfolg', targets: { sun: 0.7, venus: 0.7, jupiter: 0.5, mars: 0.3 }, houses: { 5: 1 } },
     conflict: { label: 'Konflikte und Recht', examples: 'Streit, Vertrag, Behörden, Prozess', targets: { mercury: 0.6, mars: 0.8, saturn: 0.5, jupiter: 0.4 }, houses: { 7: 0.5, 9: 0.5, 3: 0.3, 6: 0.3 } },
+  };
+
+  // Psychologische Leitfrage je Thema und Charakter der Phase
+  const PSYCH = {
+    partnership: {
+      R: 'Wo darfst du Nähe zulassen, ohne dich zu verstellen?',
+      B: 'Wie viel Nähe hältst du aus, ohne dich zu verlieren – und was passiert, wenn du sie einforderst?',
+      W: 'Welches Beziehungsmuster hat dir gedient, und welches darf enden?',
+    },
+    family: {
+      R: 'Was haben dir die Menschen, aus denen du kommst, mitgegeben, das dich trägt?',
+      B: 'Welche alte Rolle in deiner Familie trägst du noch, obwohl sie dir nicht mehr passt?',
+      W: 'Wo endet Loyalität, und wo beginnt dein eigenes Zuhause?',
+    },
+    career: {
+      R: 'Was würdest du tun, wenn du dir mehr zutrauen würdest?',
+      B: 'Arbeitest du für Anerkennung, für Sicherheit oder für etwas, das dir wirklich wichtig ist?',
+      W: 'Was bedeutet Erfolg für dich – und wessen Maßstab misst du gerade?',
+    },
+    education: {
+      R: 'Was möchtest du wirklich verstehen, nicht nur bestehen?',
+      B: 'Welche Angst vor dem Scheitern hält dich davon ab, dich zu zeigen?',
+      W: 'Welches Wissen oder welche Fähigkeit fehlt dir für den nächsten Schritt?',
+    },
+    money: {
+      R: 'Wofür ist Geld für dich da – für Sicherheit, Freiheit oder Genuss?',
+      B: 'Welches Gefühl von Mangel oder Kontrolle steckt hinter deinen Geldentscheidungen?',
+      W: 'Was bist du dir wert – unabhängig von dem, was du besitzt?',
+    },
+    housing: {
+      R: 'Was braucht ein Ort, damit du dich dort zu Hause fühlst?',
+      B: 'Läufst du von etwas weg oder auf etwas zu, wenn du über Veränderung nachdenkst?',
+      W: 'Wo gehörst du hin, und wer bestimmt das?',
+    },
+    health: {
+      R: 'Was gibt dir Kraft, und wie viel davon gönnst du dir?',
+      B: 'Welche Grenze hast du überschritten, und was will dein Körper dir damit sagen?',
+      W: 'Was in deinem Alltag darf sich ändern, damit du gesund bleibst?',
+    },
+    meaning: {
+      R: 'Was trägt dich, wenn Sicherheiten wegfallen?',
+      B: 'Wovor schützt dich deine Leere oder Erschöpfung, und was möchte gesehen werden?',
+      W: 'Welchen Glaubenssatz über dich hast du übernommen, ohne ihn zu prüfen?',
+    },
+    friends: {
+      R: 'Wo gehörst du dazu, ohne dich anzupassen?',
+      B: 'Wessen Erwartungen hast du zu lange erfüllt – und was kostet es dich, es zu lassen?',
+      W: 'Welche Beziehungen nähren dich, und welche halten nur aus Gewohnheit?',
+    },
+    identity: {
+      R: 'Welche Seite von dir zeigst du noch zu selten?',
+      B: 'Wen spielst du, um akzeptiert zu werden – und was kostet dich das?',
+      W: 'Wer möchtest du werden, jetzt wo alte Rollen nicht mehr passen?',
+    },
+    creative: {
+      R: 'Was möchtest du zeigen, wenn niemand urteilen würde?',
+      B: 'Welche Angst vor Bewertung blockiert deinen Ausdruck?',
+      W: 'Was willst du in die Welt bringen, das nur du bringen kannst?',
+    },
+    conflict: {
+      R: 'Wo darfst du klar Nein sagen, ohne eine Beziehung zu gefährden?',
+      B: 'Welcher Ärger sucht sich gerade ein Ventil, und was steckt darunter?',
+      W: 'Worum geht es dir eigentlich, wenn du streitest – ums Recht oder ums Gehörtwerden?',
+    },
+  };
+  const TONE_KEY = { 'Rückenwind': 'R', 'Belastung oder Umbruch': 'B', 'Wendepunkt': 'W' };
+
+  // Finsternis-Texte je betroffenem Geburtspunkt
+  const ECLIPSE_TEXT = {
+    sun: 'dein Selbstbild wird angestoßen – Entscheidungen zu Identität und Richtung werden fällig.',
+    moon: 'Gefühle und Bedürfnisse kommen ans Licht – Altes will verabschiedet werden.',
+    mercury: 'dein Denken verändert sich – ein Gespräch oder eine Nachricht bringt Klarheit oder Wende.',
+    venus: 'Beziehungen und Werte kommen in Bewegung – etwas wird neu bewertet.',
+    mars: 'Energie wird freigesetzt – Anlass, etwas anzupacken oder zu beenden.',
+    jupiter: 'Horizonte öffnen sich – eine Chance oder Wende bei Zielen und Überzeugungen.',
+    saturn: 'es wird geprüft, was trägt – Strukturen werden fester oder fallen weg.',
+    uranus: 'Überraschendes bricht herein – ein plötzlicher Wendepunkt.',
+    neptune: 'Gewissheiten lösen sich auf – Klarheit über Träume oder Täuschungen.',
+    pluto: 'ein Thema wird vertieft – etwas Grundlegendes endet oder beginnt.',
+    asc: 'dein Auftreten verändert sich – ein neuer Abschnitt in deiner Selbstdarstellung.',
+    desc: 'ein wichtiges Gegenüber ist betroffen – eine Beziehung verändert sich.',
+    mc: 'Beruf und Ziele kommen in Bewegung – eine berufliche Wende ist möglich.',
+    ic: 'Zuhause und Herkunft sind im Fokus – Familie und Wohnen rücken nach vorn.',
+    node: 'deine Lebensrichtung wird berührt – ein Schritt auf deinem Weg wird fällig.',
   };
 
   const DAY = 86400000;
@@ -44,16 +137,37 @@
 
   function natalPoints(natal) {
     const pts = A.PLANETS.map((k) => ({ key: k, lon: natal.planets[k].lon }));
+    if (natal.birth) pts.push({ key: 'node', lon: A.meanNode(natal.birth) });
     if (natal.timeKnown) {
       pts.push({ key: 'asc', lon: natal.asc }, { key: 'desc', lon: A.norm(natal.asc + 180) }, { key: 'mc', lon: natal.mc }, { key: 'ic', lon: A.norm(natal.mc + 180) });
     }
     return pts;
   }
 
-  // Alle Beiträge (Aspekte und Haus-Grundwirkung) zu allen Themen an einem Zeitpunkt
-  function contributions(natal, pos, pts) {
+  // Alte Tageswörter in Phasen-Sprache umsetzen
+  function phaseWording(t) {
+    return t
+      .replace(/\bheute\b/g, 'derzeit')
+      .replace(/Ein emotional intensiver Tag/g, 'Eine emotional intensive Zeit')
+      .replace(/Ein nüchterner, ernster Tag/g, 'Eine nüchterne, ernste Zeit')
+      .replace(/Ein Tag, der/g, 'Eine Zeit, die')
+      .replace(/ein Tag, an dem/g, 'eine Zeit, in der')
+      .replace(/ein guter Tag/g, 'eine gute Zeit');
+  }
+
+  function add(out, tk, v, valence, item) {
+    out[tk].total += v;
+    out[tk].net += v * valence;
+    if (item) out[tk].items.push({ ...item, value: v });
+  }
+
+  // Alle Beiträge (Transite, Finsternisse, Progressionen, Haus-Grundwirkung) zu allen Themen an einem Zeitpunkt
+  function contributions(natal, pos, pts, ctx) {
     const out = {};
     Object.keys(TOPICS).forEach((k) => { out[k] = { total: 0, net: 0, items: [] }; });
+    const topicKeys = Object.keys(TOPICS);
+
+    // Langsame Transitplaneten
     Object.keys(TRANSIT_W).forEach((tp) => {
       const lon = pos[tp].lon;
       pts.forEach((pt) => {
@@ -65,43 +179,97 @@
           const tone = TONE[asp.key];
           const valence = tone === 'F' ? 1 : tone === 'H' ? -1 : VALENCE_V[tp];
           const base = TRANSIT_W[tp] * ASP_W[asp.key] * (1 - orb / maxOrb);
-          Object.keys(TOPICS).forEach((tk) => {
+          topicKeys.forEach((tk) => {
             const w = shareOf(tk, pt.key);
-            if (!w) return;
-            const v = base * w;
-            out[tk].total += v;
-            out[tk].net += v * valence;
-            out[tk].items.push({ kind: 'aspect', transit: tp, natal: pt.key, aspect: asp, orb, tone, value: v });
+            if (w) add(out, tk, base * w, valence, { kind: 'aspect', transit: tp, natal: pt.key, aspect: asp, tone });
           });
         });
       });
       if (natal.timeKnown) {
         const h = A.wholeSignHouse(lon, natal.asc);
-        Object.keys(TOPICS).forEach((tk) => {
+        topicKeys.forEach((tk) => {
           const w = TOPICS[tk].houses[h];
-          if (!w) return;
-          const v = HOUSE_W * TRANSIT_W[tp] * w;
-          out[tk].total += v;
-          out[tk].items.push({ kind: 'house', transit: tp, house: h, value: v });
+          if (w) add(out, tk, HOUSE_W * TRANSIT_W[tp] * w, 0, { kind: 'house', transit: tp, house: h });
         });
       }
     });
+
+    // Finsternisse wirken rund 90 Tage vor und nach dem Termin
+    (ctx.eclipses || []).forEach((e) => {
+      const days = Math.abs(ctx.date - e.date) / DAY;
+      if (days > ECLIPSE_DAYS) return;
+      const decay = 1 - days / ECLIPSE_DAYS;
+      pts.forEach((pt) => {
+        ['conjunction', 'opposition', 'square'].forEach((key) => {
+          const orb = Math.abs(Math.abs(A.diff180(e.lon, pt.lon)) - ASPECT[key].angle);
+          if (orb > ECLIPSE_ORB) return;
+          const base = ECLIPSE_W * ASP_W[key] * (1 - orb / ECLIPSE_ORB) * decay;
+          const tone = TONE[key];
+          topicKeys.forEach((tk) => {
+            const w = shareOf(tk, pt.key);
+            if (w) add(out, tk, base * w, tone === 'H' ? -1 : 0, { kind: 'eclipse', transit: 'eclipse', eclipseKind: e.kind, natal: pt.key, aspect: ASPECT[key], tone });
+          });
+        });
+      });
+      if (natal.timeKnown) {
+        const h = A.wholeSignHouse(e.lon, natal.asc);
+        topicKeys.forEach((tk) => {
+          const w = TOPICS[tk].houses[h];
+          if (w) add(out, tk, HOUSE_W * ECLIPSE_W * w * decay, 0, { kind: 'house', transit: 'eclipse', house: h });
+        });
+      }
+    });
+
+    // Fortgeschriebene Planeten (Sekundärprogression)
+    if (natal.birth) {
+      const prog = A.planetPositions(A.progressedDate(natal.birth, ctx.date));
+      Object.keys(PROG_W).forEach((body) => {
+        const lon = prog[body].lon;
+        pts.forEach((pt) => {
+          const sep = Math.abs(A.diff180(lon, pt.lon));
+          A.ASPECTS.forEach((asp) => {
+            const orb = Math.abs(sep - asp.angle);
+            if (orb > PROG_ORB) return;
+            const tone = TONE[asp.key];
+            const valence = tone === 'F' ? 1 : tone === 'H' ? -1 : VALENCE_V[body];
+            const base = PROG_W[body] * ASP_W[asp.key] * (1 - orb / PROG_ORB);
+            topicKeys.forEach((tk) => {
+              const w = shareOf(tk, pt.key);
+              if (w) add(out, tk, base * w, valence, { kind: 'progression', transit: body, natal: pt.key, aspect: asp, tone });
+            });
+          });
+        });
+      });
+      if (natal.timeKnown) {
+        const h = A.wholeSignHouse(prog.moon.lon, natal.asc); // emotionaler Schwerpunkt der letzten Jahre
+        topicKeys.forEach((tk) => {
+          const w = TOPICS[tk].houses[h];
+          if (w) add(out, tk, HOUSE_W * 0.6 * w, 0, { kind: 'house', transit: 'progressed', house: h });
+        });
+      }
+    }
     return out;
+  }
+
+  function makeCtx(natal, from, to) {
+    const eclipses = A.eclipses(new Date(from.getTime() - (ECLIPSE_DAYS + 5) * DAY), new Date(to.getTime() + (ECLIPSE_DAYS + 5) * DAY));
+    return { eclipses };
   }
 
   function scan(natal, from, to, stepDays) {
     stepDays = stepDays || 2;
     const pts = natalPoints(natal);
+    const base = makeCtx(natal, from, to);
     const dates = [];
     const series = {};
     Object.keys(TOPICS).forEach((k) => { series[k] = []; });
     for (let t = from.getTime(); t <= to.getTime(); t += stepDays * DAY) {
       const d = new Date(t);
-      const c = contributions(natal, A.planetPositions(d), pts);
+      const c = contributions(natal, A.planetPositions(d), pts, { ...base, date: d });
       dates.push(d);
       Object.keys(TOPICS).forEach((k) => series[k].push(c[k].total));
     }
-    return { dates, series };
+    return { dates, series, ctx: base };
   }
 
   function smooth(a, w) {
@@ -118,31 +286,36 @@
     return s[Math.min(s.length - 1, Math.floor(p * s.length))];
   };
 
-  function describePeak(natal, pts, topicKey, date) {
-    const c = contributions(natal, A.planetPositions(date), pts)[topicKey];
+  function driverText(x) {
+    const key = TEXT_KEY[x.natal] || x.natal;
+    if (x.kind === 'eclipse') return `${x.eclipseKind === 'solar' ? 'Eine Sonnenfinsternis (Neubeginn)' : 'Eine Mondfinsternis (Abschluss)'}: ${ECLIPSE_TEXT[x.natal]}`;
+    const t = phaseWording(Themes.themeFor(x.transit, key, x.tone));
+    return x.kind === 'progression' ? `Innere Reifung: ${t}` : t;
+  }
+
+  function describePeak(natal, pts, topicKey, date, ctx) {
+    const c = contributions(natal, A.planetPositions(date), pts, { ...ctx, date })[topicKey];
     const net = c.total ? c.net / c.total : 0;
     const tone = net > 0.25 ? 'Rückenwind' : net < -0.25 ? 'Belastung oder Umbruch' : 'Wendepunkt';
     const seen = new Set();
-    const drivers = c.items.filter((x) => x.kind === 'aspect').sort((a, b) => b.value - a.value).filter((x) => {
-      const key = x.transit + x.natal;
+    const drivers = c.items.filter((x) => x.kind !== 'house').sort((a, b) => b.value - a.value).filter((x) => {
+      const key = `${x.kind}|${x.transit}|${x.natal}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
-    }).slice(0, 2).map((x) => ({
-      transit: x.transit, natal: x.natal, aspect: x.aspect.key, tone: x.tone,
-      text: Themes.themeFor(x.transit, TEXT_KEY[x.natal] || x.natal, x.tone),
-    }));
+    }).slice(0, 2).map((x) => ({ kind: x.kind, transit: x.transit, natal: x.natal, aspect: x.aspect.key, tone: x.tone, text: driverText(x) }));
     return { tone, drivers };
   }
 
   /**
    * Kapitel: die stärksten Phasen pro Thema, vergleichbar gemacht über das 90. Perzentil des jeweiligen Themas.
    * opts: { topics: [Schlüssel], perTopic: 3, limit: 10, minStrength: 1 }
+   * Erwartet natal.birth (wird von Astro.natalChart gesetzt) für Progressionen und Mondknoten.
    */
   function chapters(natal, from, to, opts) {
     opts = opts || {};
     const topics = opts.topics || Object.keys(TOPICS);
-    const { dates, series } = scan(natal, from, to, 2);
+    const { dates, series, ctx } = scan(natal, from, to, 2);
     const pts = natalPoints(natal);
     const all = [];
     topics.forEach((tk) => {
@@ -164,8 +337,14 @@
         while (r < sm.length - 1 && sm[r + 1] >= 0.5 * sm[i]) r++;
         const strength = sm[i] / p90;
         if (strength < (opts.minStrength === undefined ? 1 : opts.minStrength)) return;
-        const d = describePeak(natal, pts, tk, dates[i]);
-        all.push({ topic: tk, label: TOPICS[tk].label, peak: dates[i], start: dates[l], end: dates[r], strength, tone: d.tone, drivers: d.drivers });
+        const d = describePeak(natal, pts, tk, dates[i], ctx);
+        const psych = PSYCH[tk][TONE_KEY[d.tone]];
+        all.push({
+          topic: tk, label: TOPICS[tk].label, peak: dates[i], start: dates[l], end: dates[r], strength,
+          began: l === 0, ongoing: r === sm.length - 1, // Phase beginnt vor bzw. endet nach dem betrachteten Zeitraum
+          tone: d.tone, drivers: d.drivers, psych,
+          summary: `${TOPICS[tk].label} – ${d.tone}: ${d.drivers.map((x) => x.text).join(' ')} Innere Frage: ${psych}`,
+        });
       });
     });
     all.sort((a, b) => b.strength - a.strength);
@@ -174,13 +353,13 @@
 
   // Wie stark ist ein Thema an einem Tag im Vergleich zum ganzen Zeitraum? (0 = niedrigster, 1 = höchster Tag)
   function rankAt(natal, topicKey, date, from, to) {
-    const { series } = scan(natal, from, to, 2);
-    const v = contributions(natal, A.planetPositions(date), natalPoints(natal))[topicKey].total;
+    const { series, ctx } = scan(natal, from, to, 2);
+    const v = contributions(natal, A.planetPositions(date), natalPoints(natal), { ...ctx, date })[topicKey].total;
     const s = series[topicKey];
     return s.filter((x) => x < v).length / s.length;
   }
 
-  const api = { TOPICS, scan, chapters, rankAt, contributions, natalPoints };
+  const api = { TOPICS, PSYCH, scan, chapters, rankAt, contributions, natalPoints, makeCtx };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.LifeEvents = api;
 })(typeof window !== 'undefined' ? window : globalThis);

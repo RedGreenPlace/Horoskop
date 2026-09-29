@@ -78,5 +78,8 @@ const h2 = I.dailyHoroscope(herne, A.planetPositions(w2), 'x', { when: w2, timeZ
 assert(/Im Lauf des Tages wird es leichter/.test(h2.plain.text) && !/Am Sonntag/.test(h2.plain.text), h2.plain.text);
 assert(/Um 21:28 Uhr/.test(h2.plain.text) && /Um 16:42 Uhr wechselt die Grundstimmung/.test(h2.plain.text), h2.plain.text);
 assert(!/undefined|NaN/.test(h2.plain.text));
+// Psychologische Leitfrage im Klartext (ohne Fachbegriffe)
+assert(/Frage an dich: /.test(hs.plain.text) && /Frage an dich: /.test(h2.plain.text), 'Leitfrage fehlt');
+assert(!JARGON.test(h2.plain.text), 'Fachbegriff im Klartext von heute');
 console.log('Interpretationstests bestanden');
 console.log(h.aspects[0].title, '\n ', h.aspects[0].text, '\n ', h.aspects[0].details.join('\n  '));
