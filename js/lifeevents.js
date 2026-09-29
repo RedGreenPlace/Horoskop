@@ -371,6 +371,7 @@
     if (natal.birth) {
       const prog = A.planetPositions(A.progressedDate(natal.birth, ctx.date));
       Object.keys(PROG_W).forEach((body) => {
+        if (body === 'moon' && ctx.skipProgMoon) return; // ohne Geburtszeit ist der fortgeschriebene Mond zu ungenau
         const lon = prog[body].lon;
         pts.forEach((pt) => {
           const sep = Math.abs(A.diff180(lon, pt.lon));
