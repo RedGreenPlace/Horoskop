@@ -758,7 +758,7 @@
           let auf = [tn(e), tn(prev)].includes('H') ? Verf.aufloesung(e.natal, prev.natal) : null;
           if (auf && seen.has(auf)) auf = null;
           if (auf) seen.add(auf);
-          line = `${['Dazu kommt:', 'Außerdem wirkt mit:', 'Nebenbei meldet sich noch etwas:'][hash(`${seed}|l${woven.length}`) % 3]} ${line}${auf ? ` ${auf}` : ''}`;
+          line = `Dazu kommt: ${line}${auf ? ` ${auf}` : ''}`;
         }
         items[items.length - 1].text += ` ${line}`;
         prev = e;
