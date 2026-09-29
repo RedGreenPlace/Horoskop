@@ -528,7 +528,7 @@
     saturn: 'das Gefühl, zu viel Verantwortung zu tragen',
     uranus: 'der Drang nach Freiheit und Veränderung',
     neptune: 'eine Sehnsucht, die du nicht recht benennen kannst',
-    pluto: 'ein tiefes Thema, das du lange festhältst',
+    pluto: 'etwas, das du lange festhältst und nicht loslässt',
     asc: 'der Wunsch, anders aufzutreten, als du es gewohnt bist',
     mc: 'der Wunsch, beruflich mehr zu bewirken und anerkannt zu werden',
   };
@@ -552,8 +552,8 @@
     venus: 'Wärme und Charme', mercury: 'klaren Worten', sun: 'Selbstvertrauen', moon: 'einer guten Grundstimmung',
   };
   const REL_HEAD = {
-    soften: 'Spannung, die sich löst', sharpen: 'Spannung, die sich zuspitzt', disturb: 'Störfeuer in einem guten Lauf',
-    boost: 'Rückenwind', fuse: 'ein Thema, das nicht loslässt',
+    soften: 'eine Anspannung lässt nach', sharpen: 'die Anspannung nimmt zu', disturb: 'ein guter Lauf wird gestört',
+    boost: 'vieles läuft dir zu', fuse: 'ein Thema, das nicht loslässt',
   };
   // Auslöser im Klartext; davor steht die Uhrzeit („Um 21:22 Uhr …“)
   const PLAIN_TRIG = {
@@ -699,7 +699,7 @@
     const cands = [];
     if (natal.timeKnown) cands.push(Fein.transitHouse(bg.transit, A.wholeSignHouse(t.lon, natal.asc), v));
     if (np && np.house) cands.push(Fein.natalHouse(bg.natal, np.house, v));
-    cands.push(Fein.transitSign(bg.transit, A.signIndex(t.lon), v));
+    if (['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'].includes(bg.transit)) cands.push(Fein.transitSign(bg.transit, A.signIndex(t.lon), v));
     if (np) cands.push(Fein.natalSign(bg.natal, np.sign, v));
     const list = cands.filter(Boolean);
     if (!list.length) return [];
@@ -770,7 +770,7 @@
       const when = inDay(t) ? whenPhrase(t, opts) : 'im Lauf des Tages';
       const combo = [tn(bg), tn(trig)].sort().join('');
       const pairLine = Verf.pair(bg.transit, trig.transit, combo === 'HF' ? 'FH' : combo, hash(`${seed}|pair`));
-      items.push({ t: inDay(t) ? t : new Date(0), text: `${cap(when)} ${PLAIN_TRIG[trig.transit][rel]}${pairLine ? ` ${pairLine}` : ''}` });
+      items.push({ t: inDay(t) ? t : new Date(0), when, text: `${cap(when)} ${PLAIN_TRIG[trig.transit][rel]}${pairLine ? ` ${pairLine}` : ''}` });
       // Weitere Konstellationen verflechten: am selben Punkt per Brücke, an anderen per Auflösung
       let prev = trig;
       const woven = [];
@@ -802,9 +802,9 @@
       eventsBetween(natal, A.PLANETS, ds, de, 2.2)
         .filter((e) => !isSame(e, trig) && !isSame(e, bg) && !wovenSet.some((w) => isSame(e, w)))
         .sort((a, b) => b.weight * upcoming(b) - a.weight * upcoming(a)).slice(0, 5)
-        .forEach((e) => items.push({ t: e.t, text: `${cap(whenPhrase(e.t, opts))}: ${eventLine(e)}` }));
+        .forEach((e) => items.push({ t: e.t, when: whenPhrase(e.t, opts), text: `${cap(whenPhrase(e.t, opts))}: ${eventLine(e)}` }));
       const ing = moonIngress(ds, de);
-      if (ing) items.push({ t: ing.time, text: `${cap(whenPhrase(ing.time, opts))} wechselt die Grundstimmung: ${SIGN_STYLE[ing.sign]}.` });
+      if (ing) items.push({ t: ing.time, when: whenPhrase(ing.time, opts), text: `${cap(whenPhrase(ing.time, opts))} wechselt die Grundstimmung: ${SIGN_STYLE[ing.sign]}.` });
       const next = eventsBetween(natal, ['sun', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'], de, new Date(de.getTime() + 72 * 3600000), 4);
       const o = next.sort((a, b) => b.weight - a.weight)[0];
       if (o) {
@@ -814,6 +814,7 @@
       }
     }
     items.sort((a, b) => a.t - b.t);
+    items.forEach((x, i) => { if (i && x.when && x.when === items[i - 1].when && x.text.startsWith(cap(x.when))) x.text = `Ebenfalls ${x.when}${x.text.slice(x.when.length)}`; });
     if (items.length) paras.push(items.map((x) => x.text).join(' '));
     if (chain.length) paras.push(chain.join(' '));
     const qTone = bg ? (bg.tone === 'V' ? 'V' : bg.tone) : sel.top[0].tone;
@@ -823,7 +824,7 @@
 
     const focusHead = cap(`es geht um ${PLAIN_FOCUS[focus]}`);
     return {
-      headline: `${focusHead}: ${rel ? REL_HEAD[rel] : 'ein Thema, das dich begleitet'}`,
+      headline: `${focusHead} – ${rel ? REL_HEAD[rel] : 'ein Thema, das dich begleitet'}`,
       text: paras.join('\n\n'),
       advice: rel ? REL_ADVICE[rel] : null,
     };

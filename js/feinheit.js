@@ -44,15 +44,15 @@
     venus: [(l) => `Harmonie und Genuss suchen sich vor allem ${l} ihren Platz.`, (l) => `Zuwendung und Wertschätzung sind vor allem ${l} ein Thema.`],
     mars: [(l) => `Tempo und mögliche Konflikte wirken vor allem ${l}.`, (l) => `Deine Kraft und Ungeduld zeigen sich vor allem ${l}.`],
     jupiter: [(l) => `Wachstum und Zuversicht öffnen vor allem ${l} neue Türen.`, (l) => `Chancen und Zuversicht zeigen sich vor allem ${l}.`],
-    saturn: [(l) => `Ernst und Prüfung liegen vor allem ${l}.`, (l) => `Verantwortung und Geduld sind vor allem ${l} gefragt.`],
+    saturn: [(l) => `Vor allem ${l} wird es ernst, und du wirst auf die Probe gestellt.`, (l) => `Verantwortung und Geduld sind vor allem ${l} gefragt.`],
     uranus: [(l) => `Überraschung und Freiheitsdrang mischen vor allem ${l} auf.`, (l) => `Plötzliches und Ungewohntes tritt vor allem ${l} auf.`],
-    neptune: [(l) => `Inspiration und Nebel liegen vor allem ${l} dicht beisammen.`, (l) => `Träume und Zweifel drehen sich vor allem um das, was ${l} geschieht.`],
-    pluto: [(l) => `Der Wandel wirkt vor allem ${l}.`, (l) => `Tiefe Veränderung arbeitet vor allem ${l}.`],
+    neptune: [(l) => `Vor allem ${l} liegen Inspiration und Unklarheit dicht beieinander.`, (l) => `Träume und Zweifel betreffen vor allem das, was ${l} geschieht.`],
+    pluto: [(l) => `Ein tiefer Wandel spielt sich vor allem ${l} ab.`, (l) => `Was sich grundlegend verändern will, zeigt sich vor allem ${l}.`],
   };
 
   // Geburtspunkt in einem Haus
   const NH = {
-    sun: [(l) => `Dein Wesenskern will sich vor allem ${l} zeigen.`, (l) => `Hier will sich dein Wesenskern zeigen: ${l}.`],
+    sun: [(l) => `Du willst dich vor allem ${l} zeigen.`, (l) => `Dein Bedürfnis, gesehen zu werden, liegt vor allem ${l}.`],
     moon: [(l) => `Deine Gefühle suchen Halt vor allem ${l}.`, (l) => `Geborgenheit suchst du vor allem ${l}.`],
     mercury: [(l) => `Dein Denken kreist bei dir vor allem ${l}.`, (l) => `Dein Kopf ist vor allem ${l} beschäftigt.`],
     venus: [(l) => `Was dir wichtig ist, suchst du vor allem ${l}.`, (l) => `Nähe und Wertschätzung sind dir vor allem ${l} wichtig.`],
@@ -61,26 +61,26 @@
     saturn: [(l) => `Deine Verantwortung liegt vor allem ${l}.`, (l) => `Ernst und Pflicht spürst du vor allem ${l}.`],
     uranus: [(l) => `Dein Freiheitsdrang meldet sich vor allem ${l}.`, (l) => `Aus der Reihe tanzen willst du vor allem ${l}.`],
     neptune: [(l) => `Deine Sehnsucht und Intuition zeigen sich vor allem ${l}.`, (l) => `Träumen und Mitfühlen liegt dir vor allem ${l}.`],
-    pluto: [(l) => `Deine Tiefe zeigt sich vor allem ${l}.`, (l) => `Was dich tief bewegt, liegt vor allem ${l}.`],
+    pluto: [(l) => `Kontrolle und Loslassen sind dir vor allem ${l} ein großes Thema.`, (l) => `Was dich tief bewegt, liegt vor allem ${l}.`],
   };
 
   // Laufender Planet in einem Zeichen
   const TS = {
-    sun: [(m) => `Die Tagesenergie wirkt ${m}.`, (m) => `Die Tagesenergie kommt ${m} daher.`],
-    moon: [(m) => `Die Stimmung wirkt ${m}.`, (m) => `Gefühle zeigen sich ${m}.`],
+    sun: [(m) => `Die Grundstimmung des Tages wirkt ${m}.`, (m) => `Der Tag fühlt sich ${m} an.`],
+    moon: [(m) => `Die Stimmung ist ${m}.`, (m) => `Gefühle zeigen sich heute ${m}.`],
     mercury: [(m) => `Das Denken arbeitet ${m}.`, (m) => `Gedanken und Worte fließen ${m}.`],
-    venus: [(m) => `Das Miteinander läuft ${m}.`, (m) => `Zuwendung und Genuss zeigen sich ${m}.`],
-    mars: [(m) => `Der Antrieb äußert sich ${m}.`, (m) => `Der Antrieb geht ${m} zur Sache.`],
-    jupiter: [(m) => `Das Wachstum zeigt sich ${m}.`, (m) => `Zuversicht äußert sich ${m}.`],
-    saturn: [(m) => `Die Prüfung zeigt sich ${m}.`, (m) => `Die Strenge zeigt sich ${m}.`],
-    uranus: [(m) => `Der Umbruch zeigt sich ${m}.`, (m) => `Die Unruhe zeigt sich ${m}.`],
-    neptune: [(m) => `Die Sehnsucht zeigt sich ${m}.`, (m) => `Die Träume wirken ${m}.`],
-    pluto: [(m) => `Der Wandel zeigt sich ${m}.`, (m) => `Die Tiefe wirkt ${m}.`],
+    venus: [(m) => `Im Miteinander geht es heute ${m} zu.`, (m) => `Zuwendung und Genuss zeigen sich ${m}.`],
+    mars: [(m) => `Dein Antrieb ist heute ${m}.`, (m) => `Der Antrieb geht ${m} zur Sache.`],
+    jupiter: [(m) => `Große Ideen und Chancen wirken heute ${m}.`, (m) => `Zuversicht äußert sich ${m}.`],
+    saturn: [(m) => `Pflichten und Grenzen wirken heute ${m}.`, (m) => `Die Strenge des Tages zeigt sich ${m}.`],
+    uranus: [(m) => `Der Wunsch nach Veränderung ist heute ${m}.`, (m) => `Unruhe und Freiheitsdrang zeigen sich ${m}.`],
+    neptune: [(m) => `Sehnsüchte und Träume wirken heute ${m}.`, (m) => `Deine Intuition arbeitet ${m}.`],
+    pluto: [(m) => `Ein tiefer Wandel im Hintergrund wirkt ${m}.`, (m) => `Was sich in dir verändern will, tut das ${m}.`],
   };
 
   // Geburtspunkt in einem Zeichen
   const NS = {
-    sun: [(m) => `Dein Wesenskern zeigt sich ${m}.`, (m) => `Du selbst wirkst ${m}.`],
+    sun: [(m) => `Dein Wesen ist ${m}.`, (m) => `Du selbst wirkst ${m}.`],
     moon: [(m) => `Deine Gefühle zeigen sich ${m}.`, (m) => `Was du brauchst, verlangst du ${m}.`],
     mercury: [(m) => `Dein Denken und Sprechen wirkt ${m}.`, (m) => `Du denkst und redest ${m}.`],
     venus: [(m) => `In Liebe und Genuss bist du ${m}.`, (m) => `Zuneigung zeigst du ${m}.`],
@@ -89,7 +89,7 @@
     saturn: [(m) => `Deine Verantwortung trägst du ${m}.`, (m) => `Pflicht nimmst du ${m}.`],
     uranus: [(m) => `Dein Freiheitsdrang äußert sich ${m}.`, (m) => `Freiheit forderst du ${m}.`],
     neptune: [(m) => `Deine Sehnsucht zeigt sich ${m}.`, (m) => `Träumen und Mitfühlen tust du ${m}.`],
-    pluto: [(m) => `Deine Tiefe wirkt ${m}.`, (m) => `Was tief in dir liegt, wirkt ${m}.`],
+    pluto: [(m) => `Mit Kontrolle und Loslassen gehst du ${m} um.`, (m) => `Wenn dich etwas tief berührt, reagierst du ${m}.`],
   };
 
   // Aspektart: Opposition = im Gegenüber; Sextil = Chance, die man ergreifen muss
