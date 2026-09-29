@@ -747,6 +747,7 @@
       // Weitere Konstellationen verflechten: am selben Punkt per Brücke, an anderen per Auflösung
       let prev = trig;
       const woven = [];
+      const seen = new Set();
       (sel.rest || []).forEach((e) => {
         if (isSame(e, trig) || isSame(e, bg)) return;
         woven.push(e);
@@ -754,7 +755,9 @@
         let line = themeFor(e.transit, e.natal, e.tone);
         if (e.natal === prev.natal && r !== 'fuse') line = `${Verf.bridge(r, e.natal, hash(`${seed}|b${woven.length}`))} ${line}`;
         else {
-          const auf = [tn(e), tn(prev)].includes('H') ? Verf.aufloesung(e.natal, prev.natal) : null;
+          let auf = [tn(e), tn(prev)].includes('H') ? Verf.aufloesung(e.natal, prev.natal) : null;
+          if (auf && seen.has(auf)) auf = null;
+          if (auf) seen.add(auf);
           line = `${['Dazu kommt:', 'Außerdem wirkt mit:', 'Nebenbei meldet sich noch etwas:'][hash(`${seed}|l${woven.length}`) % 3]} ${line}${auf ? ` ${auf}` : ''}`;
         }
         items[items.length - 1].text += ` ${line}`;
