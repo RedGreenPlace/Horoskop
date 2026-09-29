@@ -8,7 +8,7 @@ OUT="${1:?Ausgabedatei fehlt}"
 FROM="${2:-1880}"
 TO="${3:-1995}"
 : > "$OUT"
-for Y in $(seq "$FROM" "$TO"); do
+for Y in ${YEARS:-$(seq "$FROM" "$TO")}; do # YEARS="1950 1961 ..." ruft nur diese Geburtsjahre ab
   Q="SELECT ?p ?b ?d WHERE {
     ?p wdt:P31 wd:Q5.
     ?p p:P569 ?bs. ?bs psv:P569 ?bv. ?bv wikibase:timeValue ?b; wikibase:timePrecision 11; wikibase:timeCalendarModel wd:Q1985727.
