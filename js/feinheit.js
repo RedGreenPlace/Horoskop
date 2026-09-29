@@ -71,11 +71,11 @@
     mercury: [(m) => `Das Denken arbeitet ${m}.`, (m) => `Gedanken und Worte fließen ${m}.`],
     venus: [(m) => `Das Miteinander läuft ${m}.`, (m) => `Zuwendung und Genuss zeigen sich ${m}.`],
     mars: [(m) => `Der Antrieb äußert sich ${m}.`, (m) => `Der Antrieb geht ${m} zur Sache.`],
-    jupiter: [(m) => `Das Wachstum kommt ${m}.`, (m) => `Zuversicht äußert sich ${m}.`],
-    saturn: [(m) => `Die Prüfung kommt ${m}.`, (m) => `Die Strenge kommt ${m}.`],
-    uranus: [(m) => `Der Umbruch kommt ${m}.`, (m) => `Die Unruhe kommt ${m}.`],
+    jupiter: [(m) => `Das Wachstum zeigt sich ${m}.`, (m) => `Zuversicht äußert sich ${m}.`],
+    saturn: [(m) => `Die Prüfung zeigt sich ${m}.`, (m) => `Die Strenge zeigt sich ${m}.`],
+    uranus: [(m) => `Der Umbruch zeigt sich ${m}.`, (m) => `Die Unruhe zeigt sich ${m}.`],
     neptune: [(m) => `Die Sehnsucht zeigt sich ${m}.`, (m) => `Die Träume wirken ${m}.`],
-    pluto: [(m) => `Der Wandel kommt ${m}.`, (m) => `Die Tiefe wirkt ${m}.`],
+    pluto: [(m) => `Der Wandel zeigt sich ${m}.`, (m) => `Die Tiefe wirkt ${m}.`],
   };
 
   // Geburtspunkt in einem Zeichen

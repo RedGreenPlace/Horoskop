@@ -655,7 +655,7 @@
     const hm = fmtTime(t, opts);
     if (sameDay(t, opts.when, opts)) return `um ${hm} Uhr`;
     const next = sameDay(t, new Date(opts.when.getTime() + 24 * 3600000), opts);
-    if (next && +hm.slice(0, 2) < 5) return `in der Nacht um ${hm} Uhr`;
+    if (next) return +hm.slice(0, 2) < 5 ? `morgen früh um ${hm} Uhr` : `morgen um ${hm} Uhr`;
     return `am ${t.toLocaleDateString('de-DE', { weekday: 'long', ...tzOpt(opts) })} um ${hm} Uhr`;
   }
 
@@ -692,13 +692,13 @@
   }
 
   // Durchgehender Text: Worum es geht, was hochwill, was es hält, wann es sich löst, Tagesverlauf, Ausblick
-  // Stufe des Hintergrundeinflusses: Höhepunkt / nah / weit, je anlaufend oder abklingend
-  function stageSentence(a) {
-    const unit = ['sun', 'moon', 'mercury', 'venus', 'mars'].includes(a.transit) ? 'Tagen' : 'Wochen';
-    if (a.orb <= 0.25) return 'Diese Phase hat jetzt ihren Höhepunkt.';
-    const near = a.orb <= 0.5 * a.maxOrb;
-    if (a.applying) return near ? `Es läuft auf seinen Höhepunkt zu und wird in den nächsten ${unit} deutlicher.` : `Es beginnt sich erst zu zeigen und baut sich in den kommenden ${unit} auf.`;
-    return near ? `Der Höhepunkt ist gerade vorbei, es wirkt in den nächsten ${unit} noch nach.` : 'Es klingt allmählich ab, der Höhepunkt liegt hinter dir.';
+  // Stufe des Hintergrundeinflusses: Höhepunkt / nah / weit, je anlaufend oder abklingend.
+  // Der Abstand zum Höhepunkt wird aus Orbis und tatsächlicher Tagesgeschwindigkeit geschätzt.
+  function stageSentence(a, speed) {
+    const days = a.orb / Math.max(Math.abs(speed || 0), 0.002);
+    if (days <= 3) return 'Diese Phase hat jetzt ihren Höhepunkt.';
+    if (days <= 30) return a.applying ? 'Diese Phase läuft auf ihren Höhepunkt zu und wird in den nächsten Wochen deutlicher.' : 'Diese Phase hat ihren Höhepunkt gerade hinter sich und wirkt noch einige Wochen nach.';
+    return a.applying ? 'Diese Phase baut sich über die kommenden Monate erst auf.' : 'Diese Phase klingt über die kommenden Monate ab, der Höhepunkt liegt schon hinter dir.';
   }
 
   function plainStory(natal, all, opts, seed, transit) {
@@ -726,11 +726,11 @@
     if (bg) {
       const bgTone = bg.tone === 'V' ? (bg.value < 0 ? 'H' : 'F') : bg.tone;
       if (bgTone === 'H') p1.push(`Was raus will, ist ${NEED[bg.natal]}. Zurückgehalten wird es von ${HOLD[bg.transit]}.`);
-      else p1.push(`${cap(NEED[bg.natal])} findet heute Unterstützung, getragen von ${SUPPORT[bg.transit]}.`);
+      else p1.push(`${cap(NEED[bg.natal])}${NEED[bg.natal].includes(',') ? ',' : ''} findet heute Unterstützung, getragen von ${SUPPORT[bg.transit]}.`);
       p1.push(themeFor(bg.transit, bg.natal, bg.tone));
       const nuance = Fein.aspectNuance(bg.transit, bg.natal, bg.aspect.key);
       if (nuance) p1.push(nuance);
-      p1.push(stageSentence(bg));
+      p1.push(stageSentence(bg, transit[bg.transit].speed));
       modifiers(bg, natal, transit, seed).forEach((m) => p1.push(m));
       if (trig) rel = trig.tone === 'V' ? 'fuse' : trig.tone === 'F' ? (bgTone === 'H' ? 'soften' : 'boost') : (bgTone === 'H' ? 'sharpen' : 'disturb');
     } else {
@@ -762,6 +762,8 @@
       const seen = new Set();
       (sel.rest || []).forEach((e) => {
         if (isSame(e, trig) || isSame(e, bg)) return;
+        const raw = themeFor(e.transit, e.natal, e.tone);
+        if (p1.some((x) => x.includes(raw)) || chain.some((x) => x.includes(raw))) return;
         woven.push(e);
         const r = e.tone === 'V' ? 'fuse' : tn(e) === 'F' ? (tn(prev) === 'H' ? 'soften' : 'boost') : (tn(prev) === 'H' ? 'sharpen' : 'disturb');
         let line = themeFor(e.transit, e.natal, e.tone);
@@ -770,7 +772,7 @@
           let auf = [tn(e), tn(prev)].includes('H') ? Verf.aufloesung(e.natal, prev.natal) : null;
           if (auf && seen.has(auf)) auf = null;
           if (auf) seen.add(auf);
-          line = `Dazu kommt heute: ${line}${auf ? ` ${auf}` : ''}`;
+          line = `${chain.length ? 'Außerdem' : 'Dazu kommt heute'}: ${line}${auf ? ` ${auf}` : ''}`;
         }
         chain.push(line);
         prev = e;
@@ -791,7 +793,8 @@
       const o = next.sort((a, b) => b.weight - a.weight)[0];
       if (o) {
         const head = { F: 'kommt Rückenwind', H: 'wird es zäh', V: 'rückt ein Thema in den Mittelpunkt' }[o.tone];
-        outlook = `Ausblick: ${cap(whenPhrase(o.t, { ...opts, when: de }))} ${head}. ${eventLine(o)}`;
+        const oLine = eventLine(o);
+        outlook = { head: `Ausblick: ${cap(whenPhrase(o.t, { ...opts, when: ds }))} ${head}.`, line: oLine };
       }
     }
     items.sort((a, b) => a.t - b.t);
@@ -799,7 +802,7 @@
     if (chain.length) paras.push(chain.join(' '));
     const qTone = bg ? (bg.tone === 'V' ? 'V' : bg.tone) : sel.top[0].tone;
     paras.push(`Frage an dich: ${PSYCH_NATAL[focus][qTone]}`);
-    if (outlook) paras.push(outlook);
+    if (outlook) paras.push(paras.join(' ').includes(outlook.line) ? outlook.head : `${outlook.head} ${outlook.line}`);
 
     const focusHead = cap(`es geht um ${PLAIN_FOCUS[focus]}`);
     return {

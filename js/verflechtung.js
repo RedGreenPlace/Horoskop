@@ -14,24 +14,24 @@
   // ---------- Stufe 2: Verbindungssätze ----------
   // Bereich des betroffenen Geburtspunkts in Nominativ (N) und Akkusativ (A)
   const DOMAIN = {
-    sun: { N: 'dein Selbstwert', A: 'deinen Selbstwert' },
-    moon: { N: 'dein Gefühlsleben', A: 'dein Gefühlsleben' },
-    mercury: { N: 'dein Denken', A: 'dein Denken' },
-    venus: { N: 'dein Bedürfnis nach Nähe', A: 'dein Bedürfnis nach Nähe' },
-    mars: { N: 'dein Antrieb', A: 'deinen Antrieb' },
-    jupiter: { N: 'deine Zuversicht', A: 'deine Zuversicht' },
-    saturn: { N: 'dein Verantwortungsgefühl', A: 'dein Verantwortungsgefühl' },
-    uranus: { N: 'dein Freiheitsdrang', A: 'deinen Freiheitsdrang' },
-    neptune: { N: 'deine Sehnsucht', A: 'deine Sehnsucht' },
-    pluto: { N: 'deine Tiefe', A: 'deine Tiefe' },
-    asc: { N: 'dein Auftreten', A: 'dein Auftreten' },
-    mc: { N: 'dein Weg im Beruf', A: 'deinen Weg im Beruf' },
+    sun: { N: 'dein Selbstwert', A: 'deinen Selbstwert', D: 'deinem Selbstwert' },
+    moon: { N: 'dein Gefühlsleben', A: 'dein Gefühlsleben', D: 'deinem Gefühlsleben' },
+    mercury: { N: 'dein Denken', A: 'dein Denken', D: 'deinem Denken' },
+    venus: { N: 'dein Bedürfnis nach Nähe', A: 'dein Bedürfnis nach Nähe', D: 'deinem Bedürfnis nach Nähe' },
+    mars: { N: 'dein Antrieb', A: 'deinen Antrieb', D: 'deinem Antrieb' },
+    jupiter: { N: 'deine Zuversicht', A: 'deine Zuversicht', D: 'deiner Zuversicht' },
+    saturn: { N: 'dein Verantwortungsgefühl', A: 'dein Verantwortungsgefühl', D: 'deinem Verantwortungsgefühl' },
+    uranus: { N: 'dein Freiheitsdrang', A: 'deinen Freiheitsdrang', D: 'deinem Freiheitsdrang' },
+    neptune: { N: 'deine Sehnsucht', A: 'deine Sehnsucht', D: 'deiner Sehnsucht' },
+    pluto: { N: 'deine Tiefe', A: 'deine Tiefe', D: 'deiner Tiefe' },
+    asc: { N: 'dein Auftreten', A: 'dein Auftreten', D: 'deinem Auftreten' },
+    mc: { N: 'dein Weg im Beruf', A: 'deinen Weg im Beruf', D: 'deinem Weg im Beruf' },
   };
   // Vier Formulierungen je Verhältnis (H = drückt, F = trägt); {N} und {A} werden durch den Bereich ersetzt
   const BRIDGE = {
     soften: ['Ein Stück weit fängt das {A} auf:', 'Zum Glück gibt es Halt für {A}:', 'Entlastung kommt für {A}:', 'Zugleich wird es für {A} erträglicher:'],
     sharpen: ['Verschärft wird es dadurch, dass {N} zugleich von anderer Seite berührt wird:', 'Dazu kommt weiterer Druck auf {A}:', 'Und {N} bekommt noch einen Stoß:', 'Zugleich wird {N} zusätzlich gefordert:'],
-    boost: ['Verstärkt wird das Gute dadurch, dass {N} zusätzlichen Rückenwind bekommt:', 'Zusätzlich trägt es {A}:', 'Und {N} bekommt noch Unterstützung:', 'Dazu passt, dass {N} weiteren Halt findet:'],
+    boost: ['Verstärkt wird das Gute dadurch, dass {N} zusätzlichen Rückenwind bekommt:', 'Zusätzlich trägt das {A}:', 'Und {N} bekommt noch Unterstützung:', 'Dazu passt, dass {N} weiteren Halt findet:'],
     disturb: ['Gestört wird der gute Lauf dadurch, dass {N} zugleich gefordert wird:', 'Ein Störfeuer trifft {A}:', 'Aber {N} wird zugleich von anderer Seite herausgefordert:', 'Doch für {A} gibt es auch Gegenwind:'],
   };
 
@@ -39,7 +39,7 @@
   const AUFLOESUNG = {
     'sun|moon': 'Was du sein willst und was du fühlst, muss sich nicht ausschließen: Wer beides zu Wort kommen lässt, wirkt echter.',
     'sun|mercury': 'Wer du sein willst und was du dazu sagst, passt zusammen, sobald du es aussprichst, statt es nur zu denken.',
-    'sun|venus': 'Dass du du selbst sein willst und zugleich gemocht werden möchtest, ist kein Widerspruch: Nähe trägt am längsten, wenn sie echt ist.',
+    'sun|venus': 'Dass du ganz du selbst sein willst und zugleich gemocht werden möchtest, ist kein Widerspruch: Nähe trägt am längsten, wenn sie echt ist.',
     'sun|mars': 'Dein Selbstbild und dein Antrieb ziehen an einem Strang, sobald du weißt, wofür du wirklich kämpfen willst.',
     'sun|jupiter': 'Selbstvertrauen und Zuversicht verstärken sich, solange du sie an der Wirklichkeit misst.',
     'sun|saturn': 'Dass du glänzen willst und zugleich Verantwortung trägst, ist kein Widerspruch: Ausstrahlung hat Bestand, wenn sie Boden hat.',
@@ -144,10 +144,10 @@
   // ---------- Stufe 5: Muster ----------
   // {N} = Bereich des betroffenen Punkts (Nominativ)
   const PATTERNS = {
-    brennpunkt_1h2f: ['{N} steht im Brennpunkt: Eine Seite drückt, zwei Seiten öffnen.', 'Bei {N} kommt heute alles zusammen: Ein Widerstand, aber zweimal Unterstützung.', 'Für {N} gilt: Ein Druck, dem gleich zwei Hilfen gegenüberstehen.'],
-    brennpunkt_2h1f: ['{N} steht im Brennpunkt: Zwei Seiten drücken, eine öffnet.', 'Bei {N} kommt heute vieles zusammen: Zweimal Widerstand, aber eine Hilfe.', 'Für {N} gilt: Zwei Belastungen und eine Stütze.'],
-    brennpunkt_3h: ['{N} steht im Brennpunkt: Von mehreren Seiten kommt Druck.', 'Bei {N} zieht sich heute alles zusammen, und nichts fängt es ab.', 'Für {N} gilt: Mehrere Belastungen ohne Ausgleich.'],
-    brennpunkt_3f: ['{N} steht im Brennpunkt: Von mehreren Seiten kommt Unterstützung.', 'Bei {N} kommt heute vieles zusammen, und alles hilft.', 'Für {N} gilt: Mehrfacher Rückenwind.'],
+    brennpunkt_1h2f: ['{N} steht im Brennpunkt: Eine Seite drückt, zwei Seiten öffnen.', 'Bei {D} kommt heute alles zusammen: Ein Widerstand, aber zweimal Unterstützung.', 'Für {A} gilt: Ein Druck, dem gleich zwei Hilfen gegenüberstehen.'],
+    brennpunkt_2h1f: ['{N} steht im Brennpunkt: Zwei Seiten drücken, eine öffnet.', 'Bei {D} kommt heute vieles zusammen: Zweimal Widerstand, aber eine Hilfe.', 'Für {A} gilt: Zwei Belastungen und eine Stütze.'],
+    brennpunkt_3h: ['{N} steht im Brennpunkt: Von mehreren Seiten kommt Druck.', 'Bei {D} zieht sich heute alles zusammen, und nichts fängt es ab.', 'Für {A} gilt: Mehrere Belastungen ohne Ausgleich.'],
+    brennpunkt_3f: ['{N} steht im Brennpunkt: Von mehreren Seiten kommt Unterstützung.', 'Bei {D} kommt heute vieles zusammen, und alles hilft.', 'Für {A} gilt: Mehrfacher Rückenwind.'],
     gegensatz_bruecke: ['Zwei Seiten in dir ziehen heute in verschiedene Richtungen, daneben gibt es auch Rückenwind.', 'Es gibt heute zwei Baustellen, aber auch etwas, das dich trägt.'],
     nur_rueckenwind: ['Heute gibt es kaum Widerstand: Vieles läuft dir zu.', 'Der Tag hat wenig Reibung und viel Unterstützung.'],
     nur_druck: ['Heute gibt es wenig Ausgleich: Du musst ihn dir selbst schaffen.', 'Der Tag hat viel Reibung und wenig Entlastung – sei nachsichtig mit dir.'],
@@ -156,7 +156,7 @@
   // ---------- Hilfsfunktionen ----------
   const key = (a, b) => (PLANETS.indexOf(a) <= PLANETS.indexOf(b) ? `${a}|${b}` : `${b}|${a}`);
   const domainPlanet = (n) => DOMAIN_PLANET[n] || n;
-  const fill = (tpl, n) => tpl.replace(/\{N\}/g, DOMAIN[n].N).replace(/\{A\}/g, DOMAIN[n].A);
+  const fill = (tpl, n) => tpl.replace(/\{N\}/g, DOMAIN[n].N).replace(/\{A\}/g, DOMAIN[n].A).replace(/\{D\}/g, DOMAIN[n].D);
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
   const api = {
