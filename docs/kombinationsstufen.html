@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stufen der Verflechtung und Feinheit</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #faf9f7; --fg: #1d1b20; --muted: #5f5b66; --card: #ffffff; --line: #e3e0e8;
+    --rot: 229 72 77; --blau: 62 99 221; --gruen: 48 164 108; --orange: 247 107 21; --lila: 142 78 198; --tuerkis: 18 165 148; --rosa: 214 64 159; --gelb: 200 150 0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #131217; --fg: #ece9f2; --muted: #a9a4b5; --card: #1c1a22; --line: #34303d;
+      --rot: 255 110 115; --blau: 122 150 255; --gruen: 82 205 148; --orange: 255 146 78; --lila: 190 130 245; --tuerkis: 64 210 190; --rosa: 255 120 200; --gelb: 240 200 60; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 780px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.25rem; margin: 36px 0 8px; }
+  h3 { font-size: 1.05rem; margin: 0 0 4px; }
+  p { margin: 8px 0; }
+  .muted { color: var(--muted); font-size: .92rem; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 14px 0; }
+  .tag { display: inline-block; font-size: .75rem; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); margin-right: 6px; }
+  .tag.echt { border-color: rgb(var(--gruen)); color: rgb(var(--gruen)); }
+  .tag.muster { border-color: rgb(var(--orange)); color: rgb(var(--orange)); }
+  .text { line-height: 2.15; }
+  .b { padding: 3px 5px; border-radius: 6px; border-left: 4px solid; margin-right: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .rot { background: rgb(var(--rot) / .17); border-color: rgb(var(--rot)); }
+  .blau { background: rgb(var(--blau) / .17); border-color: rgb(var(--blau)); }
+  .gruen { background: rgb(var(--gruen) / .17); border-color: rgb(var(--gruen)); }
+  .orange { background: rgb(var(--orange) / .17); border-color: rgb(var(--orange)); }
+  .lila { background: rgb(var(--lila) / .17); border-color: rgb(var(--lila)); }
+  .tuerkis { background: rgb(var(--tuerkis) / .17); border-color: rgb(var(--tuerkis)); }
+  .rosa { background: rgb(var(--rosa) / .17); border-color: rgb(var(--rosa)); }
+  .gelb { background: rgb(var(--gelb) / .2); border-color: rgb(var(--gelb)); }
+  .rotblau { background: linear-gradient(90deg, rgb(var(--rot) / .22), rgb(var(--blau) / .22)); border-image: linear-gradient(180deg, rgb(var(--rot)), rgb(var(--blau))) 1; border-left: 4px solid; }
+  .blaugruen { background: linear-gradient(90deg, rgb(var(--blau) / .22), rgb(var(--gruen) / .22)); border-image: linear-gradient(180deg, rgb(var(--blau)), rgb(var(--gruen))) 1; border-left: 4px solid; }
+  .rotblaugruen { background: linear-gradient(90deg, rgb(var(--rot) / .22), rgb(var(--blau) / .22), rgb(var(--gruen) / .22)); border-image: linear-gradient(180deg, rgb(var(--rot)), rgb(var(--blau)), rgb(var(--gruen))) 1; border-left: 4px solid; }
+  .alles { background: rgb(var(--rosa) / .14); border-color: rgb(var(--rosa)); }
+  sup.ref { font-size: .7rem; color: var(--muted); margin: 0 4px 0 1px; }
+  .key { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .key span { font-size: .88rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; margin: 10px 0; }
+  th, td { text-align: left; padding: 7px 6px; border-top: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; border-top: 0; }
+  .neu { font-weight: 600; min-width: 5.5em; }
+  table { table-layout: auto; word-break: break-word; }
+  th:nth-child(1), td:nth-child(1) { width: 22%; }
+  th:nth-child(2), td:nth-child(2) { width: 9%; }
+  .box { border-left: 4px solid rgb(var(--gruen)); padding: 6px 12px; background: rgb(var(--gruen) / .09); border-radius: 0 8px 8px 0; margin: 12px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Wie verflochten und wie fein?</h1>
+  <p class="muted">Beispiele für <strong>Sonntag, 27.09.2026, 19:00 Uhr</strong>, Herne, Geburt 02.03.1996 03:15. Zwei getrennte Achsen: <strong>Achse 1</strong> fragt, wie stark Sätze <em>miteinander</em> verbunden sind. <strong>Achse 2</strong> fragt, wie fein <em>eine einzelne</em> Konstellation beschrieben wird.</p>
+
+  <div class="card">
+    <h3>So liest du die Farben</h3>
+    <p>Ein <strong>farbiger Block</strong> ist ein Stück Text, das <strong>zusammen geschrieben</strong> wurde. Ein <strong>zweifarbiger Block</strong> behandelt zwei Konstellationen zugleich. Das Zeichen <sup class="ref">↩ rot</sup> sagt, worauf sich ein Block bezieht.</p>
+    <div class="key">
+      <span class="b rot">Rot: Pluto gegenüber deinem Mond (Dauerthema, seit Wochen)</span>
+      <span class="b blau">Blau: Sonne im Sextil zum Mond (exakt 21:22 Uhr)</span>
+      <span class="b gruen">Grün: Saturn im Quadrat zu Jupiter</span>
+      <span class="b orange">Orange: Uranus im Sextil zum Mond</span>
+    </div>
+    <p class="muted"><span class="tag echt">aus der App</span> = so schreibt die App das heute. <span class="tag muster">Muster</span> = von mir von Hand geschrieben, noch nicht in der App.</p>
+  </div>
+
+  <h2>Achse 1: Wie stark sind die Sätze miteinander verbunden?</h2>
+  <p class="muted">Am einen Ende hat jeder Satz eine eigene Farbe (nichts hängt zusammen), am anderen der ganze Text eine einzige. Dazwischen liegt, was wir bauen können.</p>
+
+  <div class="card">
+    <h3>Stufe 0: Jeder Satz allein</h3>
+    <span class="tag echt">aus der App</span> <span class="tag">neue Texte: 0</span>
+    <p class="text"><span class="b rot">Tiefe emotionale Prozesse; alte Verletzungen und Bindungen treten hervor.</span> <span class="b blau">Kopf und Herz sind einig – du weißt, was du brauchst, und kannst es aussprechen.</span> <span class="b gruen">Erwartungen und Realität passen nicht zusammen – Hoffnung stößt auf Grenzen.</span> <span class="b orange">Das Gefühlsleben ist unruhig; du brauchst mehr Freiheit zu Hause und in Beziehungen.</span></p>
+    <p class="muted">Jede Konstellation liefert einen eigenen Text. Wie sie zueinander stehen, sagt nichts. Das war der Anfang der App.</p>
+  </div>
+
+  <div class="card">
+    <h3>Stufe 1: Feste Regeln verbinden Dauerthema und Auslöser</h3>
+    <span class="tag echt">aus der App (Stand jetzt)</span> <span class="tag">neue Texte: 0</span>
+    <p class="text"><span class="b rot">Was raus will, ist das Bedürfnis nach Wärme, Anerkennung und Geborgenheit. Zurückgehalten wird es von der Angst, die Kontrolle zu verlieren oder dich auszuliefern. Tiefe emotionale Prozesse; alte Verletzungen und Bindungen treten hervor.</span> <span class="b blau">Um 21:22 Uhr wird es leichter: Was du jetzt aussprichst oder zeigst, kommt an, statt Druck zu erzeugen.<sup class="ref">↩ rot</sup></span> <span class="b gruen">Erwartungen und Realität passen nicht zusammen – Hoffnung stößt auf Grenzen.</span></p>
+    <p class="muted">Rot besteht aus drei Sätzen, die nach Regel zusammengehören. Blau bezieht sich auf Rot: Die Regel weiß, dass der Auslöser die Spannung abfedert. Grün steht weiter allein.</p>
+  </div>
+
+  <div class="card">
+    <h3>Stufe 2: Verbindungssätze zwischen zwei Konstellationen</h3>
+    <span class="tag muster">Muster</span> <span class="tag">neue Texte: etwa 250</span>
+    <p class="text"><span class="b rot">Was in dir Wärme und Anerkennung will, stößt auf die Angst, dich auszuliefern.</span> <span class="b rotblau">Ein Stück weit fängt der Abend das auf:</span> <span class="b blau">Wenn Kopf und Herz einig sind, kommt das Ausgesprochene an, statt Druck zu erzeugen.</span> <span class="b blaugruen">Zugleich hält die Wirklichkeit dagegen,</span> <span class="b gruen">denn Erwartungen und Realität passen noch nicht zusammen.</span> <span class="b rotblaugruen">Das ist kein Widerspruch: Wer klein anfängt, hält Nähe und Vorsicht zugleich aus.</span></p>
+    <p class="muted">Die zweifarbigen Stücke sind neu: kurze <strong>Übergänge</strong> („Ein Stück weit fängt das … auf“, „Zugleich hält … dagegen“) und ein <strong>Auflösungssatz</strong> am Ende, der den Gegensatz zwischen den Konstellationen gelten lässt. Sie hängen nicht an bestimmten Planeten, sondern an Verhältnissen (abfedern, verstärken, gegensätzlich) und Lebensbereichen. Dafür schreibe ich etwa 12 Bereiche × 4 Verhältnisse × mehrere Formulierungen und etwa 45 Auflösungssätze.</p>
+  </div>
+
+  <div class="card">
+    <h3>Stufe 3: Ein eigener Satz für jedes Planetenpaar</h3>
+    <span class="tag muster">Muster</span> <span class="tag">neue Texte: etwa 135</span>
+    <p class="text"><span class="b rot">Was in dir Wärme und Anerkennung will, stößt auf die Angst, dich auszuliefern.</span> <span class="b rotblau">Wenn das, was tief sitzt, und das, was du bewusst willst, am selben Tag aufeinandertreffen, darfst du das Schwere heute aussprechen, ohne dich zu verlieren.</span> <span class="b blau">Um 21:22 Uhr wird es leichter.</span></p>
+    <p class="muted">Der mittlere Satz ist <strong>nur für dieses Planetenpaar</strong> geschrieben (das Tiefe trifft das Bewusste), unabhängig davon, welchen Punkt in dir es betrifft. Das sind 45 Planetenpaare × 3 Charaktere (leicht, leicht+angespannt, angespannt) = etwa 135 Sätze.</p>
+  </div>
+
+  <div class="card">
+    <h3>Stufe 4: Ein eigener Text für genau dieses Konstellationspaar</h3>
+    <span class="tag muster">Muster</span> <span class="tag">neue Texte: 64.620 (realistisch etwa 1.000)</span>
+    <p class="text"><span class="b rosa">Dein Mond wird zugleich von der Tiefe herausgefordert und vom Bewusstsein gestützt: Die alte Angst, dich auszuliefern, darf heute Abend benannt werden – gerade weil Kopf und Herz für einen Moment dieselbe Sprache sprechen.</span> <span class="b gruen">Erwartungen und Realität passen nicht zusammen – Hoffnung stößt auf Grenzen.</span></p>
+    <p class="muted">Der rosa Block ist ein Text <strong>nur für „Pluto gegenüber Mond, zugleich Sonne im Sextil zu Mond“</strong>. Er kann sehr treffend klingen, aber für jedes mögliche Paar einen zu schreiben ist nicht machbar. Man würde nur die häufigsten Paare nehmen.</p>
+  </div>
+
+  <div class="card">
+    <h3>Stufe 5: Muster aus drei Konstellationen</h3>
+    <span class="tag muster">Muster</span> <span class="tag">neue Texte: etwa 20 Muster statt 7,7 Millionen</span>
+    <p class="text"><span class="b rosa">Dein Mond steht im Brennpunkt: Eine Seite drückt, zwei Seiten öffnen. Die Tiefe verlangt Ehrlichkeit, das Bewusstsein und der Freiheitsdrang geben dir den Raum, sie zu geben.</span> <span class="b gruen">Erwartungen und Realität passen nicht zusammen – Hoffnung stößt auf Grenzen.</span></p>
+    <p class="muted">Der rosa Block fasst drei Konstellationen zusammen (<span class="b rot">Pluto</span> <span class="b blau">Sonne</span> <span class="b orange">Uranus</span>, alle auf denselben Mond). Solche <strong>Muster</strong> (ein Punkt wird von mehreren Seiten getroffen, zwei Kräfte stehen sich gegenüber und eine dritte löst) sind wenige, aber sie fangen ganze Dreiergruppen ab.</p>
+  </div>
+
+  <div class="card">
+    <h3>Stufe 6: Ein Text nur für diesen Menschen an diesem Tag</h3>
+    <span class="tag muster">Muster</span> <span class="tag">neue Texte: unendlich viele</span>
+    <p class="text"><span class="b alles">Der Tag dreht sich um das, was in dir gesehen und geborgen werden will, und um die Angst, dich damit auszuliefern. Am Abend, wenn dein Denken und dein Fühlen für einen Moment einig sind, kommt das Ausgesprochene an. Zugleich fragt die Wirklichkeit, wie viel von deinen Erwartungen Bestand hat, und du merkst: Kleine, verlässliche Schritte tragen weiter als ein großer. Wo bleibst du unsichtbar, um nicht verletzt zu werden?</span></p>
+    <p class="muted">Der ganze Text ist eine Farbe: Er entstand als Ganzes für genau diese Lage. Das geht nur mit einem Textgenerator wie einer KI, nicht mit fest geschriebenen Sätzen.</p>
+  </div>
+
+  <h2>Achse 2: Wie fein wird eine einzelne Konstellation beschrieben?</h2>
+  <p class="muted">Beispiel: <strong>Pluto gegenüber deinem Mond</strong>. Jede Schicht fügt etwas hinzu und hat eine eigene Farbe. Deine Werte: Pluto steht im Wassermann und durchläuft dein 3. Haus (Kommunikation, Umfeld, Lernen). Dein Mond steht im Löwen im 9. Haus (Weite, Sinn). Die Konstellation ist eine Opposition.</p>
+
+  <div class="card">
+    <h3>Feinheit 0: grob</h3>
+    <span class="tag echt">aus der App</span> <span class="tag">Texte insgesamt: 360</span>
+    <p class="text"><span class="b rot">Tiefe emotionale Prozesse; alte Verletzungen und Bindungen treten hervor.</span></p>
+    <p class="muted">Ein Text je Planet × Geburtspunkt × Charakter (leicht, angespannt, verschmelzend).</p>
+  </div>
+
+  <div class="card">
+    <h3>Feinheit 1: + Aspektart (Opposition statt nur „angespannt“)</h3>
+    <span class="tag muster">Muster</span> <span class="tag">neu: 240 (Texte insgesamt 600)</span>
+    <p class="text"><span class="b rot">Tiefe emotionale Prozesse; alte Verletzungen und Bindungen treten hervor.</span> <span class="b orange">Oft zeigt es sich im Gegenüber: Andere spiegeln dir, was du selbst festhältst.</span></p>
+    <p class="muted">Ein <strong>Quadrat</strong> würde hier stattdessen sagen: „… von innen: ein Druck, der dich zum Handeln drängt.“ Ein <strong>Trigon</strong> („es geschieht von selbst“) klingt anders als ein <strong>Sextil</strong> („wenn du es ergreifst“). Fünf statt drei Varianten je Paar: 120 × 5 = 600, also 240 mehr.</p>
+  </div>
+
+  <div class="card">
+    <h3>Feinheit 2: + Haus (in welchem Lebensbereich es sich abspielt)</h3>
+    <span class="tag muster">Muster</span> <span class="tag">neu: 240 Zusatzsätze (als Volltexte wären es 6.600)</span>
+    <p class="text"><span class="b rot">Tiefe emotionale Prozesse; alte Verletzungen und Bindungen treten hervor.</span> <span class="b orange">Oft zeigt es sich im Gegenüber: Andere spiegeln dir, was du selbst festhältst.</span> <span class="b gelb">Spürbar wird es vor allem in Gesprächen, Kontakten und beim Lernen.</span> <span class="b gelb">Dein Mond liegt im Bereich Weite und Sinn, also trifft es dich dort, wo du Orientierung suchst.</span></p>
+    <p class="muted">Zwei neue Sätze: <strong>Wo läuft der Planet gerade durch?</strong> (10 Planeten × 12 Häuser = 120) und <strong>Wo liegt dein Geburtspunkt?</strong> (10 Punkte × 12 Häuser = 120). Als Zusatzsätze statt als 7.200 Volltexte.</p>
+  </div>
+
+  <div class="card">
+    <h3>Feinheit 3: + Zeichen (mit welcher Färbung)</h3>
+    <span class="tag muster">Muster</span> <span class="tag">neu: 240 Zusatzsätze (als Volltexte wären es 86.400)</span>
+    <p class="text"><span class="b rot">Tiefe emotionale Prozesse; alte Verletzungen und Bindungen treten hervor.</span> <span class="b orange">Oft zeigt es sich im Gegenüber: Andere spiegeln dir, was du selbst festhältst.</span> <span class="b gelb">Spürbar wird es vor allem in Gesprächen, Kontakten und beim Lernen. Dein Mond liegt im Bereich Weite und Sinn, also trifft es dich dort, wo du Orientierung suchst.</span> <span class="b tuerkis">Der Wandel kommt eigenwillig, mit Abstand und über neue Ideen.</span> <span class="b tuerkis">Dein Mond will stolz, großzügig und dramatisch gesehen werden.</span></p>
+    <p class="muted">Zwei weitere Sätze: <strong>Wie wirkt das Zeichen des laufenden Planeten?</strong> (10 × 12 = 120, hier Pluto im Wassermann) und <strong>Wie färbt das Zeichen deines Geburtspunkts?</strong> (10 × 12 = 120, hier Mond im Löwen). Heute gibt es dafür nur 12 allgemeine Beschreibungen, die für alle Planeten gleich sind.</p>
+  </div>
+
+  <div class="card">
+    <h3>Feinheit 4: alles zusammen, verwoben</h3>
+    <span class="tag muster">Muster</span>
+    <p class="text"><span class="b tuerkis">Was in dir stolz und großzügig gesehen werden will,</span> <span class="b gelb">und zwar dort, wo du Weite und Sinn suchst,</span> <span class="b rot">trifft heute auf tiefe emotionale Prozesse, in denen alte Verletzungen hervortreten.</span> <span class="b orange">Oft zeigt es sich im Gegenüber: Andere spiegeln dir, was du selbst festhältst –</span> <span class="b gelb">in Gesprächen, Kontakten und beim Lernen,</span> <span class="b tuerkis">auf eine Art, die eigenwillig und distanziert wirkt, aber neue Ideen möglich macht.</span></p>
+    <p class="muted">Alle Schichten sind da (jede in ihrer Farbe), aber sie sind zu <strong>einem</strong> Satz verwoben. Das Ziel wäre, dass sich die Schichten so lesen, nicht als angehängte Einzelsätze.</p>
+  </div>
+
+  <h2>Zusammenfassung: Was wir hätten und was neu wäre</h2>
+  <table>
+    <tr><th>Achse</th><th>Stufe</th><th>Was</th><th class="neu">Neue Texte</th></tr>
+    <tr><td>1 Verflechtung</td><td>0, 1</td><td>Einzelsätze, feste Regeln (Stand jetzt)</td><td class="neu">0</td></tr>
+    <tr><td></td><td>2</td><td>Verbindungssätze, Auflösungssätze</td><td class="neu">≈ 250</td></tr>
+    <tr><td></td><td>3</td><td>Satz je Planetenpaar</td><td class="neu">≈ 135</td></tr>
+    <tr><td></td><td>4</td><td>Text je Konstellationspaar (nur häufigste)</td><td class="neu">≈ 1.000 von 64.620</td></tr>
+    <tr><td></td><td>5</td><td>Muster aus drei Konstellationen</td><td class="neu">≈ 20</td></tr>
+    <tr><td></td><td>6</td><td>Ein Text je Mensch und Tag</td><td class="neu">nur mit Generator</td></tr>
+    <tr><td>2 Feinheit</td><td>0</td><td>grob (Stand jetzt)</td><td class="neu">0 (360)</td></tr>
+    <tr><td></td><td>1</td><td>Aspektart</td><td class="neu">+ 240</td></tr>
+    <tr><td></td><td>2</td><td>Haus (Zusatzsätze)</td><td class="neu">+ 240</td></tr>
+    <tr><td></td><td>3</td><td>Zeichen (Zusatzsätze)</td><td class="neu">+ 240</td></tr>
+  </table>
+  <div class="box">
+    <p><strong>Vorschlag:</strong> Achse 1 die Stufen 2, 3 und 5 (etwa 405 Texte), Achse 2 die Stufen 1, 2 und 3 (720 Zusatzsätze). Zusammen rund <strong>1.100 neue Texte</strong> statt der 86.400 Volltexte oder der 64.620 Paare. Danach kämen die Varianten gegen die Wiederholung (drei bis vier Formulierungen je Baustein).</p>
+  </div>
+  <p class="muted">Hinweis: Das ist eine Frage der Formulierung und der Struktur. Ob die Deutung deinen Tag trifft, sagt sie nicht. Unser Test an 300 echten Heiratsterminen fand keine Vorhersagekraft.</p>
+</main>
+</body>
+</html>
