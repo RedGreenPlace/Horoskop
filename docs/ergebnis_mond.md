@@ -17,3 +17,6 @@ Der Mond wird auf dieser Grundlage nicht in den Rückblick übernommen; das ist 
 Einschränkung: getestet wurde nur Heirat ohne Geburtszeit, mit einem einzigen Gewicht (0,2). Andere Gewichte oder Themen wurden nicht ausprobiert.
 
 Wichtig: Ohne Geburtszeit fehlen genau die Punkte, die für Partnerschaft und für den Mond zentral sind (Geburtsmond, Deszendent, Häuser). Der Test prüft daher nur einen Teil der Methode und kann sie mit Geburtszeit weder bestätigen noch widerlegen. Um das zu klären, bräuchte man Personen mit belegter Geburtszeit und Geburtsort (zum Beispiel Wikidata-Einträge mit minutengenauer Geburt oder eine geprüfte Sammlung wie die Astro-Databank).
+
+## Nachtrag: Wikidata hat keine Geburtszeiten
+Eine Abfrage nach Personen mit minutengenauer Geburtszeit (Zeitpräzision ab Minute) zusammen mit Heiratsdatum und Geburtsort ergab in den geprüften Geburtsjahrgängen 1920–1979 keinen einzigen Treffer; auch ohne Heirat und Ort gab es für 1940–1969 keinen einzigen Eintrag mit Zeit. Wikidata speichert Geburtszeiten praktisch nicht. Für einen Test mit Geburtszeit bleibt daher nur eine Sammlung wie die Astro-Databank (die Nutzung durch Claude ist dort per `robots.txt` ausgeschlossen, Abruf und Zusammenstellung müsste von Hand erfolgen) oder eigene Fälle.
