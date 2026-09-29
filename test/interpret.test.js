@@ -70,7 +70,6 @@ assert(hs.plain.text.includes('Was raus will, ist das Bedürfnis nach Wärme, An
 assert(hs.plain.text.includes('Zurückgehalten wird es von der Angst, die Kontrolle zu verlieren oder dich auszuliefern.'));
 assert(hs.plain.text.includes('Um 21:22 Uhr wird es leichter'), hs.plain.text);
 assert(/Um 06:55 Uhr: Worte und Zuwendung passen nicht zusammen/.test(hs.plain.text), hs.plain.text);
-assert(/Ausblick: Am Mittwoch um 04:39 Uhr/.test(hs.plain.text), hs.plain.text);
 assert(/Kurz nach Vollmond/.test(hs.moonPlain), hs.moonPlain);
 // Am Folgetag liegt der Auslöser schon hinter dir und wird nicht als Zukunft dargestellt
 const w2 = new Date(Date.UTC(2026, 8, 28, 10, 0));

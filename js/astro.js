@@ -141,7 +141,12 @@
       out[name] = norm(atan2d(yh + ys, xh + xs));
     });
 
-    out.pluto = plutoLon(d);
+    // Pluto: heliozentrische Reihen (Schlyter), mit Sonnenposition ins Geozentrische umgerechnet (Parallaxe bis ca. 2°)
+    const Pp = 238.95 + 0.003968789 * d;
+    const plat = -3.908 - 5.441 * sind(Pp) - 14.963 * cosd(Pp) + 3.544 * sind(2 * Pp) + 1.669 * cosd(2 * Pp) - 1.06 * sind(3 * Pp) + 0.318 * cosd(3 * Pp);
+    const pr = 40.724 + 6.684 * sind(Pp) + 6.895 * cosd(Pp) - 1.184 * sind(2 * Pp) - 0.032 * cosd(2 * Pp) + 0.162 * sind(3 * Pp) - 0.143 * cosd(3 * Pp);
+    const pl = plutoLon(d);
+    out.pluto = norm(atan2d(pr * sind(pl) * cosd(plat) + ys, pr * cosd(pl) * cosd(plat) + xs));
     return out;
   }
 

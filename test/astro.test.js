@@ -20,7 +20,7 @@ near('Jupiter 2020-12-21', p.jupiter.lon, 300.48, 0.15);
 near('Saturn 2020-12-21', p.saturn.lon, 300.48, 0.15);
 // Pluto 2000-01-01 12h ≈ 251.4° (Schütze)
 p = A.planetPositions(new Date(Date.UTC(2000, 0, 1, 12, 0)));
-near('Pluto J2000', p.pluto.lon, 251.4, 1.2);
+near('Pluto J2000', p.pluto.lon, 251.4, 0.1);
 near('Sonne J2000', p.sun.lon, 280.37, 0.05);
 // Rückläufigkeit: Merkur 2024-04-10 rückläufig, 2024-06-01 direkt
 assert(A.planetPositions(new Date(Date.UTC(2024, 3, 10))).mercury.retro === true);
@@ -66,3 +66,15 @@ const b0 = new Date(Date.UTC(1996, 2, 2, 2, 15));
 const pd = A.progressedDate(b0, new Date(b0.getTime() + 30 * 365.2422 * 864e5));
 assert(Math.abs(pd.getTime() - (b0.getTime() + 30 * 864e5)) < 60000);
 console.log('Alle Tests bestanden');
+
+// Vergleich mit PyEphem-Referenz (1000 Zeitpunkte 1900–2100, data/ephem_referenz.json)
+{
+  const ref = require('../data/ephem_referenz.json');
+  const worst = {};
+  ref.forEach((r) => {
+    const pos = A.planetPositions(new Date(r.t));
+    A.PLANETS.forEach((pl) => { worst[pl] = Math.max(worst[pl] || 0, Math.abs(A.diff180(pos[pl].lon, r[pl]))); });
+  });
+  A.PLANETS.forEach((pl) => assert(worst[pl] <= (pl === 'moon' ? 0.15 : 0.06), `Referenzabweichung ${pl}: ${worst[pl].toFixed(3)}°`));
+  console.log(`OK   Referenzvergleich 1900–2100: größte Abweichung Mond ${worst.moon.toFixed(3)}°, Pluto ${worst.pluto.toFixed(3)}°, übrige ≤ ${Math.max(...A.PLANETS.filter((x) => x !== 'moon').map((x) => worst[x])).toFixed(3)}°`);
+}
